@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Remote",
+            "address": "localhost",
+            "port": 9229,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/usr/src/app",
+            "restart": true,
+        },
+        {
+            "name": "Docker Node.js Launch and Attach",
+            "type": "docker",
+            "request": "launch",
+            "preLaunchTask": "docker-run: debug",
+            "platform": "node"
+        }
+    ]
+}
+
+// {
+//     "type": "node",
+//     "request": "attach",
+//     "name": "Attach to Remote",
+//     "address": "localhost",
+//     "port": 9229,
+//     "localRoot": "${workspaceFolder}",
+//     "remoteRoot": "/usr/src/app",
+//     "restart": true
+// }
