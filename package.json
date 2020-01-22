@@ -16,14 +16,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< Updated upstream
     "axios": "^0.19.2",
+=======
+    "axios": "^0.19.1",
+>>>>>>> Stashed changes
     "body-parser": "^1.19.0",
     "concurrently": "^5.0.2",
     "express": "^4.17.1",
+    "immutability-helper": "^3.0.1",
     "lodash": "^4.17.15",
+    "moment": "^2.24.0",
     "mysql2": "^2.1.0",
-    "react-live-clock": "^3.1.0",
-    "sequelize": "^5.21.3"
+    "sequelize": "^5.21.3",
+    "react-live-clock": "^3.1.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
