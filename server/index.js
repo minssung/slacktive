@@ -5,7 +5,6 @@ const user_router = require("./route/user");
 const boards_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
 const axios = require("axios");
-const url = require('url');
 const configs = require('./server_config');
 
 app.use(function(req, res, next) {
