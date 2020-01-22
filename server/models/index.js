@@ -5,8 +5,8 @@ const Sequelize = require("sequelize");
  
 const db = {};
  
-const sequelize = new Sequelize("node_example", "root", "multi1004", { host: "docker.for.mac.host.internal", dialect: "mysql" });
- 
+const sequelize = new Sequelize("cedar_slack", "root", "multi1004", { host: "docker.for.mac.host.internal", dialect: "mysql" });
+
 sequelize.authenticate().then(() => {
     console.log("연결 성공");
 }).catch(err => {
