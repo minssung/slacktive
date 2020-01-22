@@ -17,7 +17,11 @@
   "license": "ISC",
   "dependencies": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "axios": "^0.19.2",
+=======
+    "axios": "^0.19.1",
+>>>>>>> Stashed changes
 =======
     "axios": "^0.19.1",
 >>>>>>> Stashed changes
