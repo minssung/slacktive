@@ -1,4 +1,25 @@
-.App {
+.time {
+  text-align: center;
+  margin: 50px 50px;
+  font-size: 23pt;
+  font-weight: 600;
+}
+
+.time_box {
+  margin: 80px 400px;
+  border: 2px solid lightgray;
+}
+
+.work {
+  text-align: center;
+}
+
+.workbtn {
+  font-size: 20pt;
+  padding: 5px 25px;
+}
+
+/* .App {
   text-align: center;
 }
 
@@ -89,4 +110,4 @@ li > span:hover{
 
 .viewAndhide {
   display: none;
-}
+} */
