@@ -46,7 +46,7 @@ router.post("/messagePost", async(req,res)=>{
                 token : configs.p_token,
                 channel : req.body.channel,
                 text : req.body.text,
-                //username : req.body.username
+                as_user : true
               }
         });
         res.send(result.data);
