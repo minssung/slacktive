@@ -37,8 +37,7 @@ router.get("/", async(req, res) => {
 
 // DB SelectOne --------------------
 router.get("/:id", async(req, res) => {
-    try 
-    {
+    try {
         let result = await Slack.findOne({
             where: {
                 id: req.params.id
@@ -72,7 +71,7 @@ router.post("/", async(req, res) => {
 // DB FindOrCreate --------------------
 router.post("/create", async(req, res) => {
     let result = false;
-    try{
+    try {
         Slack.findOrCreate({
             where : {
                 date : req.body.date,
@@ -105,9 +104,7 @@ router.put("/:id", async(req, res) => {
             where: {
               id : req.params.id
             }
-          }).then(() => {
-              return result;
-          });
+        });
     } catch(err) {
         console.error(err);
     }
@@ -122,7 +119,7 @@ router.delete("/:id", async(req, res) => {
         }
     }).then(() => {
         console.log("Done");
-      });
+    });
     res.send(result);
 });
 
