@@ -2,3 +2,4 @@
 /node_modules
 /docker-compose.yml
 /package-lock.json
+/server/server_config.js
