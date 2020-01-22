@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const models = require("./models");
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -18,12 +17,17 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+app.listen(PORT, () => {
+    console.log(`app running on port ${PORT}`);
+});
+
+/*
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 0", {raw: true})
 .then(() => {
     models.sequelize.sync({force:false}).then(()=>{
         app.listen(PORT, () => {
             console.log(`app running on port ${PORT}`);
-            
         });
     });
 })
+*/
