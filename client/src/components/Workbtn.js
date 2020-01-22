@@ -25,18 +25,10 @@ class Workbtn extends React.Component {
 
     render() {
 
-        const { postMs } = this.state;
-
-        console.log(postMs);
-        
-
         return (
             <div>
-                <button className="workbtn" onClick={()=> {
-                    this.setState({
-                        nowChannel: postMs.channel,
-                        postText: postMs.text
-                    }, () => {this.messagePost();})
+                <button className="workbtn" onClick={() => {
+                    this.messagePost();
                 }}>출근</button>
             </div>
           );

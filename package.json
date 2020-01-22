@@ -16,15 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     "axios": "^0.19.2",
-=======
-    "axios": "^0.19.1",
->>>>>>> Stashed changes
-=======
-    "axios": "^0.19.1",
->>>>>>> Stashed changes
     "body-parser": "^1.19.0",
     "concurrently": "^5.0.2",
     "express": "^4.17.1",
