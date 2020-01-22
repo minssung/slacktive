@@ -2,10 +2,11 @@ const fs = require("fs");
 const path = require("path");
 const basename  = path.basename(__filename);
 const Sequelize = require("sequelize");
+const config = require("../server_config");
  
 const db = {};
  
-const sequelize = new Sequelize("cedar_slack", "root", "multi1004", { host: "docker.for.mac.host.internal", dialect: "mysql" });
+const sequelize = new Sequelize(config.database, config.user, config.password, { host: config.host, dialect: config.dialect });
 
 sequelize.authenticate().then(() => {
     console.log("연결 성공");
