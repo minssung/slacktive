@@ -5,9 +5,7 @@ class Workbtn extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            postMs: [],
-            postText: '출근',
-            nowChannel: 'CSMN5L4KY'
+            postMs: []
         }
     }
 
