@@ -19,6 +19,77 @@
   padding: 5px 25px;
 }
 
+@media (min-width: 1050px) and (max-width: 1300px) {
+  .time_box {
+    margin: 80px 200px;
+  }
+
+}
+
+@media (min-width: 750px) and (max-width: 1049px) {
+  .time_box {
+    margin: 80px 200px;
+  }
+
+}
+
+@media (min-width: 350px) and (max-width: 749px) {
+  .time {
+    font-size: 15pt;
+  }
+
+  .time_box {
+    margin: 80px 150px 70px;
+  }
+
+  .workbtn {
+    font-size: 12pt;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 665px) {
+  .time {
+    font-size: 12pt;
+  }
+
+  .time_box {
+    margin: 80px 150px 60px;
+  }
+
+  .workbtn {
+    font-size: 9pt;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 631px) {
+  .time {
+    font-size: 12pt;
+  }
+
+  .time_box {
+    margin: 80px 150px 60px;
+  }
+
+  .workbtn {
+    font-size: 9pt;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 531px) {
+  .time {
+    font-size: 9pt;
+    margin: 25px 25px;
+  }
+
+  .time_box {
+    margin: 80px 100px 60px;
+  }
+
+  .workbtn {
+    font-size: 6pt;
+  }
+}
+
 /* .App {
   text-align: center;
 }
