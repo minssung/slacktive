@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require('axios');
 const _ = require("lodash");
-const configs = require("../server_config");
+var configs = require("../server_config");
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.post("/teamUsers", async(req,res)=>{
@@ -47,7 +47,7 @@ router.post("/messagePost", async(req,res)=>{
                 channel : req.body.channel,
                 text : req.body.text,
                 as_user : true
-              }
+            }
         });
         res.send(result.data);
     }catch(err){

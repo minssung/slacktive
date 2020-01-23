@@ -22,6 +22,7 @@ class Workbtn extends React.Component {
     }
 
     componentDidMount() {
+
     }
 
     render() {
@@ -31,6 +32,13 @@ class Workbtn extends React.Component {
                 <button className="workbtn" onClick={() => {
                     this.messagePost();
                 }}>출근</button>
+
+                <a href="http://localhost:5000/login">
+                    <img alt="Sign in with Slack" height="40" width="172" 
+                    src="https://platform.slack-edge.com/img/sign_in_with_slack.png" 
+                    srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, 
+                    https://platform.slack-edge.com/img/sign_in_with_slack@2x.png 2x" />
+                </a>
             </div>
           );
     }
