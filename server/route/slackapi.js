@@ -14,7 +14,7 @@ router.post("/teamUsers", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params: {
-                token : configs.b_token,
+                token : configs.p_token,
             }
         });
         const resultSet = result.data.members;
@@ -44,15 +44,9 @@ router.post("/messagePost", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-                channel : "CSMN5L4KY",
                 text : "출근",
-                //as_user: true
+                as_user: true
               }
-        });
-        res.send(result.data);
-    }catch(err){
-        console.log(err);
-    }
 });
 
 // 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
@@ -97,7 +91,7 @@ router.post("/channelMembers", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.b_token,
+                token : configs.p_token,
                 channel : req.body.channel,
             }
         });
@@ -123,7 +117,7 @@ router.post("/channelList", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.b_token,
+                token : configs.p_token,
             }
         });
         const resultSet = result.data.channels;
@@ -217,10 +211,11 @@ router.post("/usersInfo", async(req,res)=>{
                 "Content-type" : "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.b_token,
+                token : configs.p_token,
                 user : req.body.user,
               }
         });
+        console.log(result.data);
         const resultSet = result.data.user;
         const resultJson = {
             id : resultSet.id,
@@ -253,7 +248,7 @@ router.post("/botInfo", async(req,res)=>{
                 "Content-type" : "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.b_token,
+                token : configs.p_token,
             }
         });
         res.send(result.data);

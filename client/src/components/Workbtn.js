@@ -10,8 +10,11 @@ class Workbtn extends React.Component {
     }
 
     async messagePost() {
-        const result = await axios.post("http://localhost:5000/slackapi/messagePost");
-        //return result.data
+        const { postText, nowChannel } = this.state;
+        const result = await axios.post("http://localhost:5000/slackapi/messagePost",{
+            channel : nowChannel,
+            text : postText
+        });
         this.setState({
             postMs: result.data,
             
