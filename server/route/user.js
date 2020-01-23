@@ -18,7 +18,7 @@ router.get("/init", async(req, res) => {
         state : "출근"
     }];
 
-    await User.sync ({ forcce : true });
+    await User.sync ({ force : true });
 
     for (const user of users) {
         await User.create ({ 

@@ -44,9 +44,9 @@ router.post("/messagePost", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-                channel : req.body.channel,
-                text : req.body.text,
-                //username : req.body.username
+                channel : "CSMN5L4KY",
+                text : "출근",
+                //as_user: true
               }
         });
         res.send(result.data);
@@ -70,7 +70,7 @@ router.post("/channelHistory", async(req,res) =>{
             params: {
                 token : configs.p_token,
                 channel : req.body.chname
-              }
+            }
         });
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
@@ -99,7 +99,7 @@ router.post("/channelMembers", async(req,res)=>{
             params : {
                 token : configs.b_token,
                 channel : req.body.channel,
-              }
+            }
         });
         const resultSet = result.data.members;
         const array = resultSet.map(data=>{
@@ -124,7 +124,7 @@ router.post("/channelList", async(req,res)=>{
             },
             params : {
                 token : configs.b_token,
-              }
+            }
         });
         const resultSet = result.data.channels;
         const array = resultSet.map(data =>{
@@ -153,7 +153,7 @@ router.post("/messageDelete", async(req,res)=>{
                 token : configs.p_token,
                 channel : req.body.channels,
                 ts : req.body.times
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
@@ -177,7 +177,7 @@ router.post("/messageUpdate", async(req,res)=>{
                 text : req.body.texts,
                 ts : req.body.times,
                 as_user : true
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
@@ -199,7 +199,7 @@ router.post("/conversationsKick", async(req,res)=>{
                 token : configs.p_token,
                 channel : req.body.channel,
                 user : req.body.user,
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
@@ -254,7 +254,7 @@ router.post("/botInfo", async(req,res)=>{
             },
             params : {
                 token : configs.b_token,
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
@@ -274,7 +274,7 @@ router.post("/authInfo", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
