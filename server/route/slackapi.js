@@ -44,9 +44,9 @@ router.post("/messagePost", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-                channel : "CSMN5L4KY",
-                text : "출근",
-                as_user: true
+                channel : req.body.channel,
+                text : req.body.text,
+                as_user : true
               }
         });
         res.send(result.data);

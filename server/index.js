@@ -48,7 +48,12 @@ app.get('/login', async(req, res) => {
 });
 
 app.get('/loginslack', async(req,res) => {
-    const result = await axios.get("https://slack.com/api/oauth.access",{
+    const result = await axios({
+        method : "get",
+        url : "https://slack.com/api/oauth.access",
+        header : {
+            "X-OAuth-Scopes": "identity.basic, chat:write:user",
+        },
         params : {
             client_id : configs.c_id,
             client_secret : configs.c_s_id,
