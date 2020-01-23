@@ -44,7 +44,7 @@ router.post("/messagePost", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-                channel : "CS7RWKTT5",
+                channel : "CSMN5L4KY",
                 text : "출근",
                 //as_user: true
               }
