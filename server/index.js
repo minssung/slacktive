@@ -38,7 +38,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 0", {raw: true})
 app.get('/login', async(req, res) => {
     const result = await axios.get("https://slack.com/oauth/authorize",{
         params : {
-            scope : "identity.basic",
+            scope : "chat:write:user",
             client_id : configs.c_id,
             redirect_uri : "http://localhost:5000/loginslack",
             state : "loging..."

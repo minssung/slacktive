@@ -3,9 +3,12 @@ const router = express.Router();
 const axios = require('axios');
 const _ = require("lodash");
 const configs = require("../server_config");
+const models = require("../models");
+
+const User = models.slackuser;
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
-router.post("/teamUsers", async(req,res)=>{
+router.get("/teamUsers", async(req,res)=>{
     try {
         const result = await axios({
             method : "get",
@@ -26,6 +29,16 @@ router.post("/teamUsers", async(req,res)=>{
                 is_bot : data.is_bot
             }
         });
+
+        await User.sync({force: true});
+
+        // 테이블 생성 name 컬럼 추가 ( 봇 제외 유저만 )
+        for (const user of array) {
+            if(user.R_name !== undefined && user.R_name !== "Slackbot" && user.is_bot === false)
+                await User.create({ "name": user.R_name });
+        }
+        
+
         res.send(array);
     }catch(err){
         console.log(err);
@@ -44,11 +57,38 @@ router.post("/messagePost", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-                channel : "CSMN5L4KY",
-                text : "출근",
+                channel : "CSZTZ7TCL",
+                text : req.body.text,
                 as_user: true
               }
         });
+
+        // onWork 컬럼에 데이터 추가
+        if((result.data.message.text === "출근")) { 
+                await User.update({
+                    onWork: "출근" 
+                  }, {
+                      where: { name: ["Minsung", "jojunmyeong"] }
+                  })
+                  .then( () => {
+                      return User.findOne({
+                          where: { onWork: "출근" }
+                        });
+                })
+            } if (result.data.message.text === "퇴근") { 
+                await User.update({
+                    onWork: "퇴근" 
+                  }, {
+                      where: { name: ["Minsung", "jojunmyeong"] }
+                  })
+                  .then( () => {
+                      return User.findOne({
+                          where: { onWork: "퇴근" }
+                        });
+                })
+            } 
+        
+
         res.send(result.data);
     }catch(err){
         console.log(err);
@@ -88,7 +128,7 @@ router.post("/channelHistory", async(req,res) =>{
 });
 
 // 해당 채널의 대화 멤버 가져오기 --------------------------------------------------
-router.post("/channelMembers", async(req,res)=>{
+router.get("/channelMembers", async(req,res)=>{
     try {
         const result = await axios({
             method : "get",
