@@ -17,6 +17,7 @@ app.use(function(req, res, next) {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use("/user", user_router);
 app.use("/slack", boards_router);
 app.use("/slackapi", slack_router);
@@ -48,25 +49,35 @@ app.get('/login', async(req, res) => {
 });
 
 app.get('/loginslack', async(req,res) => {
-    const result = await axios({
-        method : "get",
-        url : "https://slack.com/api/oauth.access",
-        params : {
-            client_id : configs.c_id,
-            client_secret : configs.c_s_id,
-            code : req.query.code,
-            redirect_uri : "http://localhost:5000/loginslack"
-        }
-    })
-    let userInfoJson = {
-        u_token : result.data.access_token,
-        u_id : result.data.user_id
-    };
-
-    configs.p_token = userInfoJson.u_token;
-    configs.bearer_p_token = "Bearer " + userInfoJson.u_token;
-    configs.u_id = userInfoJson.u_id;
+    try { 
+        const result = await axios({
+            method : "get",
+            url : "https://slack.com/api/oauth.access",
+            params : {
+                client_id : configs.c_id,
+                client_secret : configs.c_s_id,
+                code : req.query.code,
+                redirect_uri : "http://localhost:5000/loginslack"
+            }
+        })
+        let userInfoJson = {
+            u_token : result.data.access_token,
+            u_id : result.data.user_id
+        };
     
-    console.log(configs);
-    res.redirect("http://localhost:3000/");
+        configs.p_token = userInfoJson.u_token;
+        configs.bearer_p_token = "Bearer " + userInfoJson.u_token;
+        configs.u_id = userInfoJson.u_id;
+    
+        await axios.put("http://localhost:5000/user/update",{
+            p_token : userInfoJson.u_token,
+            b_p_token : "Bearer " + userInfoJson.u_token,
+            u_id : userInfoJson.u_id,
+        });
+        
+        console.log(configs);
+        res.redirect("http://localhost:3000?" + userInfoJson.u_id);
+    } catch(err) {
+        console.log(err);
+    }
 });
