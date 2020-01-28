@@ -124,14 +124,16 @@ router.put("/:id", async(req, res) => {
 
 // DB Delete --------------------
 router.delete("/:id", async(req, res) => {
-    let result = await User.destroy({
-        where: {
-            id: req.params.id
-        }
-    }).then(() => {
-        console.log("Done");
-      });
-    res.send(result);
+    try {
+        let result = await User.destroy({
+            where: {
+                id: req.params.id
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log(err);
+    }
 });
 
 // Module Exports --------------------

@@ -11,6 +11,7 @@ var configs = {
 
     c_id : "",
     c_s_id : "",
+    u_id : "",
 }
 
 module.exports = configs;
