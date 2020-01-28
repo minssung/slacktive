@@ -6,7 +6,7 @@ class Workbtn extends React.Component {
         super(props);
         this.state = {
             onWork: '미출근',
-            visib: false
+            visib: false,
         }
     }
 
@@ -26,6 +26,7 @@ class Workbtn extends React.Component {
 
     }
 
+    // userlist DB에 저장시키기 위해
     async teamUsers() {
         const result = await axios.get("http://localhost:5000/slackapi/teamUsers");
         return result.data
@@ -37,15 +38,13 @@ class Workbtn extends React.Component {
 
     render() {
 
-        
-
         return (
             <div>
                 {/* <button className="workbtn" onClick={() => {
                     this.messagePost();
                 }}>출근</button> */}
                 <button className="workbtn" onClick={()=>this.messagePost()}>
-                    {this.state.visib? this.state.onWork : this.state.onWork='출근'}
+                    {this.state.visib? this.state.onWork : this.state.onWork = '출근'}
                 </button>
             </div>
           );

@@ -11,7 +11,10 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: "미출근"
             //allowNull: false
         }
-    });
+        
+    }
+
+    );
 
     // User.associate = function(models) {
     //     //models.user.hasOne(models.group);

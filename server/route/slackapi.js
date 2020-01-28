@@ -30,7 +30,7 @@ router.get("/teamUsers", async(req,res)=>{
             }
         });
 
-        await User.sync({force: true});
+        await User.sync({force: false});
 
         // 테이블 생성 name 컬럼 추가 ( 봇 제외 유저만 )
         for (const user of array) {
@@ -57,7 +57,7 @@ router.post("/messagePost", async(req,res)=>{
             },
             params : {
                 token : configs.p_token,
-                channel : "CSZTZ7TCL",
+                channel : "CSZTZ7TCL",    // time_and_attendance
                 text : req.body.text,
                 as_user: true
               }
@@ -65,29 +65,68 @@ router.post("/messagePost", async(req,res)=>{
 
         // onWork 컬럼에 데이터 추가
         if((result.data.message.text === "출근")) { 
-                await User.update({
-                    onWork: "출근" 
-                  }, {
-                      where: { name: ["Minsung", "jojunmyeong"] }
-                  })
-                  .then( () => {
-                      return User.findOne({
-                          where: { onWork: "출근" }
-                        });
+                // await User.update({
+                //     onWork: "출근" 
+                //   }, {
+                //       where: { name: ["Minsung", "jojunmyeong"] }
+                //   })
+                //   .then( () => {
+                //       return User.findOne({
+                //           where: { onWork: "출근" }
+                //         });
+                // })
+
+                await User.create({
+                    onWork: "출근"
                 })
-            } if (result.data.message.text === "퇴근") { 
-                await User.update({
-                    onWork: "퇴근" 
-                  }, {
-                      where: { name: ["Minsung", "jojunmyeong"] }
-                  })
-                  .then( () => {
-                      return User.findOne({
-                          where: { onWork: "퇴근" }
-                        });
+            }
+        if (result.data.message.text === "퇴근") { 
+                // await User.update({
+                //     onWork: "퇴근" 
+                //   }, {
+                //       where: { name: ["Minsung", "jojunmyeong"] }
+                //   })
+                //   .then( () => {
+                //       return User.findOne({
+                //           where: { onWork: "퇴근" }
+                //         });
+                // })
+                await User.create({
+                    onWork: "퇴근"
                 })
             } 
-        
+
+            // if((result.data.message.text === "출근")) {
+            //     User.findOrCreate({
+            //         where: { onWork: '퇴근' },
+            //         defaults: {
+            //         onWork: '출근'
+            //         }
+            //     })
+            //     .spread((user, created) => {
+            //         if (created) {
+            //         console.log('New Memo: ', user.dataValues);
+            //         } else {
+            //         console.log('Old Memo: ', user.dataValues);
+            //         }
+            //     });
+            // }
+
+            // if (result.data.message.text === "퇴근") {
+            //     User.findOrCreate({
+            //         where: { onWork: '퇴근' },
+            //         defaults: {
+            //         onWork: '퇴근'
+            //         }
+            //     })
+            //     .spread((user, created) => {
+            //         if (created) {
+            //         console.log('New Memo: ', user.dataValues);
+            //         } else {
+            //         console.log('Old Memo: ', user.dataValues);
+            //         }
+            //     });
+            // }
 
         res.send(result.data);
     }catch(err){
