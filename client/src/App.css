@@ -1,184 +1,45 @@
-.time {
-  text-align: center;
-  margin: 50px 50px;
-  font-size: 23pt;
-  font-weight: 600;
+.app-mainDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
 }
 
-.time_box {
-  margin: 80px 400px;
-  border: 2px solid lightgray;
-}
-
-.work {
-  text-align: center;
-}
-
-.workbtn {
-  font-size: 20pt;
-  padding: 5px 25px;
-}
-
-@media (min-width: 1050px) and (max-width: 1300px) {
-  .time_box {
-    margin: 80px 200px;
-  }
-
-}
-
-@media (min-width: 750px) and (max-width: 1049px) {
-  .time_box {
-    margin: 80px 200px;
-  }
-
-}
-
-@media (min-width: 350px) and (max-width: 749px) {
-  .time {
-    font-size: 15pt;
-  }
-
-  .time_box {
-    margin: 80px 150px 70px;
-  }
-
-  .workbtn {
-    font-size: 12pt;
-  }
-}
-
-@media (min-width: 350px) and (max-width: 665px) {
-  .time {
-    font-size: 12pt;
-  }
-
-  .time_box {
-    margin: 80px 150px 60px;
-  }
-
-  .workbtn {
-    font-size: 9pt;
-  }
-}
-
-@media (min-width: 350px) and (max-width: 631px) {
-  .time {
-    font-size: 12pt;
-  }
-
-  .time_box {
-    margin: 80px 150px 60px;
-  }
-
-  .workbtn {
-    font-size: 9pt;
-  }
-}
-
-@media (min-width: 350px) and (max-width: 531px) {
-  .time {
-    font-size: 9pt;
-    margin: 25px 25px;
-  }
-
-  .time_box {
-    margin: 80px 100px 60px;
-  }
-
-  .workbtn {
-    font-size: 6pt;
-  }
-}
-
-/* .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.slack-mainDiv {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-content: center;
+  width: 100%;
 }
 
-.App-link {
-  color: #61dafb;
+.slacklogin-maindiv {
+  align-self: center;
+  padding-top: 320px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.slack-dashboardDiv {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
-li {
-  text-align: left;
-  animation-duration: 1s;
-  animation-name: fade;
+.slack-dash {
+  border: 1px solid black;
+  height: 250px;
+  flex-grow: 1;
 }
 
-li > span{
-  margin-left: 15px;
-  float: right;
+@media (min-width : 861px) {
+    .slack-dash {
+      flex-basis: 45%;
+    }
 }
 
-li > span:hover{
-  color: #09d3ac;
-  cursor: pointer;
+@media (max-width : 860px) {
+    .slack-dash {
+      flex-basis: 65%;
+    }
 }
-
-@keyframes fade{
-  from{
-      opacity: 0
-  }
-  to{
-      opacity: 1;
-  }
-}
-
-.loadmask{
-  position: absolute;
-  width:100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: rgba(11,11,11,0.8);
-}
-
-.loadmask img{
-  width: 400px;
-  position: relative;
-  top: 50%;
-  transform: translate(0%,-50%);
-}
-
-.countUpDown {
-  user-select: none;
-}
-
-.countUpDown:hover {
-  color: skyblue;
-  cursor: pointer;
-}
-
-.viewAndhide {
-  display: none;
-} */

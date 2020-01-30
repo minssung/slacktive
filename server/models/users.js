@@ -1,5 +1,4 @@
 module.exports = (sequelize, DataTypes) => {
- 
     const User = sequelize.define("user", {
         userid : {
             type: DataTypes.STRING,
@@ -26,11 +25,5 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
     });
-
-    //User.associate = function(models) {
-        //models.user.hasMany(models.group);
-        //models.user.belongsTo(models.group);
-    //};
- 
     return User;
 };

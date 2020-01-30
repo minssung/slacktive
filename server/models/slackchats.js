@@ -1,7 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
- 
     const Slack = sequelize.define("slackchat", {
-        username: {
+        userid: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -9,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        date: {
+        time: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -19,11 +18,5 @@ module.exports = (sequelize, DataTypes) => {
         //     defaultValues: '지각'
         // }
     });
-
-    //Slack.associate = function(models) {
-        //models.board.hasMany(models.group);
-        //models.slack.belongsTo(models.group);
-    //};
- 
     return Slack;
 };
