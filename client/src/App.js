@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import SlackLoginBtn from './components/SlackLoginBtn';
-import Slack_Dashboard from './components/Slack_Dashboard';
+import SlackDashboard from './components/Slack_Dashboard';
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
             {
               !localStorage.getItem("usertoken") ? <SlackLoginBtn /> :
               <div>
-                  <Slack_Dashboard />
+                  <SlackDashboard />
               </div>
             }
         </div>
