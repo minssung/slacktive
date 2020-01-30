@@ -1,7 +1,7 @@
 import React from 'react';
 import Time from './components/Time';
 import './App.css';
-import Workbtn from './components/Workbtn';
+import SlackLoginBtn from './components/SlackLoginBtn';
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         
         {/* 출근 버튼 */}
         <div className="work">
-            <Workbtn></Workbtn>
+            <SlackLoginBtn />
         </div>
     </div>
   );

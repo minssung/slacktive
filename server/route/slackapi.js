@@ -52,7 +52,7 @@ router.get("/teamUsers", async(req,res)=>{
         }
         res.send(array);
     }catch(err){
-        console.log(err);
+        console.log("db created err : " + err);
     }
 });
 

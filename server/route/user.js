@@ -45,8 +45,7 @@ router.post("/create", async(req, res) => {
                 username: req.body.username, 
                 // useremail : req.body.useremail,
                 // userphone : req.body.userphone,
-                state : "출근"
-                //result_user.createGroup({groupName: req.body.groupName});
+                state : ""
             }
         }).spread((none, created)=>{
             if(created){
@@ -81,7 +80,7 @@ router.put("/update", async(req, res) => {
         console.error(err);
         result = false;
     }
-    console.log("update : "+result);
+    console.log("update : " + result);
     res.send(result);
 });
 
