@@ -13,8 +13,6 @@ class HistoryDB extends React.Component {
         const result = await axios.post("http://localhost:5000/slackapi/channelHistory",{
             chname : this.state.ch
         });
-
-        console.log(result.data)
         return result.data;
 
     }

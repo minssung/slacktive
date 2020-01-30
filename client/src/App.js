@@ -1,7 +1,7 @@
 import React from 'react';
 import Time from './components/Time';
 import './App.css';
-import Workbtn from './components/Workbtn';
+import SlackLoginBtn from './components/SlackLoginBtn';
 import HistoryDB from './components/HistoryDB';
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
         
         {/* 출근 버튼 */}
         <div className="work">
-            <Workbtn></Workbtn>
+            <SlackLoginBtn />
         </div>
 
         {/** 출근 기록 DB에 담기 */}

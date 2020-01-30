@@ -4,12 +4,8 @@ import Clock from 'react-live-clock';
 class Time extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-        }
     }
-
     render() {
-
         return (
             <div>
                 <div>

@@ -8,7 +8,7 @@ const moment = require('moment');
 
 const User = models.user;
 const History = models.slackuser;
-const slackchat = models.slackchat;
+const Slackchat = models.slackchat;
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -58,7 +58,7 @@ router.get("/teamUsers", async(req,res)=>{
         }
         res.send(array);
     }catch(err){
-        console.log(err);
+        console.log("db created err : " + err);
     }
 });
 
@@ -79,70 +79,14 @@ router.post("/messagePost", async(req,res)=>{
                 as_user: true
               }
         });
-
-        const resultname = await axios({
-            method : "get",
-            url : "https://slack.com/api/users.list",
-            header : {
-                "Content-type": "application/x-www-form-urlencoded",
-            },
-            params: {
-                token : configs.b_token,
-            }
-        });
-                
-        const resultSet = resultname.data.members;
-        const array = resultSet.map((data)=>{
-            return {
-                user : data.id,
-                R_name : data.real_name
-            }
-        });
         
-        
-        // const newTest = result.data.message;
-        // console.log(newTest);
-
-        // const mergeData = newTest(data1 => {
-        //     return Object.assign(data1, newTest.find(data2 => {
-        //         return data2 && data1.user === data2.user
-        //     })
-        //     )
-
-        // })
-
-        //console.log(mergeData);
-        
-
         // onWork 컬럼에 데이터 추가
         if((result.data.message.text === "출근")) { 
-                // await User.update({
-                //     onWork: "출근" 
-                //   }, {
-                //       where: { name: ["Minsung", "jojunmyeong"] }
-                //   })
-                //   .then( () => {
-                //       return User.findOne({
-                //           where: { onWork: "출근" }
-                //         });
-                // })
-                
                 await History.create({
                     onWork: "출근"
                 })
             }
         if (result.data.message.text === "퇴근") { 
-                // await User.update({
-                //     onWork: "퇴근" 
-                //   }, {
-                //       where: { name: ["Minsung", "jojunmyeong"] }
-                //   })
-                //   .then( () => {
-                //       return User.findOne({
-                //           where: { onWork: "퇴근" }
-                //         });
-                // })
-
                 await History.create({
                     onWork: "퇴근"
                 })
@@ -180,13 +124,28 @@ router.post("/channelHistory", async(req,res) =>{
                 ts : data.ts
             }
         });
-        console.log(resultArray[0].text);
+
+        //await Slackchat.sync({force: true});
+        const ChangeTime = moment.unix(resultArray[0].ts).utcOffset("+09:00").format("YYYY년 MM월 DD일 HH:mm:ss");
+        
+        var date = new Date(resultArray[0].ts * 1000);
+        console.log(date);
         
 
-        slackchat.create({
-            username: resultArray[0].name,
-            text: resultArray[0].text,
-            date: moment.unix(resultArray[0].ts).zone("+09:00").format("YYYY년 MM월 DD일 HH시 mm분")
+        Slackchat.findOrCreate({
+            where: {
+                date: ChangeTime
+            },
+            defaults: {
+                username: resultArray[0].user,
+                text: resultArray[0].text,
+                date: ChangeTime,
+                //state: 
+            }}).spread((user, created) => {
+            // console.log(user.get({
+            //   plain: true
+            // }))
+            // console.log(created)
         })
 
         res.send(resultArray);
