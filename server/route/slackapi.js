@@ -4,8 +4,11 @@ const axios = require('axios');
 const _ = require("lodash");
 const configs = require("../server_config");
 const models = require("../models");
+const moment = require('moment');
 
-const User = models.slackuser;
+const User = models.user;
+const History = models.slackuser;
+const slackchat = models.slackchat;
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -17,7 +20,7 @@ router.get("/teamUsers", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params: {
-                token : configs.p_token,
+                token : configs.b_token,
             }
         });
         const resultSet = result.data.members;
@@ -30,15 +33,29 @@ router.get("/teamUsers", async(req,res)=>{
             }
         });
 
-        await User.sync({force: false});
+        //await User.sync({force: true});
 
         // 테이블 생성 name 컬럼 추가 ( 봇 제외 유저만 )
         for (const user of array) {
             if(user.R_name !== undefined && user.R_name !== "Slackbot" && user.is_bot === false)
-                await User.create({ "name": user.R_name });
+                await User.findOrCreate({
+                    where : {
+                        userid : user.user,
+                        username : user.R_name
+                    },
+                    defaults : {
+                        userid : user.user,
+                        username : user.R_name
+                    }
+                }).spread((none, created) =>{
+                    if(created){
+                        console.log(created);
+                    } else {
+                        console.log('already create');
+                        
+                    }
+                });
         }
-        
-
         res.send(array);
     }catch(err){
         console.log(err);
@@ -63,6 +80,40 @@ router.post("/messagePost", async(req,res)=>{
               }
         });
 
+        const resultname = await axios({
+            method : "get",
+            url : "https://slack.com/api/users.list",
+            header : {
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            params: {
+                token : configs.b_token,
+            }
+        });
+                
+        const resultSet = resultname.data.members;
+        const array = resultSet.map((data)=>{
+            return {
+                user : data.id,
+                R_name : data.real_name
+            }
+        });
+        
+        
+        // const newTest = result.data.message;
+        // console.log(newTest);
+
+        // const mergeData = newTest(data1 => {
+        //     return Object.assign(data1, newTest.find(data2 => {
+        //         return data2 && data1.user === data2.user
+        //     })
+        //     )
+
+        // })
+
+        //console.log(mergeData);
+        
+
         // onWork 컬럼에 데이터 추가
         if((result.data.message.text === "출근")) { 
                 // await User.update({
@@ -75,8 +126,8 @@ router.post("/messagePost", async(req,res)=>{
                 //           where: { onWork: "출근" }
                 //         });
                 // })
-
-                await User.create({
+                
+                await History.create({
                     onWork: "출근"
                 })
             }
@@ -91,43 +142,11 @@ router.post("/messagePost", async(req,res)=>{
                 //           where: { onWork: "퇴근" }
                 //         });
                 // })
-                await User.create({
+
+                await History.create({
                     onWork: "퇴근"
                 })
-            } 
-
-            // if((result.data.message.text === "출근")) {
-            //     User.findOrCreate({
-            //         where: { onWork: '퇴근' },
-            //         defaults: {
-            //         onWork: '출근'
-            //         }
-            //     })
-            //     .spread((user, created) => {
-            //         if (created) {
-            //         console.log('New Memo: ', user.dataValues);
-            //         } else {
-            //         console.log('Old Memo: ', user.dataValues);
-            //         }
-            //     });
-            // }
-
-            // if (result.data.message.text === "퇴근") {
-            //     User.findOrCreate({
-            //         where: { onWork: '퇴근' },
-            //         defaults: {
-            //         onWork: '퇴근'
-            //         }
-            //     })
-            //     .spread((user, created) => {
-            //         if (created) {
-            //         console.log('New Memo: ', user.dataValues);
-            //         } else {
-            //         console.log('Old Memo: ', user.dataValues);
-            //         }
-            //     });
-            // }
-
+        }
         res.send(result.data);
     }catch(err){
         console.log(err);
@@ -148,7 +167,8 @@ router.post("/channelHistory", async(req,res) =>{
             },
             params: {
                 token : configs.p_token,
-                channel : req.body.chname
+                channel : req.body.chname,
+                limit : 1
             }
         });
         const resultSet = (result.data.messages).reverse();
@@ -160,6 +180,15 @@ router.post("/channelHistory", async(req,res) =>{
                 ts : data.ts
             }
         });
+        console.log(resultArray[0].text);
+        
+
+        slackchat.create({
+            username: resultArray[0].name,
+            text: resultArray[0].text,
+            date: moment.unix(resultArray[0].ts).zone("+09:00").format("YYYY년 MM월 DD일 HH시 mm분")
+        })
+
         res.send(resultArray);
     } catch(error) {
         console.log(error);

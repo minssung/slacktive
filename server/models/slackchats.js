@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     const Slack = sequelize.define("slackchat", {
         username: {
             type: DataTypes.STRING,
-            allowNull: false,
+            //allowNull: false,
         },
         text: {
             type: DataTypes.STRING,

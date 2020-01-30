@@ -11,7 +11,6 @@ class Workbtn extends React.Component {
     }
 
     async messagePost() {
-        
         console.log(this.state)
         const result = await axios.post("http://localhost:5000/slackapi/messagePost",{
             text : this.state.onWork
@@ -26,26 +25,38 @@ class Workbtn extends React.Component {
 
     }
 
-    // userlist DB에 저장시키기 위해
-    async teamUsers() {
-        const result = await axios.get("http://localhost:5000/slackapi/teamUsers");
-        return result.data
-    }
-
-    componentDidMount() {
-        this.teamUsers();
+    async componentDidMount() {
+        await axios.get("http://localhost:5000/slackapi/teamUsers");
+        var url = (window.location.href).split('?');
+        if(url[1]){
+            try {
+                const resultUser = await axios.get(`http://localhost:5000/user/${url[1]}`);
+                this.setState({
+                    p_token : resultUser.data.p_token
+                })
+            } catch(err) {
+                console.log(err);
+            }
+        }
     }
 
     render() {
-
+        const { p_token } = this.state;
         return (
             <div>
-                {/* <button className="workbtn" onClick={() => {
-                    this.messagePost();
-                }}>출근</button> */}
-                <button className="workbtn" onClick={()=>this.messagePost()}>
-                    {this.state.visib? this.state.onWork : this.state.onWork = '출근'}
-                </button>
+                {
+                    p_token ? 
+                    <button className="workbtn" onClick={()=>this.messagePost()}>
+                        {this.state.visib ? this.state.onWork : this.state.onWork='출근'}
+                    </button>
+                    : 
+                    <a href="http://localhost:5000/login">
+                        <img alt="Sign in with Slack" height="40" width="172" 
+                        src="https://platform.slack-edge.com/img/sign_in_with_slack.png" 
+                        srcSet="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, 
+                        https://platform.slack-edge.com/img/sign_in_with_slack@2x.png 2x" />
+                    </a>
+                }
             </div>
           );
     }

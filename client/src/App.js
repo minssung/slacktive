@@ -2,6 +2,7 @@ import React from 'react';
 import Time from './components/Time';
 import './App.css';
 import Workbtn from './components/Workbtn';
+import HistoryDB from './components/HistoryDB';
 
 function App() {
   return (
@@ -14,6 +15,11 @@ function App() {
         {/* 출근 버튼 */}
         <div className="work">
             <Workbtn></Workbtn>
+        </div>
+
+        {/** 출근 기록 DB에 담기 */}
+        <div>
+            <HistoryDB></HistoryDB>
         </div>
     </div>
   );

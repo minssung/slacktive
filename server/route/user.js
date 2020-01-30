@@ -3,73 +3,33 @@ const express = require("express");
 const router = express.Router();
 const models = require("../models");
 const _ = require("lodash");
+const axios = require("axios");
+let configs = require('../server_config');
 
 // DB Setting --------------------
 const User = models.user;
-
-// DB Insert --------------------
-router.get("/init", async(req, res) => {
-    const users = [{
-        userid : 'ABCDEF',
-        username : "HongGilDong",
-        useremail : "aaa@a.com",
-        userphone : "000-0000-0000",
-        totalcount : 0,
-        state : "출근"
-    }];
-
-    await User.sync ({ force : true });
-
-    for (const user of users) {
-        await User.create ({ 
-            "userid" : user.userid, 
-            "username" : user.username,
-            "useremail" : user.useremail,
-            "userphone" : user.userphone,
-            "totalcount" : user.totalcount,
-            "state" : user.state });
-    }
-    res.send(true);
-});
  
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
-router.get("/", async(req, res) => {
+router.get("/all", async(req, res) => {
     let result = await User.findAll({
     });
     res.send(result);
 });
 
 // DB SelectOne --------------------
-router.get("/:id", async(req, res) => {
-    let result = await User.findOne({
-        where: {
-            id: req.params.id
-        }
-    });
-    res.send(result);
-});
-
-/*
-// DB Create --------------------
-router.post("/", async(req, res) => {
-    let result = false;
-    try{
-        await User.create({
-            userid: req.body.userid, 
-            username: req.body.username, 
-            useremail : req.body.useremail,
-            userphone : req.body.userphone,
-            totalcount : 0,
-            state : "출근"});
-        //await result_user.createGroup({groupName: req.body.groupName});
-        result = true;
-    }catch(err) {
-        console.error(err);
+router.get("/:userid", async(req, res) => {
+    try {
+        let result = await User.findOne({
+            where : {
+                userid : req.params.userid
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log(err);
     }
-    res.send(result);
 });
-*/
 
 // DB FineOrCreate --------------------
 router.post("/create", async(req, res) => {
@@ -78,16 +38,15 @@ router.post("/create", async(req, res) => {
         await User.findOrCreate({
             where : {
                 userid : req.body.userid,
-                username : req.body.username
             },
             defaults : {
                 id : req.body.id,
                 userid: req.body.userid, 
                 username: req.body.username, 
-                useremail : req.body.useremail,
-                userphone : req.body.userphone,
-                totalcount : 0,
+                // useremail : req.body.useremail,
+                // userphone : req.body.userphone,
                 state : "출근"
+                //result_user.createGroup({groupName: req.body.groupName});
             }
         }).spread((none, created)=>{
             if(created){
@@ -101,37 +60,43 @@ router.post("/create", async(req, res) => {
 });
 
 // DB Update --------------------
-router.put("/:id", async(req, res) => {
+router.put("/update", async(req, res) => {
     let result = null;
     try {
         await User.update({ 
             username: req.body.username,
             useremail: req.body.useremail, 
             userphone : req.body.userphone,
-            totalcount : req.body.totalcount,
-            state : req.body.state }, {
+            p_token : req.body.p_token,
+            b_p_token : req.body.b_p_token,
+            state : req.body.state 
+            }, {
             where: {
-              id : req.params.id
+                userid : req.body.u_id
             }
           }).then((res) => {
-              return result;
+              result = true;
           });
     } catch(err) {
         console.error(err);
+        result = false;
     }
+    console.log("update : "+result);
     res.send(result);
 });
 
 // DB Delete --------------------
 router.delete("/:id", async(req, res) => {
-    let result = await User.destroy({
-        where: {
-            id: req.params.id
-        }
-    }).then(() => {
-        console.log("Done");
-      });
-    res.send(result);
+    try {
+        let result = await User.destroy({
+            where: {
+                id: req.params.id
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log(err);
+    }
 });
 
 // Module Exports --------------------
