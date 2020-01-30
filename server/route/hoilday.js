@@ -5,30 +5,30 @@ const models = require("../models");
 const _ = require("lodash");
 
 // DB Setting --------------------
-const User = models.user;
+const Hoilday = models.Hoilday;
  
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
 router.get("/all", async(req, res) => {
     try {
-        const result = await User.findAll();
+        const result = await Hoilday.findAll();
         res.send(result);
     } catch(err) {
-        console.log("select users all err : " + err)
+        console.log("select hoilday all err : " + err)
     }
 });
 
 // DB SelectOne --------------------
 router.get("/one", async(req, res) => {
     try {
-        const result = await User.findOne({
+        const result = await Hoilday.findOne({
             where : {
-                userid : req.query.userid
+                time : req.query.time
             }
         });
         res.send(result);
     } catch(err) {
-        console.log("select user one err : " + err);
+        console.log("select hoilday one err : " + err);
     }
 });
 
@@ -36,14 +36,15 @@ router.get("/one", async(req, res) => {
 router.post("/create", async(req, res) => {
     let result = false;
     try{
-        await User.findOrCreate({
+        await Hoilday.findOrCreate({
             where : {
-                userid : req.body.userid,
+                time : req.body.time
             },
             defaults : {
-                id : req.body.id,
                 userid: req.body.userid, 
-                username: req.body.username, 
+                text: req.body.text,
+                time : req.body.time,
+                state : req.body.state,
             }
         }).spread((none, created)=>{
             if(created){
@@ -51,7 +52,7 @@ router.post("/create", async(req, res) => {
             }
         });
     }catch(err) {
-        console.error("created user err : " + err);
+        console.error("created hoilday err : " + err);
     }
     res.send(result);
 });
@@ -60,23 +61,19 @@ router.post("/create", async(req, res) => {
 router.put("/update", async(req, res) => {
     let result = null;
     try {
-        await User.update({ 
-            id : req.body.id,
-            userid : req.body.userid,
-            username: req.body.username,
-            useremail: req.body.useremail, 
-            userphone : req.body.userphone,
-            p_token : req.body.p_token,
-            b_p_token : req.body.b_p_token,
+        await Hoilday.update({ 
+            userid: req.body.userid,
+            text: req.body.text,
+            time: req.body.time,
             state : req.body.state 
             }, {
             where: {
-                userid : req.body.userid
+                time : req.body.time
             }
         });
         result = true;
     } catch(err) {
-        console.error("user update err : " + err);
+        console.error("hoilday update err : " + err);
         result = false;
     }
     console.log("update : " + result);
@@ -86,14 +83,14 @@ router.put("/update", async(req, res) => {
 // DB Delete --------------------
 router.delete("/delete", async(req, res) => {
     try {
-        let result = await User.destroy({
+        let result = await Hoilday.destroy({
             where: {
-                userid: req.query.userid
+                time: req.query.time
             }
         });
         res.send(result);
     } catch(err) {
-        console.log("delete user err : " + err);
+        console.log("delete hoilday err : " + err);
     }
 });
 

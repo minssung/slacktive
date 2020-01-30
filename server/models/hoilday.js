@@ -1,20 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
-    const Slack = sequelize.define("slackchat", {
+    const Hoilday = sequelize.define("hoilday", {
         userid: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: false
         },
         text: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: false
         },
         time: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: false
         },
         state: {
             type: DataTypes.STRING,
         },
     });
-    return Slack;
+    return Hoilday;
 };

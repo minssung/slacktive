@@ -35,7 +35,7 @@ router.get("/teamUsers", async(req,res)=>{
         // 테이블 생성 name 컬럼 추가 ( 봇 제외 유저만 )
         for (const user of array) {
             if(user.R_name !== undefined && user.R_name !== "Slackbot" && user.is_bot === false)
-                await User.findOrCreate({
+                User.findOrCreate({
                     where : {
                         userid : user.user,
                         username : user.R_name
@@ -64,43 +64,18 @@ router.post("/messagePost", async(req,res)=>{
             url : "https://slack.com/api/chat.postMessage",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : configs.bearer_p_token,
+                "Authorization" : req.body.b_p_token,
             },
             params : {
-                token : configs.p_token,
-                channel : "CSZTZ7TCL",
+                token : req.body.p_token,
+                channel : req.body.channel,
                 text : req.body.text,
                 as_user: true
               }
         });
-
-        // onWork 컬럼에 데이터 추가
-        if((result.data.message.text === "출근")) { 
-                await User.update({
-                    onWork: "출근" 
-                  }, {
-                      where: { name: ["Minsung", "jojunmyeong"] }
-                  })
-                  .then( () => {
-                      return User.findOne({
-                          where: { onWork: "출근" }
-                        });
-                })
-            } if (result.data.message.text === "퇴근") { 
-                await User.update({
-                    onWork: "퇴근" 
-                  }, {
-                      where: { name: ["Minsung", "jojunmyeong"] }
-                  })
-                  .then( () => {
-                      return User.findOne({
-                          where: { onWork: "퇴근" }
-                        });
-                })
-        }
         res.send(result.data);
     }catch(err){
-        console.log(err);
+        console.log("slack post message err : " + err);
     }
 });
 
@@ -117,8 +92,8 @@ router.post("/channelHistory", async(req,res) =>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params: {
-                token : configs.p_token,
-                channel : req.body.chname
+                token : req.body.p_token,
+                channel : req.body.channel
             }
         });
         const resultSet = (result.data.messages).reverse();
@@ -132,7 +107,7 @@ router.post("/channelHistory", async(req,res) =>{
         });
         res.send(resultArray);
     } catch(error) {
-        console.log(error);
+        console.log("slack channel history err : " + error);
     }
 });
 
@@ -146,7 +121,7 @@ router.get("/channelMembers", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.p_token,
+                token : req.body.p_token,
                 channel : req.body.channel,
             }
         });
@@ -158,7 +133,7 @@ router.get("/channelMembers", async(req,res)=>{
         })
         res.send(array);
     } catch(err){
-        console.log(err);
+        console.log("slack channel members err : " + err);
     }
 });
 
@@ -172,9 +147,10 @@ router.post("/channelList", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.p_token,
+                token : req.body.p_token,
             }
         });
+        console.log(result.data)
         const resultSet = result.data.channels;
         const array = resultSet.map(data =>{
             return {
@@ -184,7 +160,7 @@ router.post("/channelList", async(req,res)=>{
         });
         res.send(array);
     }catch(err){
-        console.log(err);
+        console.log("slack channel list err : " + err);
     }
 });
 
@@ -196,17 +172,17 @@ router.post("/messageDelete", async(req,res)=>{
             url : "	https://slack.com/api/chat.delete",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : configs.bearer_p_token,
+                "Authorization" : req.body.b_p_token,
             },
             params : {
-                token : configs.p_token,
-                channel : req.body.channels,
-                ts : req.body.times
+                token : req.body.p_token,
+                channel : req.body.channel,
+                ts : req.body.time
             }
         });
         res.send(result.data);
     }catch(err){
-        console.log(err);
+        console.log("slack message delete err : " + err);
     }
 });
 
@@ -218,19 +194,19 @@ router.post("/messageUpdate", async(req,res)=>{
             url : "	https://slack.com/api/chat.update",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : configs.bearer_p_token,
+                "Authorization" : req.body.b_p_token,
             },
             params : {
-                token : configs.p_token,
-                channel : req.body.channels,
-                text : req.body.texts,
-                ts : req.body.times,
+                token : req.body.p_token,
+                channel : req.body.channel,
+                text : req.body.text,
+                ts : req.body.time,
                 as_user : true
             }
         });
         res.send(result.data);
     }catch(err){
-        console.log(err);
+        console.log("slack channel msg update err : " + err);
     }
 });
 
@@ -242,10 +218,10 @@ router.post("/conversationsKick", async(req,res)=>{
             url : "	https://slack.com/api/conversations.kick",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : configs.bearer_p_token,
+                "Authorization" : req.body.b_p_token,
             },
             params : {
-                token : configs.p_token,
+                token : req.body.p_token,
                 channel : req.body.channel,
                 user : req.body.user,
             }
@@ -266,7 +242,7 @@ router.post("/usersInfo", async(req,res)=>{
                 "Content-type" : "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.p_token,
+                token : req.body.p_token,
                 user : req.body.user,
               }
         });
@@ -289,7 +265,7 @@ router.post("/usersInfo", async(req,res)=>{
         };
         res.send(resultJson);
     }catch(err){
-        console.log(err);
+        console.log("slack user info err : " + err);
     }
 });
 
@@ -303,7 +279,7 @@ router.post("/botInfo", async(req,res)=>{
                 "Content-type" : "application/x-www-form-urlencoded",
             },
             params : {
-                token : configs.p_token,
+                token : req.body.p_token,
             }
         });
         res.send(result.data);
@@ -320,15 +296,15 @@ router.post("/authInfo", async(req,res)=>{
             url : "	https://slack.com/api/auth.test",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : configs.bearer_p_token,
+                "Authorization" : req.body.b_p_token,
             },
             params : {
-                token : configs.p_token,
+                token : req.body.p_token,
             }
         });
         res.send(result.data);
     }catch(err){
-        console.log(err);
+        console.log("slack auth identity test err : " + err);
     }
 });
 

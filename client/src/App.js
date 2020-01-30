@@ -1,19 +1,18 @@
 import React from 'react';
-import Time from './components/Time';
 import './App.css';
 import SlackLoginBtn from './components/SlackLoginBtn';
+import Slack_Dashboard from './components/Slack_Dashboard';
 
 function App() {
   return (
-    <div className="container">
-        {/* 현재 시간 */}
-        <div className="time_box">
-            <div className="time"><Time></Time></div>
-        </div>
-        
-        {/* 출근 버튼 */}
-        <div className="work">
-            <SlackLoginBtn />
+    <div>
+        <div className="app-mainDiv">
+            {
+              !localStorage.getItem("usertoken") ? <SlackLoginBtn /> :
+              <div>
+                  <Slack_Dashboard />
+              </div>
+            }
         </div>
     </div>
   );

@@ -6,67 +6,31 @@ const _ = require("lodash");
 // DB Setting --------------------
 const Slack = models.slackchat;
 
-// DB Insert --------------------
-router.get("/init", async(req, res) => {
-    const slacks = [{
-        username: "slack user name",
-        text : "slack board text",
-        date : "2020,02,20,10:00,AM"
-    }];
-
-    await Slack.sync ({ forcce : true });
-
-    for (const slack of slacks) {
-        await Slack.create ({ 
-            "username" : slack.username, 
-            "text" : slack.text, 
-            "date" : slack.date 
-        });
-    }
-    res.send(true);
-});
-
 // ------------------------------------- DB CRUD -------------------------------------
 
 // DB SelectAll --------------------
-router.get("/", async(req, res) => {
-    let result = await Slack.findAll({
-    });
-    res.send(result);
+router.get("/all", async(req, res) => {
+    try {
+        const result = await Slack.findAll();
+        res.send(result);
+    } catch(err){
+        console.log("select chat all err : " + err);
+    }
 });
 
 // DB SelectOne --------------------
-router.get("/:id", async(req, res) => {
+router.get("/one", async(req, res) => {
     try {
         let result = await Slack.findOne({
             where: {
-                id: req.params.id
+                time: req.query.time
             },
         });
         res.send(result);
     } catch (err){
-        console.log(err);
+        console.log("select chat one err : " + err);
     }
 });
-
-/*
-// DB Create --------------------
-router.post("/", async(req, res) => {
-    let result = false;
-    try{
-        await Slack.create({
-            username: req.body.username, 
-            text : req.body.text, 
-            date : req.body.date
-        });
-        //await result_slack.createGroup({groupName: "slackApp"});
-        result = true;
-    }catch(err) {
-        console.error(err);
-    }
-    res.send(result);
-});
-*/
 
 // DB FindOrCreate --------------------
 router.post("/create", async(req, res) => {
@@ -74,14 +38,14 @@ router.post("/create", async(req, res) => {
     try {
         Slack.findOrCreate({
             where : {
-                date : req.body.date,
-                username : req.body.username
+                time : req.body.time,
+                userid : req.body.userid
             },
             defaults : {
-                id : req.body.id,
-                username: req.body.username, 
+                userid: req.body.userid, 
                 text : req.body.text,
-                date : req.body.date
+                time : req.body.time,
+                state : req.body.state,
             }
         }).spread((none, created) =>{
             if(created) {
@@ -95,32 +59,35 @@ router.post("/create", async(req, res) => {
 });
 
 // DB Update --------------------
-router.put("/:id", async(req, res) => {
-    let result = null;
+router.put("/update", async(req, res) => {
     try {
-        result = await Slack.update({ 
-            username: req.body.username, 
-            text: req.body.text }, {
+        const result = await Slack.update({ 
+            userid: req.body.userid, 
+            text: req.body.text,
+            state : req.body.state,
+        }, {
             where: {
-              id : req.params.id
+                time : req.body.time
             }
         });
+        res.send(result);
     } catch(err) {
         console.error(err);
     }
-    res.send(result);
 });
 
 // DB Delete --------------------
-router.delete("/:id", async(req, res) => {
-    let result = await Slack.destroy({
-        where: {
-            id: req.params.id
-        }
-    }).then(() => {
-        console.log("Done");
-    });
-    res.send(result);
+router.delete("/delete", async(req, res) => {
+    try {
+        let result = await Slack.destroy({
+            where: {
+                time: req.query.time
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("delete chat err : " + err);
+    }
 });
 
 // Module Exports --------------------
