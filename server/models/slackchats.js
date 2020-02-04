@@ -12,11 +12,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        // state: {
-        //     type: DataTypes.STRING,
-        //     allowNull: false,
-        //     defaultValues: '지각'
-        // }
+        ts: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        state: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        }
     });
     return Slack;
 };

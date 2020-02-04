@@ -14,11 +14,19 @@ class HistoryDB extends React.Component {
             chname : this.state.ch
         });
         return result.data;
-
+        
     }
 
     componentDidMount() {
+    //     this.interval = setInterval( () => {
+    //         this.History();
+    //     }, 1000 * 60 * 60);
+        
         this.History();
+    }
+
+    componentWillUnmount() {
+        //clearInterval(this.interval)
     }
 
     render() {

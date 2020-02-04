@@ -5,6 +5,8 @@ const _ = require("lodash");
 const configs = require("../server_config");
 const models = require("../models");
 const moment = require('moment');
+moment.tz.setDefault("Asia/Seoul");
+const { Op } = require("sequelize");
 
 const User = models.user;
 const Slackchat = models.slackchat;
@@ -49,9 +51,6 @@ router.get("/teamUsers", async(req,res)=>{
                 }).spread((none, created) =>{
                     if(created){
                         console.log(created);
-                    } else {
-                        console.log('already create');
-                        
                     }
                 });
         }
@@ -90,6 +89,14 @@ router.post("/channelHistory", async(req,res) =>{
         res.on('error', (err) =>{
             console.log(err);
         });
+
+        const lastData = await Slackchat.findOne({
+            limit: 1,
+            order: [
+                ['time', 'DESC']
+            ]
+        });
+
         const result = await axios({
             method : "get",
             url : "https://slack.com/api/conversations.history",
@@ -99,9 +106,10 @@ router.post("/channelHistory", async(req,res) =>{
             params: {
                 token : configs.p_token,
                 channel : req.body.chname,
-                limit : 1
+                oldest : lastData.ts
             }
         });
+        
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
             return {
@@ -113,27 +121,34 @@ router.post("/channelHistory", async(req,res) =>{
         });
 
         //await Slackchat.sync({force: true});
-        const ChangeTime = moment.unix(resultArray[0].ts).utcOffset("+09:00").format("YYYY년 MM월 DD일 HH:mm:ss");
-        
-        var date = new Date(resultArray[0].ts * 1000);
-        console.log(date);
-        
 
-        Slackchat.findOrCreate({
-            where: {
-                time: ChangeTime
-            },
-            defaults: {
-                userid: resultArray[0].user,
-                text: resultArray[0].text,
-                time: ChangeTime,
-                //state: 
-            }}).spread((user, created) => {
-            // console.log(user.get({
-            //   plain: true
-            // }))
-            // console.log(created)
-        })
+        for (const user of resultArray) {
+            const ChangeTime = moment.unix(user.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            const timecheck = moment.unix(user.ts).utcOffset("+09:00").format("HH:mm");
+
+            if (timecheck > "11:00") {
+                console.log('지각 상태');
+
+                await Slackchat.create({
+                    userid: user.user,
+                    text: user.text,
+                    time: ChangeTime,
+                    ts: user.ts,
+                    state: "지각"  
+                })
+
+            } else {
+                    console.log('출근 상태');
+
+                    await Slackchat.create({
+                        userid: user.user,
+                        text: user.text,
+                        time: ChangeTime,
+                        ts: user.ts,
+                        state: "출근"  
+                    })
+                }
+            } 
 
         res.send(resultArray);
     } catch(error) {
