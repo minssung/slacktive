@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const Slack = sequelize.define("slackchat", {
-        chat_userid: {
+        userid: {
             type: DataTypes.STRING,
             allowNull: false,
         },

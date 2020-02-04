@@ -5,7 +5,7 @@ const models = require("../models");
 // DB Setting --------------------
 const Slack = models.slackchat;
 
-const queryFindAll = "SELECT `slackchat`.`id`, `slackchat`.`chat_userid`, `slackchat`.`text`, `slackchat`.`time`, `slackchat`.`state`, `slackchat`.`createdAt`, `slackchat`.`updatedAt`, `user`.`username` AS `username`, `user`.`state` AS `userstate`FROM `slackchats` AS `slackchat` LEFT OUTER JOIN `users` AS `user` ON `slackchat`.`chat_userid` = `user`.`userid` ORDER BY `slackchat`.`id` ASC;"
+const queryFindAll = "SELECT `slackchat`.`id`, `slackchat`.`userid`, `slackchat`.`text`, `slackchat`.`time`, `slackchat`.`state`, `slackchat`.`createdAt`, `slackchat`.`updatedAt`, `user`.`username` AS `username`, `user`.`state` AS `userstate`FROM `slackchats` AS `slackchat` LEFT OUTER JOIN `users` AS `user` ON `slackchat`.`userid` = `user`.`userid` ORDER BY `slackchat`.`id` ASC;"
 // ------------------------------------- DB CRUD -------------------------------------
 
 // DB SelectAll --------------------
@@ -36,12 +36,13 @@ router.get("/one", async(req, res) => {
 });
 
 // DB SelectOne Id --------------------
-router.get("/oneid", async(req, res) => {
+router.get("/oneRow", async(req, res) => {
     try {
         let result = await Slack.findOne({
-            where: {
-                id: req.query.id
-            },
+            limit : 1,
+            order : [
+                [ 'time','DESC']
+            ]
         });
         res.send(result);
     } catch (err){
@@ -67,11 +68,11 @@ router.post("/create", async(req, res) => {
         let result = await Slack.findOrCreate({
             where : {
                 time : req.body.time,
-                chat_userid : req.body.userid
+                userid : req.body.userid
             },
             defaults : {
                 id : req.body.id,
-                chat_userid: req.body.userid, 
+                userid: req.body.userid, 
                 text : req.body.text,
                 time : req.body.time,
                 state : req.body.state,
@@ -87,7 +88,7 @@ router.post("/create", async(req, res) => {
 router.put("/update", async(req, res) => {
     try {
         const result = await Slack.update({ 
-            chat_userid: req.body.userid, 
+            userid: req.body.userid, 
             text: req.body.text,
             state : req.body.state,
         }, {

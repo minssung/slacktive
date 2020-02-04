@@ -73,7 +73,7 @@ router.post("/messagePost", async(req,res)=>{
                 channel : req.body.channel,
                 text : req.body.text,
                 as_user: true
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
@@ -83,6 +83,47 @@ router.post("/messagePost", async(req,res)=>{
 
 // 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
+    try {
+        let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
+        console.log("on --------------------------------");
+        const result = await axios({
+            method : "get",
+            url : "https://slack.com/api/conversations.history",
+            header : {
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            params: {
+                token : configs.p_token,
+                channel : req.body.channel,
+                oldest : historyOne.data.time
+            }
+        });
+        let id = historyOne.data.id;
+        const resultSet = (result.data.messages).reverse();
+        const resultArray = resultSet.map(data=>{
+            return data.user &&  {
+                id : ++id,
+                userid : data.user,
+                time : data.ts,
+                text : data.text,
+                state : "출근",
+            }
+        });
+        try {
+            await Slackchat.bulkCreate(resultArray,{
+                individualHooks : true,
+            });
+        } catch(err) {
+            console.error("bulk create arr : " + err);
+        }
+        res.send(resultArray);
+    } catch(error) {
+        console.log("slack channel history err : " + error);
+    }
+});
+
+// 채널의 메시지 내역 가져오기 초기 실행 --------------------------------------------------
+router.post("/channelHistoryInit", async(req,res) =>{
     try {
         const result = await axios({
             method : "get",
@@ -97,52 +138,22 @@ router.post("/channelHistory", async(req,res) =>{
         });
         let id = 0;
         const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map(async(data)=>{
-            return data.user &&  await axios.post("http://localhost:5000/slack/create",{
+        const resultArray = resultSet.map(data=>{
+            return data.user &&  {
                 id : ++id,
                 userid : data.user,
                 time : data.ts,
                 text : data.text,
                 state : "출근",
-            });
-        });
-
-        res.send(resultArray);
-    } catch(error) {
-        console.log("slack channel history err : " + error);
-    }
-});
-
-// 채널의 메시지 내역 마지막 내용부터 새로운 내용만 가져오기 --------------------------------------------------
-router.post("/channelHistoryOldest", async(req,res) =>{
-    try {
-        const historyDbMaxId = await axios.get("http://localhost:5000/slack/max");
-        const historyDbMaxRaw = await axios.get(`http://localhost:5000/slack/oneid?id=${historyDbMaxId}`);
-        console.log(historyDbMaxRaw.ts);
-        const result = await axios({
-            method : "get",
-            url : "https://slack.com/api/conversations.history",
-            header : {
-                "Content-type": "application/x-www-form-urlencoded",
-            },
-            params: {
-                token : configs.p_token,
-                channel : req.body.channel,
-                oldest : historyDbMaxRaw.ts,
             }
         });
-        let id = historyDbMaxRaw.id;
-        const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map(async(data)=>{
-            return data.user &&  await axios.post("http://localhost:5000/slack/create",{
-                id : ++id,
-                userid : data.user,
-                time : data.ts,
-                text : data.text,
-                state : "출근",
+        try {
+            await Slackchat.bulkCreate(resultArray,{
+                individualHooks : true,
             });
-        });
-
+        } catch(err) {
+            console.error(err);
+        }
         res.send(resultArray);
     } catch(error) {
         console.log("slack channel history err : " + error);

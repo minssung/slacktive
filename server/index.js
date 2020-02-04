@@ -37,11 +37,14 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 0", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:false }).then(()=>{
+    models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
                 await axios.get("http://localhost:5000/slackapi/teamUsers");
+                await axios.post("http://localhost:5000/slackapi/channelHistoryInit", {
+                    channel : "CS7RWKTT5",
+                });
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }
@@ -66,7 +69,7 @@ app.get('/login', async(req, res) => {
 });
 
 app.get('/login-access', async(req,res) => {
-    try { 
+    try {
         const result = await axios({
             method : "get",
             url : "https://slack.com/api/oauth.access",
