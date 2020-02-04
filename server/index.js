@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 0", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:true }).then(()=>{
+    models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
@@ -121,5 +121,4 @@ app.get('/verify', (req,res)=>{
         res.send("err");
     }
 });
-
 // -------------------- ********** --------------------
