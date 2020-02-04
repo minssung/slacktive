@@ -5,6 +5,8 @@ const _ = require("lodash");
 const configs = require("../server_config");
 const models = require("../models");
 const moment = require('moment');
+moment.tz.setDefault("Asia/Seoul");
+const { Op } = require("sequelize");
 
 const User = models.user;
 const Slackchat = models.slackchat;
@@ -47,8 +49,6 @@ router.get("/teamUsers", async(req,res)=>{
                 }).spread((none, created) =>{
                     if(created){
                         console.log(created);
-                    } else {
-                        console.log('already create');
                     }
                 });
         }
@@ -139,13 +139,26 @@ router.post("/channelHistoryInit", async(req,res) =>{
         let id = 0;
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
-            return data.user &&  {
+        const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+        const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+        if (timeCheck > "11:00") {
+            return data.user && {
                 id : ++id,
                 userid : data.user,
-                time : data.ts,
+                time : Changetime,
+                text : data.text,
+                state : "지각",
+            }
+        } else {
+            return data.user && {
+                id : ++id,
+                userid : data.user,
+                time : Changetime,
                 text : data.text,
                 state : "출근",
             }
+        }
+            
         });
         try {
             await Slackchat.bulkCreate(resultArray,{
@@ -295,6 +308,7 @@ router.post("/usersInfo", async(req,res)=>{
                 user : req.body.user,
               }
         });
+
         const resultSet = result.data.user;
         const resultJson = {
             id : resultSet.id,

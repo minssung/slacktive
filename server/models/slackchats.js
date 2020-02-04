@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         state: {
             type: DataTypes.STRING,
-        },
+            allowNull: false,
+        }
     });
     return Slack;
 };

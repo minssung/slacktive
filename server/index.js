@@ -57,7 +57,7 @@ app.get('/login', async(req, res) => {
     try {
         const result = await axios.get("https://slack.com/oauth/authorize",{
             params : {
-                scope : 'chat:write:user',
+                scope : 'chat:write:user,users:read',
                 client_id : configs.c_id,
                 redirect_uri : "http://localhost:3000",
             }
