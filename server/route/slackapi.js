@@ -73,7 +73,7 @@ router.post("/messagePost", async(req,res)=>{
                 channel : req.body.channel,
                 text : req.body.text,
                 as_user: true
-              }
+            }
         });
         res.send(result.data);
     }catch(err){
@@ -84,13 +84,8 @@ router.post("/messagePost", async(req,res)=>{
 // 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
     try {
-        const lastData = await Slackchat.findOne({
-            limit: 1,
-            order: [
-                ['time', 'DESC']
-            ]
-        });
-
+        let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
+        console.log("on --------------------------------");
         const result = await axios({
             method : "get",
             url : "https://slack.com/api/conversations.history",
@@ -99,51 +94,79 @@ router.post("/channelHistory", async(req,res) =>{
             },
             params: {
                 token : configs.p_token,
-                channel : req.body.chname,
-                oldest : lastData.ts,
-                //limit : 10
+                channel : req.body.channel,
+                oldest : historyOne.data.time
             }
         });
-        
+        let id = historyOne.data.id;
         const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map((data)=>{
-            return { 
+        const resultArray = resultSet.map(data=>{
+            return data.user &&  {
+                id : ++id,
                 userid : data.user,
                 time : data.ts,
-                text : data.text
+                text : data.text,
+                state : "출근",
             }
         });
+        try {
+            await Slackchat.bulkCreate(resultArray,{
+                individualHooks : true,
+            });
+        } catch(err) {
+            console.error("bulk create arr : " + err);
+        }
+        res.send(resultArray);
+    } catch(error) {
+        console.log("slack channel history err : " + error);
+    }
+});
 
-        //await Slackchat.sync({force: true});
-
-        for (const user of resultArray) {
-            const ChangeTime = moment.unix(user.time).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
-            const timecheck = moment.unix(user.time).utcOffset("+09:00").format("HH:mm");
-
-            if (timecheck > "11:00") {
-                console.log('지각 상태');
-
-                await Slackchat.create({
-                    userid: user.userid,
-                    text: user.text,
-                    time: ChangeTime,
-                    ts: user.time,
-                    state: "지각"  
-                })
-
-            } else {
-                    console.log('출근 상태');
-
-                    await Slackchat.create({
-                        userid: user.user,
-                        text: user.text,
-                        time: ChangeTime,
-                        ts: user.ts,
-                        state: "출근"  
-                    })
-                }
-            } 
-
+// 채널의 메시지 내역 가져오기 초기 실행 --------------------------------------------------
+router.post("/channelHistoryInit", async(req,res) =>{
+    try {
+        const result = await axios({
+            method : "get",
+            url : "https://slack.com/api/conversations.history",
+            header : {
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            params: {
+                token : configs.p_token,
+                channel : req.body.channel,
+            }
+        });
+        let id = 0;
+        const resultSet = (result.data.messages).reverse();
+        const resultArray = resultSet.map(data=>{
+        const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+        const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+        if (timeCheck > "11:00") {
+            return data.user && {
+                id : ++id,
+                userid : data.user,
+                time : Changetime,
+                text : data.text,
+                state : "지각",
+            }
+        } else {
+            return data.user && {
+                id : ++id,
+                userid : data.user,
+                time : Changetime,
+                text : data.text,
+                state : "출근",
+            }
+        }
+            
+        });
+        try {
+            await Slackchat.bulkCreate(resultArray,{
+                individualHooks : true,
+            });
+        } catch(err) {
+            console.error(err);
+        }
         res.send(resultArray);
     } catch(error) {
         console.log("slack channel history err : " + error);

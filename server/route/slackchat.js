@@ -36,12 +36,13 @@ router.get("/one", async(req, res) => {
 });
 
 // DB SelectOne Id --------------------
-router.get("/oneid", async(req, res) => {
+router.get("/oneRow", async(req, res) => {
     try {
         let result = await Slack.findOne({
-            where: {
-                id: req.query.id
-            },
+            limit : 1,
+            order : [
+                [ 'time','DESC']
+            ]
         });
         res.send(result);
     } catch (err){
