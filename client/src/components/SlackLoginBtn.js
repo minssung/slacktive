@@ -18,7 +18,7 @@ class SlackLoginBtn extends React.Component {
                 console.log("jwt user token : "+result.data);
                 localStorage.setItem("usertoken", result.data);
 
-                window.location.href = "http://localhost:3000";
+                window.location.href = "/";
             }
         }
     }

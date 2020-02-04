@@ -2,33 +2,32 @@
 const express = require("express");
 const router = express.Router();
 const models = require("../models");
-const _ = require("lodash");
 
 // DB Setting --------------------
-const Hoilday = models.Hoilday;
+const Holiday = models.holiday;
  
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
 router.get("/all", async(req, res) => {
     try {
-        const result = await Hoilday.findAll();
+        const result = await Holiday.findAll();
         res.send(result);
     } catch(err) {
-        console.log("select hoilday all err : " + err)
+        console.log("select holiday all err : " + err)
     }
 });
 
 // DB SelectOne --------------------
 router.get("/one", async(req, res) => {
     try {
-        const result = await Hoilday.findOne({
+        const result = await Holiday.findOne({
             where : {
                 time : req.query.time
             }
         });
         res.send(result);
     } catch(err) {
-        console.log("select hoilday one err : " + err);
+        console.log("select holiday one err : " + err);
     }
 });
 
@@ -36,12 +35,12 @@ router.get("/one", async(req, res) => {
 router.post("/create", async(req, res) => {
     let result = false;
     try{
-        await Hoilday.findOrCreate({
+        await Holiday.findOrCreate({
             where : {
                 time : req.body.time
             },
             defaults : {
-                userid: req.body.userid, 
+                holiday_userid: req.body.userid, 
                 text: req.body.text,
                 time : req.body.time,
                 state : req.body.state,
@@ -52,7 +51,7 @@ router.post("/create", async(req, res) => {
             }
         });
     }catch(err) {
-        console.error("created hoilday err : " + err);
+        console.error("created holiday err : " + err);
     }
     res.send(result);
 });
@@ -61,8 +60,8 @@ router.post("/create", async(req, res) => {
 router.put("/update", async(req, res) => {
     let result = null;
     try {
-        await Hoilday.update({ 
-            userid: req.body.userid,
+        await Holiday.update({ 
+            holiday_userid: req.body.userid,
             text: req.body.text,
             time: req.body.time,
             state : req.body.state 
@@ -73,7 +72,7 @@ router.put("/update", async(req, res) => {
         });
         result = true;
     } catch(err) {
-        console.error("hoilday update err : " + err);
+        console.error("Holiday update err : " + err);
         result = false;
     }
     console.log("update : " + result);
@@ -83,14 +82,14 @@ router.put("/update", async(req, res) => {
 // DB Delete --------------------
 router.delete("/delete", async(req, res) => {
     try {
-        let result = await Hoilday.destroy({
+        let result = await Holiday.destroy({
             where: {
                 time: req.query.time
             }
         });
         res.send(result);
     } catch(err) {
-        console.log("delete hoilday err : " + err);
+        console.log("delete holiday err : " + err);
     }
 });
 

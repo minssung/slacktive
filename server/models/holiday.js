@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    const Hoilday = sequelize.define("hoilday", {
-        userid: {
+    const Holiday = sequelize.define("holiday", {
+        holiday_userid: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -16,5 +16,5 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
     });
-    return Hoilday;
+    return Holiday;
 };

@@ -26,20 +26,39 @@
   flex-wrap: wrap;
 }
 
+.tokenprops {
+  display: none;
+}
+
 .slack-dash {
   border: 1px solid black;
   height: 250px;
   flex-grow: 1;
 }
 
-@media (min-width : 861px) {
+@media (min-width : 651px) {
     .slack-dash {
       flex-basis: 45%;
     }
 }
 
-@media (max-width : 860px) {
+@media (max-width : 650px) {
     .slack-dash {
       flex-basis: 65%;
     }
+}
+
+.slack-dash-userlistdiv {
+  display: inline-flex;
+  align-content: space-around;
+  justify-content: space-around;
+  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+}
+
+.slack-dash-userlist-cate {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }

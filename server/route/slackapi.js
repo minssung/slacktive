@@ -4,8 +4,10 @@ const axios = require('axios');
 const _ = require("lodash");
 const configs = require("../server_config");
 const models = require("../models");
+const moment = require('moment');
 
 const User = models.user;
+const Slackchat = models.slackchat;
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -29,9 +31,6 @@ router.get("/teamUsers", async(req,res)=>{
                 is_bot : data.is_bot
             }
         });
-
-        //await User.sync({force: true});
-
         // 테이블 생성 name 컬럼 추가 ( 봇 제외 유저만 )
         for (const user of array) {
             if(user.R_name !== undefined && user.R_name !== "Slackbot" && user.is_bot === false)
@@ -42,16 +41,19 @@ router.get("/teamUsers", async(req,res)=>{
                     },
                     defaults : {
                         userid : user.user,
-                        username : user.R_name
+                        username : user.R_name,
+                        state : "대기"
                     }
                 }).spread((none, created) =>{
                     if(created){
                         console.log(created);
+                    } else {
+                        console.log('already create');
                     }
                 });
         }
         res.send(array);
-    }catch(err){
+    } catch(err){
         console.log("db created err : " + err);
     }
 });
@@ -82,9 +84,6 @@ router.post("/messagePost", async(req,res)=>{
 // 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
     try {
-        res.on('error', (err) =>{
-            console.log(err);
-        });
         const result = await axios({
             method : "get",
             url : "https://slack.com/api/conversations.history",
@@ -92,19 +91,58 @@ router.post("/channelHistory", async(req,res) =>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params: {
-                token : req.body.p_token,
-                channel : req.body.channel
+                token : configs.p_token,
+                channel : req.body.channel,
             }
         });
+        let id = 0;
         const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map(data=>{
-            return {
+        const resultArray = resultSet.map(async(data)=>{
+            return data.user &&  await axios.post("http://localhost:5000/slack/create",{
+                id : ++id,
+                userid : data.user,
+                time : data.ts,
                 text : data.text,
-                user : data.user,
-                name : data.username,
-                ts : data.ts
+                state : "출근",
+            });
+        });
+
+        res.send(resultArray);
+    } catch(error) {
+        console.log("slack channel history err : " + error);
+    }
+});
+
+// 채널의 메시지 내역 마지막 내용부터 새로운 내용만 가져오기 --------------------------------------------------
+router.post("/channelHistoryOldest", async(req,res) =>{
+    try {
+        const historyDbMaxId = await axios.get("http://localhost:5000/slack/max");
+        const historyDbMaxRaw = await axios.get(`http://localhost:5000/slack/oneid?id=${historyDbMaxId}`);
+        console.log(historyDbMaxRaw.ts);
+        const result = await axios({
+            method : "get",
+            url : "https://slack.com/api/conversations.history",
+            header : {
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            params: {
+                token : configs.p_token,
+                channel : req.body.channel,
+                oldest : historyDbMaxRaw.ts,
             }
         });
+        let id = historyDbMaxRaw.id;
+        const resultSet = (result.data.messages).reverse();
+        const resultArray = resultSet.map(async(data)=>{
+            return data.user &&  await axios.post("http://localhost:5000/slack/create",{
+                id : ++id,
+                userid : data.user,
+                time : data.ts,
+                text : data.text,
+                state : "출근",
+            });
+        });
+
         res.send(resultArray);
     } catch(error) {
         console.log("slack channel history err : " + error);
@@ -121,7 +159,7 @@ router.get("/channelMembers", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : req.body.p_token,
+                token : configs.p_token,
                 channel : req.body.channel,
             }
         });
@@ -147,7 +185,7 @@ router.post("/channelList", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : req.body.p_token,
+                token : configs.p_token,
             }
         });
         console.log(result.data)
@@ -246,7 +284,6 @@ router.post("/usersInfo", async(req,res)=>{
                 user : req.body.user,
               }
         });
-        console.log(result.data);
         const resultSet = result.data.user;
         const resultJson = {
             id : resultSet.id,
