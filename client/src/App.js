@@ -1,17 +1,23 @@
 import React from 'react';
 import './App.css';
 import SlackLoginBtn from './components/SlackLoginBtn';
+import SlackDashboard from './components/Slack_Dashboard';
 import HistoryDB from './components/HistoryDB';
-import Slack_Dashboard from './components/Slack_Dashboard';
 
+let token = "";
+function tokenState(tokenstate) {
+    if(tokenstate === "on"){
+        return token = "on"
+    }
+}
 function App() {
   return (
     <div>
         <div className="app-mainDiv">
             {
-              !localStorage.getItem("usertoken") ? <SlackLoginBtn /> :
+              !localStorage.getItem("usertoken") && token !== "on" ? <SlackLoginBtn /> :
               <div>
-                  <Slack_Dashboard />
+                  <SlackDashboard tokenstate={tokenState.bind(this)}/>
               </div>
             }
         </div>

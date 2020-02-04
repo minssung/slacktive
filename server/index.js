@@ -5,8 +5,9 @@ const models = require("./models");
 const user_router = require("./route/user");
 const chat_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
-const hoilday_router = require("./route/hoilday");
+const holiday_router = require("./route/holiday");
 const axios = require("axios");
+// const crypto = require("crypto");
 let jwt = require("jsonwebtoken");
 let configs = require('./server_config');
 
@@ -24,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 // DB
 app.use("/user", user_router);
 app.use("/slack", chat_router);
-app.use("/hoilday", hoilday_router);
+app.use("/holiday", holiday_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
@@ -53,7 +54,7 @@ app.get('/login', async(req, res) => {
     try {
         const result = await axios.get("https://slack.com/oauth/authorize",{
             params : {
-                scope : 'chat:write:user',
+                scope : 'chat:write:user,users:read',
                 client_id : configs.c_id,
                 redirect_uri : "http://localhost:3000",
             }
@@ -98,7 +99,7 @@ function getToken(data){
         },
             configs.secretKey,
         {
-            expiresIn : '5m'
+            expiresIn : '600m'
         });
         return getToken;
     } catch(err) {
@@ -113,7 +114,8 @@ app.get('/verify', (req,res)=>{
         console.log("token verify");
         res.send(getToken);
     } catch(err) {
-        console.log("token verify err " + err);
+        console.log("token verify Api err " + err);
+        res.send("err");
     }
 });
 

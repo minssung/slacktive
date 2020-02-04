@@ -39,7 +39,6 @@ class HistoryDB extends React.Component {
             </div>
           );
     }
-  
 }
 
 export default HistoryDB;

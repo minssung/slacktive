@@ -33,9 +33,6 @@ router.get("/teamUsers", async(req,res)=>{
                 is_bot : data.is_bot
             }
         });
-
-        //await User.sync({force: true});
-
         // 테이블 생성 name 컬럼 추가 ( 봇 제외 유저만 )
         for (const user of array) {
             if(user.R_name !== undefined && user.R_name !== "Slackbot" && user.is_bot === false)
@@ -46,7 +43,8 @@ router.get("/teamUsers", async(req,res)=>{
                     },
                     defaults : {
                         userid : user.user,
-                        username : user.R_name
+                        username : user.R_name,
+                        state : "대기"
                     }
                 }).spread((none, created) =>{
                     if(created){
@@ -55,7 +53,7 @@ router.get("/teamUsers", async(req,res)=>{
                 });
         }
         res.send(array);
-    }catch(err){
+    } catch(err){
         console.log("db created err : " + err);
     }
 });
@@ -86,10 +84,6 @@ router.post("/messagePost", async(req,res)=>{
 // 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
     try {
-        res.on('error', (err) =>{
-            console.log(err);
-        });
-
         const lastData = await Slackchat.findOne({
             limit: 1,
             order: [
@@ -106,34 +100,34 @@ router.post("/channelHistory", async(req,res) =>{
             params: {
                 token : configs.p_token,
                 channel : req.body.chname,
-                oldest : lastData.ts
+                oldest : lastData.ts,
+                //limit : 10
             }
         });
         
         const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map(data=>{
-            return {
-                text : data.text,
-                user : data.user,
-                name : data.username,
-                ts : data.ts
+        const resultArray = resultSet.map((data)=>{
+            return { 
+                userid : data.user,
+                time : data.ts,
+                text : data.text
             }
         });
 
         //await Slackchat.sync({force: true});
 
         for (const user of resultArray) {
-            const ChangeTime = moment.unix(user.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
-            const timecheck = moment.unix(user.ts).utcOffset("+09:00").format("HH:mm");
+            const ChangeTime = moment.unix(user.time).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            const timecheck = moment.unix(user.time).utcOffset("+09:00").format("HH:mm");
 
             if (timecheck > "11:00") {
                 console.log('지각 상태');
 
                 await Slackchat.create({
-                    userid: user.user,
+                    userid: user.userid,
                     text: user.text,
                     time: ChangeTime,
-                    ts: user.ts,
+                    ts: user.time,
                     state: "지각"  
                 })
 
@@ -166,7 +160,7 @@ router.get("/channelMembers", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : req.body.p_token,
+                token : configs.p_token,
                 channel : req.body.channel,
             }
         });
@@ -192,7 +186,7 @@ router.post("/channelList", async(req,res)=>{
                 "Content-type": "application/x-www-form-urlencoded",
             },
             params : {
-                token : req.body.p_token,
+                token : configs.p_token,
             }
         });
         console.log(result.data)
@@ -291,7 +285,7 @@ router.post("/usersInfo", async(req,res)=>{
                 user : req.body.user,
               }
         });
-        console.log(result.data);
+
         const resultSet = result.data.user;
         const resultJson = {
             id : resultSet.id,
