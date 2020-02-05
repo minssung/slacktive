@@ -59,7 +59,7 @@ class Slack_Dashboard extends React.Component {
             const userdb = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
             const result = await axios.post("http://localhost:5000/slackapi/usersInfo",{
                 p_token : userdb.data.p_token,
-                user : userdb.data.userid
+                user : userdb.data.id
             });
             await this.setState({
                 userinfo : result.data,

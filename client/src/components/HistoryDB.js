@@ -22,7 +22,7 @@ class HistoryDB extends React.Component {
     //         this.History();
     //     }, 1000 * 60 * 60);
         
-        this.History();
+        //this.History();
     }
 
     componentWillUnmount() {
