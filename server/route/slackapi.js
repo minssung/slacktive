@@ -86,6 +86,7 @@ router.post("/channelHistory", async(req,res) =>{
     try {
         let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
         console.log("on --------------------------------");
+        
         const result = await axios({
             method : "get",
             url : "https://slack.com/api/conversations.history",
@@ -95,18 +96,32 @@ router.post("/channelHistory", async(req,res) =>{
             params: {
                 token : configs.p_token,
                 channel : req.body.channel,
-                oldest : historyOne.data.time
+                oldest : historyOne.data.ts
             }
         });
         let id = historyOne.data.id;
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
-            return data.user &&  {
-                id : ++id,
-                userid : data.user,
-                time : data.ts,
-                text : data.text,
-                state : "출근",
+            const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+            if (timeCheck > "11:00") {
+                return data.user && {
+                    id : ++id,
+                    userid : data.user,
+                    time : Changetime,
+                    ts : data.ts,
+                    text : data.text,
+                    state : "지각",
+                }
+            } else {
+                return data.user && {
+                    id : ++id,
+                    userid : data.user,
+                    time : Changetime,
+                    ts : data.ts,
+                    text : data.text,
+                    state : "출근",
+                }
             }
         });
         try {
@@ -139,26 +154,27 @@ router.post("/channelHistoryInit", async(req,res) =>{
         let id = 0;
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
-        const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
-        const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
-        if (timeCheck > "11:00") {
-            return data.user && {
-                id : ++id,
-                userid : data.user,
-                time : Changetime,
-                text : data.text,
-                state : "지각",
+            const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+            if (timeCheck > "11:00") {
+                return data.user && {
+                    id : ++id,
+                    userid : data.user,
+                    time : Changetime,
+                    ts : data.ts,
+                    text : data.text,
+                    state : "지각",
+                }
+            } else {
+                return data.user && {
+                    id : ++id,
+                    userid : data.user,
+                    time : Changetime,
+                    ts : data.ts,
+                    text : data.text,
+                    state : "출근",
+                }
             }
-        } else {
-            return data.user && {
-                id : ++id,
-                userid : data.user,
-                time : Changetime,
-                text : data.text,
-                state : "출근",
-            }
-        }
-            
         });
         try {
             await Slackchat.bulkCreate(resultArray,{
