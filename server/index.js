@@ -68,18 +68,18 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:true }).then(()=>{
+    models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                await axios.get("http://localhost:5000/slackapi/teamUsers");
-                await axios.post("http://localhost:5000/slackapi/channelHistoryInit", {
-                   channel : "CS7RWKTT5",
-                });
-                await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
-                    channel : "CSZTZ7TCL",
-                 });
-                //await axios.get("http://localhost:5000/")
+                // await axios.get("http://localhost:5000/slackapi/teamUsers");
+                // await axios.post("http://localhost:5000/slackapi/channelHistoryInit", {
+                //    channel : "CS7RWKTT5",
+                // });
+                // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
+                //     channel : "CSZTZ7TCL",
+                //  });
+                await axios.get("http://localhost:5000/")
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }

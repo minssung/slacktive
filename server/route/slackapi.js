@@ -85,13 +85,7 @@ router.post("/messagePost", async(req,res)=>{
 // 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
     try {
-        let historyOne = [];
-        historyOne = await Slack.findOne({
-            limit : 1,
-            order : [
-                [ 'time','DESC']
-            ]
-        });
+        let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
         console.log("on --------------------------------");
         const result = await axios({
             method : "get",
