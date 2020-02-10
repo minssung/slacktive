@@ -1,8 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
-    const Holiday = sequelize.define("holiday", {
-        holiday_userid: {
-            type: DataTypes.STRING,
-            allowNull: false
+    const Calendar = sequelize.define("calendar", {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
         text: {
             type: DataTypes.STRING,
@@ -16,5 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
     });
-    return Holiday;
+    Calendar.associate = function(models) {
+        Calendar.belongsTo(models.user)
+    }
+    return Calendar;
 };

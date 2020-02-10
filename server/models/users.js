@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
         holidaycount : {
-            type: DataTypes.INTEGER,
+            type: DataTypes.DOUBLE,
         },
         p_token : {
             type: DataTypes.STRING,
@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     });
     User.associate = function(models) {
         User.hasMany(models.slackchat)
+        User.hasMany(models.calendar)
     }
     return User;
 };

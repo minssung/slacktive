@@ -186,8 +186,7 @@ class Slack_Dashboard extends React.Component {
     // hoilday Api & Render
     async holidayApi(usertoken){
         try {
-            const userdb = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
-            console.log(userdb);
+            //const userdb = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
         } catch(err){
             console.log("holiday Api err : " + err);
         }

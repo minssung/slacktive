@@ -9,6 +9,7 @@ moment.tz.setDefault("Asia/Seoul");
 
 const User = models.user;
 const Slackchat = models.slackchat;
+const Calendar = models.calendar;
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -85,7 +86,8 @@ router.post("/messagePost", async(req,res)=>{
 router.post("/channelHistory", async(req,res) =>{
     try {
         let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
-        console.log("on --------------------------------");
+
+        console.log("History Update");
         
         const result = await axios({
             method : "get",
@@ -134,7 +136,7 @@ router.post("/channelHistory", async(req,res) =>{
     }
 });
 
-// 채널의 메시지 내역 가져오기 초기 실행 --------------------------------------------------
+// 채널의 메시지 내역 가져오기 초기 실행 ( 출퇴근용 )--------------------------------------------------
 router.post("/channelHistoryInit", async(req,res) =>{
     try {
         const result = await axios({
@@ -168,10 +170,46 @@ router.post("/channelHistoryInit", async(req,res) =>{
                     text : data.text,
                     state : "출근",
                 }
-            }
+            }   
         });
         try {
             await Slackchat.bulkCreate(resultArray,{
+                individualHooks : true,
+            });
+        } catch(err) {
+            console.error("bulkcreate init err : " + err);
+        }
+        res.send(resultArray);
+    } catch(error) {
+        console.log("slack channel history err : " + error);
+    }
+});
+// 채널의 메시지 내역 가져오기 초기 실행 ( 일정용 ) --------------------------------------------------
+router.post("/channelHistoryInitCal", async(req,res) =>{
+    try {
+        const result = await axios({
+            method : "get",
+            url : "https://slack.com/api/conversations.history",
+            header : {
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            params: {
+                token : configs.p_token,
+                channel : req.body.channel,
+            }
+        });
+        const resultSet = (result.data.messages).reverse();
+        let resultArray = [];
+        resultArray = resultSet.map(data=> {
+            return data.user && {
+                userId : data.user,
+                time : data.ts,
+                text : data.text,
+                state : "휴가",
+            }
+        });
+        try {
+            await Calendar.bulkCreate(resultArray,{
                 individualHooks : true,
             });
         } catch(err) {
