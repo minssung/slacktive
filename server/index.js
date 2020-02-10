@@ -10,6 +10,8 @@ const axios = require("axios");
 // const crypto = require("crypto");
 let jwt = require("jsonwebtoken");
 let configs = require('./server_config');
+const moment = require('moment');
+const cron = require('node-cron');
 
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
@@ -78,8 +80,36 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
                 // });
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
                 //     channel : "CSZTZ7TCL",
-                //  });
-                await axios.get("http://localhost:5000/")
+                // });
+
+                // < ----------- 현재 시간의 date string ----------- >
+                let nowtimeString = new Date();
+                nowtimeString = moment().format('HH:mm')
+                console.log('현재 시간 : ', nowtimeString);
+
+                // < ----------- 서버 스케줄러 ---------- >
+                if (nowtimeString > '09:00' && nowtimeString < '19:00') {
+                    cron.schedule('*/10 * * * *', async() => {
+                        console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+                        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+                            channel : "CS7RWKTT5",
+                        });
+                        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+                            channel : "CSZTZ7TCL",
+                        });
+                      });
+                } else {
+                    cron.schedule('*/2 * * *', async() => {
+                        console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+                        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+                            channel : "CS7RWKTT5",
+                        });
+                        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+                            channel : "CSZTZ7TCL",
+                        });
+                      });
+                }
+                
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }

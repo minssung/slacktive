@@ -1,0 +1,26 @@
+.container_time {
+    text-align: center;
+    font-size: 16pt;
+    padding: 50px 0;
+}
+
+.btn_time {
+    font-size: 11pt;
+    padding: 6px 20px;
+    
+}
+
+.timediv1 {
+    font-size: 9pt;
+    color: gray;
+}
+
+.timediv2 {
+    margin-bottom: 30px;
+}
+
+.updating {
+    margin-bottom: 30px;
+    margin-top: 10px;
+    font-size: 28pt;
+}

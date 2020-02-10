@@ -1,12 +1,13 @@
 import React from 'react';
-import Clock from 'react-live-clock';
 import axios from 'axios';
 import Dashboard from './Dashboard/Dashboard';
-import moment from 'moment';
+import './css/Contents.css';
+const moment = require('moment');
 
 class Slack_Dashboard extends React.Component {
     constructor(props){
         super(props);
+        this.timeBtnClick = this.timeBtnClick.bind(this);
         this.state = {
             // token state
             tokenexpire : "",
@@ -16,6 +17,10 @@ class Slack_Dashboard extends React.Component {
             // users list - state
             usersalldb : [],
             statearray : ['대기','출근','외근','지각','휴가'],
+            // time data
+            lasttimedb : "",
+            updateprogressing : false,
+            waiting : false
         }
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -26,6 +31,7 @@ class Slack_Dashboard extends React.Component {
             await this.userInfoApi(usertoken);   // user Info Api
             await this.userListApi();   // user List Api
             await this.holidayApi(usertoken);    // holiday Api
+            await this.timeRenewalApi();    // timeRenewal Api
         } else {
             window.location.href = "/";
         }
@@ -113,13 +119,70 @@ class Slack_Dashboard extends React.Component {
             }
         </div>
     }
+
     // clock Api & Render
-    clockContents() {
-        return <span>
-            <Clock format={'YYYY년 MM월 DD일'} ticking={true} timezone={'Asia/Seoul'} /><br></br>
-            <Clock format={'HH:mm:ss'} ticking={true} timezone={'Asia/Seoul'} />
-        </span>
+    async timeRenewalApi() {
+        this.setState({
+            updateprogressing: true
+        })
+        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+            channel : "CS7RWKTT5",
+        });
+        await this.setState({
+            lasttimedb : moment().format('MM월 DD일 HH시 mm분'),
+            updateprogressing: false
+        })
+        
     }
+
+    async timeBtnClick() {
+        if (this.state.waiting) {
+            alert('처리중입니다. 잠시만 기다려주세요.');
+            return;
+        }
+        this.setState({
+            updateprogressing: true,
+            waiting: true
+        });
+        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+            channel : "CS7RWKTT5",
+        });
+        await this.setState({
+            lasttimedb : moment().format('MM월 DD일 HH시 mm분'),
+            updateprogressing: false
+        })
+
+        setTimeout(() => {
+            this.setState({ waiting: false })
+        }, 10000)
+
+        console.log('update');
+        
+    }
+
+    clockContents() {
+        const { lasttimedb, updateprogressing } = this.state;
+        return <div className="container_time">
+            <div className="timediv1">마지막 업데이트</div>
+            {
+                !updateprogressing ? 
+                    <div className="timediv2">{lasttimedb}</div>
+                : 
+                    <div className="updating">Loading</div>
+            }
+            {
+                !updateprogressing ? 
+                <div>
+                    <button className="btn_time" onClick={this.timeBtnClick}>갱신</button>
+                </div>
+                : 
+                <div>
+                    {/** Loading... */}
+                </div>
+            }
+        </div>
+    }
+
     // hoilday Api & Render
     async holidayApi(usertoken){
         try {
