@@ -5,7 +5,7 @@ const models = require("./models");
 const user_router = require("./route/user");
 const chat_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
-const holiday_router = require("./route/holiday");
+const calendar_router = require("./route/calendar");
 const axios = require("axios");
 // const crypto = require("crypto");
 let jwt = require("jsonwebtoken");
@@ -25,19 +25,42 @@ app.use(express.urlencoded({ extended: true }));
 // DB
 app.use("/user", user_router);
 app.use("/slack", chat_router);
-app.use("/holiday", holiday_router);
+app.use("/calendar", calendar_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
-    // [준명] 3월 1일 or 1,2,3일 or 11월27일~12월 3일 휴가/병가/오전/오후반차/예비군/병원/동원/개인사유
+    // [준명] 3월 1일 or 1,2,3일 or 11월27일~12월 3일 휴가/병가/오전/오후반차/예비군/병원/동원/개인사유/압원
     // 출근/ㅊㄱ/퇴근/ㅌㄱ/야근/외근/ooㅇㄱ/10시20분출근/7시퇴근/
-    let holiday = //;
-    console.log(text);
     
-    let times = //;
-    console.log(text);
+    let slackMessage = "[준명] 20년 1월 25 27 28일 29일,30일,31일 휴가 개인사정";
+    let holiday = /\[\s*(\S*)\s*\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?[\,*\s+]?)*)*\s*(\W*)/;
+    let text = holiday.exec(slackMessage);
+    let array = [];
+    for (let index = 0; index < text.length; index++) {
+        if(index === 0 || index === 5)
+            continue;
+        array.push(text[index]);
+    }
+    array[3] = text[4].split(/\s{1,}|\,|일/)
+    let search = "";
+    for (let index = 0; index < array[3].length; index++) {
+        search = array[3].indexOf("")
+        if(search!= -1)
+        array[3].splice(search,1)
+    }
+    console.log(array);
 
+    let slackMsgTimes = "출근"
+    let timeatten = /(\d*시)?\s*(\d*분)?\s*(\W*)?\s*(출근|ㅊㄱ|퇴근|ㅌㄱ|외근|ㅇㄱ|야근|예비군|민방위|개인사유|입원|병원)/;
+    let timesTest = timeatten.exec(slackMsgTimes);
+    let timearray = [];
+    for (let index = 0; index < timesTest.length; index++) {
+        if(index === 0)
+            continue;
+        timearray.push(timesTest[index]);
+    }
+    console.log(timearray);
     res.send("Hello SlackApi World!");
 });
 
@@ -45,14 +68,18 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:false }).then(()=>{
+    models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
                 await axios.get("http://localhost:5000/slackapi/teamUsers");
                 await axios.post("http://localhost:5000/slackapi/channelHistoryInit", {
-                    channel : "CS7RWKTT5",
+                   channel : "CS7RWKTT5",
                 });
+                await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
+                    channel : "CSZTZ7TCL",
+                 });
+                //await axios.get("http://localhost:5000/")
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }
