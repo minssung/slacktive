@@ -1,8 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
-    const Slack = sequelize.define("slackchat", {
-        userid: {
-            type: DataTypes.STRING,
-            allowNull: false,
+    const Slack = sequelize.define("slackchat",{
+        id : {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
         text: {
             type: DataTypes.STRING,
@@ -21,5 +22,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         }
     });
+    Slack.associate = function(models) {
+        Slack.belongsTo(models.user)
+    }
     return Slack;
 };

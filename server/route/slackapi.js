@@ -6,7 +6,6 @@ const configs = require("../server_config");
 const models = require("../models");
 const moment = require('moment');
 moment.tz.setDefault("Asia/Seoul");
-const { Op } = require("sequelize");
 
 const User = models.user;
 const Slackchat = models.slackchat;
@@ -38,13 +37,14 @@ router.get("/teamUsers", async(req,res)=>{
             if(user.R_name !== undefined && user.R_name !== "Slackbot" && user.is_bot === false)
                 User.findOrCreate({
                     where : {
-                        userid : user.user,
+                        id : user.user,
                         username : user.R_name
                     },
                     defaults : {
-                        userid : user.user,
+                        id : user.user,
                         username : user.R_name,
-                        state : "대기"
+                        state : "대기",
+                        holidaycount : 20,
                     }
                 }).spread((none, created) =>{
                     if(created){
@@ -66,7 +66,7 @@ router.post("/messagePost", async(req,res)=>{
             url : "https://slack.com/api/chat.postMessage",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : req.body.b_p_token,
+                "Authorization" : "Bearer " + req.body.p_token,
             },
             params : {
                 token : req.body.p_token,
@@ -99,15 +99,13 @@ router.post("/channelHistory", async(req,res) =>{
                 oldest : historyOne.data.ts
             }
         });
-        let id = historyOne.data.id;
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
             const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
             if (timeCheck > "11:00") {
                 return data.user && {
-                    id : ++id,
-                    userid : data.user,
+                    userId : data.user,
                     time : Changetime,
                     ts : data.ts,
                     text : data.text,
@@ -115,8 +113,7 @@ router.post("/channelHistory", async(req,res) =>{
                 }
             } else {
                 return data.user && {
-                    id : ++id,
-                    userid : data.user,
+                    userId : data.user,
                     time : Changetime,
                     ts : data.ts,
                     text : data.text,
@@ -151,15 +148,13 @@ router.post("/channelHistoryInit", async(req,res) =>{
                 channel : req.body.channel,
             }
         });
-        let id = 0;
         const resultSet = (result.data.messages).reverse();
         const resultArray = resultSet.map(data=>{
             const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
             if (timeCheck > "11:00") {
                 return data.user && {
-                    id : ++id,
-                    userid : data.user,
+                    userId : data.user,
                     time : Changetime,
                     ts : data.ts,
                     text : data.text,
@@ -167,8 +162,7 @@ router.post("/channelHistoryInit", async(req,res) =>{
                 }
             } else {
                 return data.user && {
-                    id : ++id,
-                    userid : data.user,
+                    userId : data.user,
                     time : Changetime,
                     ts : data.ts,
                     text : data.text,
@@ -181,7 +175,7 @@ router.post("/channelHistoryInit", async(req,res) =>{
                 individualHooks : true,
             });
         } catch(err) {
-            console.error(err);
+            console.error("bulkcreate init err : " + err);
         }
         res.send(resultArray);
     } catch(error) {
@@ -250,7 +244,7 @@ router.post("/messageDelete", async(req,res)=>{
             url : "	https://slack.com/api/chat.delete",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : req.body.b_p_token,
+                "Authorization" : "Bearer " + req.body.p_token,
             },
             params : {
                 token : req.body.p_token,
@@ -272,7 +266,7 @@ router.post("/messageUpdate", async(req,res)=>{
             url : "	https://slack.com/api/chat.update",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : req.body.b_p_token,
+                "Authorization" : "Bearer " + req.body.p_token,
             },
             params : {
                 token : req.body.p_token,
@@ -296,7 +290,7 @@ router.post("/conversationsKick", async(req,res)=>{
             url : "	https://slack.com/api/conversations.kick",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : req.body.b_p_token,
+                "Authorization" : "Bearer " + req.body.p_token,
             },
             params : {
                 token : req.body.p_token,
@@ -324,7 +318,6 @@ router.post("/usersInfo", async(req,res)=>{
                 user : req.body.user,
               }
         });
-
         const resultSet = result.data.user;
         const resultJson = {
             id : resultSet.id,
@@ -374,7 +367,7 @@ router.post("/authInfo", async(req,res)=>{
             url : "	https://slack.com/api/auth.test",
             header : {
                 "Content-type" : "application/json",
-                "Authorization" : req.body.b_p_token,
+                "Authorization" : "Bearer " + req.body.p_token,
             },
             params : {
                 token : req.body.p_token,

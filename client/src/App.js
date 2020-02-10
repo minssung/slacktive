@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import SlackLoginBtn from './components/SlackLoginBtn';
 import SlackDashboard from './components/Slack_Dashboard';
-import HistoryDB from './components/HistoryDB';
+import TuiCalendar from './components/TuiCalendar';
 
 let token = "";
 function tokenState(tokenstate) {
@@ -18,14 +18,11 @@ function App() {
               !localStorage.getItem("usertoken") && token !== "on" ? <SlackLoginBtn /> :
               <div>
                   <SlackDashboard tokenstate={tokenState.bind(this)}/>
+                  <TuiCalendar />
               </div>
             }
         </div>
 
-        {/** 출근 기록 DB에 담기 */}
-        <div>
-            <HistoryDB></HistoryDB>
-        </div>
     </div>
   );
 }

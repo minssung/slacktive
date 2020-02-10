@@ -18,7 +18,9 @@ class Slack_Dashboard extends React.Component {
             usersalldb : [],
             statearray : ['대기','출근','외근','지각','휴가'],
             // time data
-            lasttimedb : ""
+            lasttimedb : "",
+            updateprogressing : false,
+            waiting : false
         }
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -64,7 +66,7 @@ class Slack_Dashboard extends React.Component {
             const userdb = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
             const result = await axios.post("http://localhost:5000/slackapi/usersInfo",{
                 p_token : userdb.data.p_token,
-                user : userdb.data.userid
+                user : userdb.data.id
             });
             await this.setState({
                 userinfo : result.data,
@@ -120,35 +122,64 @@ class Slack_Dashboard extends React.Component {
 
     // clock Api & Render
     async timeRenewalApi() {
-        try {
-            const result = await axios.get("http://localhost:5000/slack/oneRow");
-            await this.setState({
-                lasttimedb : moment(result.data.time).format('MM월 DD일 HH시 mm분')
-            });
-        } catch(err){
-            console.log("time Renewal Api err : " + err);
-        }
-    }
-
-    async timeBtnClick() {
-        const result = await axios.post("http://localhost:5000/slackapi/channelHistory", {
+        this.setState({
+            updateprogressing: true
+        })
+        await axios.post("http://localhost:5000/slackapi/channelHistory", {
             channel : "CS7RWKTT5",
         });
         await this.setState({
-            lasttimedb : moment().format('MM월 DD일 HH시 mm분')
+            lasttimedb : moment().format('MM월 DD일 HH시 mm분'),
+            updateprogressing: false
         })
-        return (
-            result.data,
-            console.log('update')
-        )
+        
+    }
+
+    async timeBtnClick() {
+        if (this.state.waiting) {
+            alert('처리중입니다. 잠시만 기다려주세요.');
+            return;
+        }
+        this.setState({
+            updateprogressing: true,
+            waiting: true
+        });
+        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+            channel : "CS7RWKTT5",
+        });
+        await this.setState({
+            lasttimedb : moment().format('MM월 DD일 HH시 mm분'),
+            updateprogressing: false
+        })
+
+        setTimeout(() => {
+            this.setState({ waiting: false })
+        }, 10000)
+
+        console.log('update');
+        
     }
 
     clockContents() {
-        const { lasttimedb } = this.state;
+        const { lasttimedb, updateprogressing } = this.state;
         return <div className="container_time">
             <div className="timediv1">마지막 업데이트</div>
-            <div className="timediv2">{lasttimedb}</div>
-            <div><button className="btn_time" onClick={this.timeBtnClick}>갱신</button></div>
+            {
+                !updateprogressing ? 
+                    <div className="timediv2">{lasttimedb}</div>
+                : 
+                    <div className="updating">Loading</div>
+            }
+            {
+                !updateprogressing ? 
+                <div>
+                    <button className="btn_time" onClick={this.timeBtnClick}>갱신</button>
+                </div>
+                : 
+                <div>
+                    {/** Loading... */}
+                </div>
+            }
         </div>
     }
 

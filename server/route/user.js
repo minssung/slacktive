@@ -23,7 +23,7 @@ router.get("/one", async(req, res) => {
     try {
         const result = await User.findOne({
             where : {
-                userid : req.query.userid
+                id : req.query.userid
             }
         });
         res.send(result);
@@ -38,11 +38,10 @@ router.post("/create", async(req, res) => {
     try{
         await User.findOrCreate({
             where : {
-                userid : req.body.userid,
+                id : req.body.userid,
             },
             defaults : {
-                id : req.body.id,
-                userid: req.body.userid, 
+                id : req.body.userid,
                 username: req.body.username, 
             }
         }).spread((none, created)=>{
@@ -61,17 +60,15 @@ router.put("/update", async(req, res) => {
     let result = null;
     try {
         await User.update({ 
-            id : req.body.id,
-            userid : req.body.userid,
+            id : req.body.userid,
             username: req.body.username,
             useremail: req.body.useremail, 
             userphone : req.body.userphone,
             p_token : req.body.p_token,
-            b_p_token : req.body.b_p_token,
             state : req.body.state 
             }, {
             where: {
-                userid : req.body.userid
+                id : req.body.userid
             }
         });
         result = true;
@@ -88,7 +85,7 @@ router.delete("/delete", async(req, res) => {
     try {
         let result = await User.destroy({
             where: {
-                userid: req.query.userid
+                id: req.query.userid
             }
         });
         res.send(result);

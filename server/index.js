@@ -32,29 +32,38 @@ app.use("/holiday", holiday_router);
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
+    // [준명] 3월 1일 or 1,2,3일 or 11월27일~12월 3일 휴가/병가/오전/오후반차/예비군/병원/동원/개인사유
+    // 출근/ㅊㄱ/퇴근/ㅌㄱ/야근/외근/ooㅇㄱ/10시20분출근/7시퇴근/
+    let holiday = //;
+    console.log(text);
+    
+    let times = //;
+    console.log(text);
+
     res.send("Hello SlackApi World!");
 });
 
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || 5000;
-models.sequelize.query("SET FOREIGN_KEY_CHECKS = 0", {raw: true})
+models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
     models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
                 await axios.get("http://localhost:5000/slackapi/teamUsers");
+
+                // < 데이터 없을 때 초기 설정 (일회성) >
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit", {
                 //     channel : "CS7RWKTT5",
                 // });
 
-                
-
-                // 현재 시간의 date string
+                // < 현재 시간의 date string >
                 let nowtimeString = new Date();
                 nowtimeString = moment().format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
 
+                // < 서버 스케줄러 >
                 if (nowtimeString > '09:00' && nowtimeString < '19:00') {
                     cron.schedule('*/10 * * * *', async() => {
                         console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
@@ -109,7 +118,6 @@ app.get('/login-access', async(req,res) => {
         await axios.put("http://localhost:5000/user/update",{
             userid : result.data.user_id,
             p_token : result.data.access_token,
-            b_p_token : "Bearer " + result.data.access_token,
         });
         const usertoken = getToken(result.data);
 
@@ -147,5 +155,4 @@ app.get('/verify', (req,res)=>{
         res.send("err");
     }
 });
-
 // -------------------- ********** --------------------

@@ -5,15 +5,33 @@ const models = require("../models");
 // DB Setting --------------------
 const Slack = models.slackchat;
 
-const queryFindAll = "SELECT `slackchat`.`id`, `slackchat`.`userid`, `slackchat`.`text`, `slackchat`.`time`, `slackchat`.`state`, `slackchat`.`createdAt`, `slackchat`.`updatedAt`, `user`.`username` AS `username`, `user`.`state` AS `userstate`FROM `slackchats` AS `slackchat` LEFT OUTER JOIN `users` AS `user` ON `slackchat`.`userid` = `user`.`userid` ORDER BY `slackchat`.`id` ASC;"
+const queryFindAll = "SELECT `slackchat`.`id`, `slackchat`.`userId`, `slackchat`.`text`, `slackchat`.`time`, `slackchat`.`state`, `slackchat`.`createdAt`, `slackchat`.`updatedAt`, `user`.`username` AS `username`, `user`.`state` AS `userstate`FROM `slackchats` AS `slackchat` LEFT OUTER JOIN `users` AS `user` ON `slackchat`.`userId` = `user`.`id` ORDER BY `slackchat`.`id` ASC;"
 // ------------------------------------- DB CRUD -------------------------------------
 
 // DB SelectAll --------------------
-router.get("/all", async(req, res) => {
+router.get("/allquery", async(req, res) => {
     try {
         const result = await models.sequelize.query(queryFindAll, {
             type : models.sequelize.QueryTypes.SELECT,
             raw : true
+        });
+        res.send(result);
+    } catch(err){
+        console.log("select chat all err : " + err);
+    }
+});
+
+// DB SelectAll --------------------
+router.get("/all", async(req, res) => {
+    try {
+        const result = await Slack.findAll({
+            include : [{
+                model : models.user,
+                attributes : ['username']
+            }],
+            order : [[
+                'id' , 'ASC'
+            ]]
         });
         res.send(result);
     } catch(err){
