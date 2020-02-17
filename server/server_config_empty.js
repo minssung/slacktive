@@ -12,7 +12,16 @@ var configs = {
     c_id : "",
     c_s_id : "",
 
+    channel_time : "",
+    channel_calendar : "",
+
     serectKey : "",
+
+    timeAttenden : "",
+    subTime : "",
+
+    calendarReg : "",
+    subCalReg : "",
 }
 
 module.exports = configs;

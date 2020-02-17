@@ -13,9 +13,22 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        state: {
+        ts: {
             type: DataTypes.STRING,
+            allowNull: false,
         },
+        cate : {
+            type : DataTypes.STRING,
+            allowNull: false,
+        },
+        textTime : {
+            type : DataTypes.STRING,
+            allowNull: false,
+        },
+        textTitle : {
+            type : DataTypes.STRING,
+            allowNull: false,
+        }
     });
     Calendar.associate = function(models) {
         Calendar.belongsTo(models.user)

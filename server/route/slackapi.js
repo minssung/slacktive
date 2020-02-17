@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const axios = require('axios');
-const _ = require("lodash");
+
 const configs = require("../server_config");
+
+const axios = require('axios');
 const models = require("../models");
 const moment = require('moment');
 moment.tz.setDefault("Asia/Seoul");
@@ -82,11 +83,10 @@ router.post("/messagePost", async(req,res)=>{
     }
 });
 
-// 채널의 메시지 내역 가져오기 ( 봇 및 앱도 포함 ) --------------------------------------------------
+// 채널의 메시지 내역 가져오기 ( 출퇴근 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
     try {
         let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
-
         console.log("History Update");
         
         const result = await axios({
@@ -97,29 +97,75 @@ router.post("/channelHistory", async(req,res) =>{
             },
             params: {
                 token : configs.p_token,
-                channel : req.body.channel,
+                channel : configs.channel_time,
                 oldest : historyOne.data.ts
             }
         });
         const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map(data=>{
-            const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
-            const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
-            if (timeCheck > "11:00") {
-                return data.user && {
-                    userId : data.user,
-                    time : Changetime,
-                    ts : data.ts,
-                    text : data.text,
-                    state : "지각",
+        let Changetime = "";
+        let timeCheck = "";
+        let timeArray = [];
+        let timeReg = [];
+        let indexText = [];
+        let stateSet = "";
+        const resultArray = resultSet.map(data=> {
+            Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+            timeReg = configs.timeAttenden.exec(data.text);
+            if(timeReg && timeReg[4]) {
+                for (let index = 0; index < timeReg.length; index++) {
+                    if(index === 0){
+                        continue;
+                    }
+                    if(configs.subTime.exec(timeReg[index])){
+                        timeReg[index] = timeReg[index].replace(indexText, "");
+                    }
+                    timeArray[index-1] = timeReg[index];
                 }
-            } else {
+                // 단답 텍스트 변환
+                switch(timeArray[3]){
+                    case "ㅊㄱ" :
+                        timeArray[3] = "출근"
+                        break;
+                    case "ㅌㄱ" :
+                        timeArray[3] = "퇴근"
+                        break;
+                    case "ㅇㄱ" : 
+                        timeArray[3] = "외근"
+                        break;
+                    default : 
+                        break
+                }
+                // 본인 지정 시간대가 있을 경우
+                if(timeArray[0] && timeArray[0] < "11"){
+                    stateSet = timeArray[3]
+                    // 지정 시간 없이 텍스트만 입력 시
+                } else {
+                    // 11시 이전 8시 반 이후 지정 텍스트 같이 입력 시
+                    if (timeCheck < "11:00" && timeCheck > "08:30") {
+                        stateSet = timeArray[3]
+                        // 11시 이후 입력 텍스트 경우
+                    } else if(timeCheck > "11:00") {
+                        stateSet = (timeArray[3] === "출근") ? "지각" : timeArray[3]
+                        // 4시 50분 이후 입력 텍스트 경우
+                    } else if(timeCheck > "16:50") {
+                        stateSet = (timeArray[3] === "퇴근") ? "퇴근" : timeArray[3]
+                    }
+                }
+                User.update({
+                    state : stateSet
+                },{
+                    where : { id : data.user }
+                })
+                // 추가해야 될 예외 처리
+                // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
+                // 오후 반차의 경우 이른 시간 퇴근 입력 시 처리 경우
                 return data.user && {
                     userId : data.user,
                     time : Changetime,
                     ts : data.ts,
                     text : data.text,
-                    state : "출근",
+                    state : stateSet
                 }
             }
         });
@@ -128,11 +174,114 @@ router.post("/channelHistory", async(req,res) =>{
                 individualHooks : true,
             });
         } catch(err) {
-            console.error("bulk create arr : " + err);
+            console.error("bulkcreate atten arr : " + err);
         }
         res.send(resultArray);
     } catch(error) {
         console.log("slack channel history err : " + error);
+    }
+});
+
+// 채널의 메시지 내역 가져오기 ( 일정용 ) --------------------------------------------------
+router.post("/channelHistoryCal", async(req,res) =>{
+    try {
+        let historyOne = await axios.get("http://localhost:5000/calendar/oneRow");
+        console.log("calendar History Update");
+        const result = await axios({
+            method : "get",
+            url : "https://slack.com/api/conversations.history",
+            header : {
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            params: {
+                token : configs.p_token,
+                channel : configs.channel_calendar,
+                oldest : historyOne.data.ts
+            }
+        });
+        const resultSet = (result.data.messages).reverse();
+        let Changetime = "";
+        let calReg = [];
+        let search = "";
+        let index = 0;
+        let toDayDate = new Date();
+        const resultArray = resultSet.map(data => {
+            Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            calReg = configs.calendarReg.exec(data.text);
+            let calArray = [];
+            let textTimes = "";
+            if(calReg && calReg[5]) {
+                try {
+                    // 배열에다가 정규표현식으로 담기
+                    for (index = 0; index < calReg.length; index++) {
+                        if(index === 0 || index === 5)
+                            continue;
+                        calArray.push(calReg[index]);
+                    }
+                    // 일 수를 배열로 받아서 변환
+                    calArray[3] = calReg[4].split(/\s{1,}|\,|일/)
+                    for (index = 0; index < calArray[3].length; index++) {
+                        search = calArray[3].indexOf("")
+                        if(search!= -1)
+                        calArray[3].splice(search,1)
+                    }
+                    // 예 : 20년 입력시 2020으로 바꿈 & 입력 없을 시 현재 년도
+                    if(calArray[1]){
+                        if(!/\d{4}?/.exec(calArray[1])){
+                            calArray[1] = "20" + calArray[1]
+                        }
+                        calArray[1] = calArray[1].replace(/\년$/, "-");
+                        textTimes = calArray[1]
+                    } else {
+                        textTimes = (toDayDate.getFullYear()) + "-";
+                    }
+                    // 예 : 1월 입력시 01로 바꿈 & 입력 없을 시 현재 월
+                    if(calArray[2]){
+                        if(!/\d{2}?/.exec(calArray[2])){
+                            calArray[2] = "0" + calArray[2]
+                        }
+                        calArray[2] = calArray[2].replace(/\월$/, "-");
+                        textTimes = textTimes + calArray[2];
+                    } else {
+                        if((toDayDate.getMonth() + 1) < 10){
+                            textTimes = textTimes + "0" + (toDayDate.getMonth() + 1) + "-"; 
+                        } else {
+                            textTimes = textTimes + (toDayDate.getMonth() + 1) + "-"; 
+                        }
+                    }
+                    // 뒤에 남은 일 수들 입력 및 중간에 , 넣기
+                    for (index = 0; index < calArray[3].length; index++) {
+                        if(!/\d{2}?/.exec(calArray[3][index])){
+                            calArray[3][index] = "0" + calArray[3][index]
+                        }
+                        textTimes = textTimes + calArray[3][index] + (index === calArray[3].length -1 ? "" : ",");
+                    }
+                    // 반환
+                    return data.user && {
+                        userId : data.user,
+                        time : Changetime,
+                        ts : data.ts,
+                        text : data.text,
+                        cate : calArray[4],
+                        textTime : textTimes,
+                        textTitle : calArray[0] + " " + calArray[4]
+                    }
+                } catch(err){
+                    console.log("Calendar init Reg err : " + err)
+                }
+            }
+        });
+        try {
+            await Calendar.bulkCreate(resultArray,{
+                individualHooks : true,
+            });
+        } catch(err) {
+            console.error("bulkcreate cal arr : " + err);
+        }
+        await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
+        res.send(resultArray);
+    } catch(error) {
+        console.log("slack channel history cal err : " + error);
     }
 });
 
@@ -147,43 +296,98 @@ router.post("/channelHistoryInit", async(req,res) =>{
             },
             params: {
                 token : configs.p_token,
-                channel : req.body.channel,
+                channel : configs.channel_time,
             }
         });
         const resultSet = (result.data.messages).reverse();
-        const resultArray = resultSet.map(data=>{
-            const Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
-            const timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
-            if (timeCheck > "11:00") {
-                return data.user && {
-                    userId : data.user,
-                    time : Changetime,
-                    ts : data.ts,
-                    text : data.text,
-                    state : "지각",
+        let Changetime = "";
+        let timeCheck = "";
+        let timeArray = [];
+        let timeReg = [];
+        let indexText = [];
+        let stateSet = "";
+        const resultArray = resultSet.map(data=> {
+            Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+            // 0 : 시
+            // 1 : 분
+            // 2 : 장소
+            // 3 : 상태 내용
+            timeReg = configs.timeAttenden.exec(data.text);
+            if(timeReg && timeReg[4]) {
+                try {
+                    for (let index = 0; index < timeReg.length; index++) {
+                        if(index === 0){
+                            continue;
+                        }
+                        if(configs.subTime.exec(timeReg[index])){
+                            timeReg[index] = timeReg[index].replace(indexText, "");
+                        }
+                        timeArray[index-1] = timeReg[index];
+                    }
+                    // 단답 텍스트 변환
+                    switch(timeArray[3]){
+                        case "ㅊㄱ" :
+                            timeArray[3] = "출근"
+                            break;
+                        case "ㅌㄱ" :
+                            timeArray[3] = "퇴근"
+                            break;
+                        case "ㅇㄱ" : 
+                            timeArray[3] = "외근"
+                            break;
+                        default : 
+                            break
+                    }
+                    // 본인 지정 시간대가 있을 경우
+                    if(timeArray[0] && timeArray[0] < "11"){
+                        stateSet = timeArray[3]
+                        // 지정 시간 없이 텍스트만 입력 시
+                    } else {
+                        // 11시 이전 8시 반 이후 지정 텍스트 같이 입력 시
+                        if (timeCheck < "11:00" && timeCheck > "08:30") {
+                            stateSet = timeArray[3]
+                            // 11시 이후 입력 텍스트 경우
+                        } else if(timeCheck > "11:00") {
+                            stateSet = (timeArray[3] === "출근") ? "지각" : timeArray[3]
+                            // 4시 50분 이후 입력 텍스트 경우
+                        } else if(timeCheck > "16:50") {
+                            stateSet = (timeArray[3] === "퇴근") ? "퇴근" : timeArray[3]
+                        }
+                    }
+                    // 추가해야 될 예외 처리
+                    // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
+                    // 오후 반차의 경우 이른 시간 퇴근 입력 시 처리 경우
+                    User.update({
+                        state : stateSet
+                    },{
+                        where : { id : data.user }
+                    })
+                    return data.user && {
+                        userId : data.user,
+                        time : Changetime,
+                        ts : data.ts,
+                        text : data.text,
+                        state : stateSet
+                    }
+                } catch(err) {
+                    console.log("Atten init Reg err : " + err)
                 }
-            } else {
-                return data.user && {
-                    userId : data.user,
-                    time : Changetime,
-                    ts : data.ts,
-                    text : data.text,
-                    state : "출근",
-                }
-            }   
+            }
         });
         try {
             await Slackchat.bulkCreate(resultArray,{
                 individualHooks : true,
             });
         } catch(err) {
-            console.error("bulkcreate init err : " + err);
+            console.error("bulkcreate atten init err : " + err);
         }
         res.send(resultArray);
     } catch(error) {
-        console.log("slack channel history err : " + error);
+        console.log("slack channel history atten init err : " + error);
     }
 });
+
 // 채널의 메시지 내역 가져오기 초기 실행 ( 일정용 ) --------------------------------------------------
 router.post("/channelHistoryInitCal", async(req,res) =>{
     try {
@@ -195,29 +399,92 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
             },
             params: {
                 token : configs.p_token,
-                channel : req.body.channel,
+                channel : configs.channel_calendar,
             }
         });
         const resultSet = (result.data.messages).reverse();
-        let resultArray = [];
-        resultArray = resultSet.map(data=> {
-            return data.user && {
-                userId : data.user,
-                time : data.ts,
-                text : data.text,
-                state : "휴가",
+        let Changetime = "";
+        let calReg = [];
+        let search = "";
+        let index = 0;
+        let toDayDate = new Date();
+        const resultArray = resultSet.map(data => {
+            Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
+            calReg = configs.calendarReg.exec(data.text);
+            let calArray = [];
+            let textTimes = "";
+            if(calReg && calReg[5]) {
+                try {
+                    // 배열에다가 정규표현식으로 담기
+                    for (index = 0; index < calReg.length; index++) {
+                        if(index === 0 || index === 5)
+                            continue;
+                        calArray.push(calReg[index]);
+                    }
+                    // 일 수를 배열로 받아서 변환
+                    calArray[3] = calReg[4].split(/\s{1,}|\,|일/)
+                    for (index = 0; index < calArray[3].length; index++) {
+                        search = calArray[3].indexOf("")
+                        if(search!= -1)
+                        calArray[3].splice(search,1)
+                    }
+                    // 예 : 20년 입력시 2020으로 바꿈 & 입력 없을 시 현재 년도
+                    if(calArray[1]){
+                        if(!/\d{4}?/.exec(calArray[1])){
+                            calArray[1] = "20" + calArray[1]
+                        }
+                        calArray[1] = calArray[1].replace(/\년$/, "-");
+                        textTimes = calArray[1]
+                    } else {
+                        textTimes = (toDayDate.getFullYear()) + "-";
+                    }
+                    // 예 : 1월 입력시 01로 바꿈 & 입력 없을 시 현재 월
+                    if(calArray[2]){
+                        if(!/\d{2}?/.exec(calArray[2])){
+                            calArray[2] = "0" + calArray[2]
+                        }
+                        calArray[2] = calArray[2].replace(/\월$/, "-");
+                        textTimes = textTimes + calArray[2];
+                    } else {
+                        if((toDayDate.getMonth() + 1) < 10){
+                            textTimes = textTimes + "0" + (toDayDate.getMonth() + 1) + "-"; 
+                        } else {
+                            textTimes = textTimes + (toDayDate.getMonth() + 1) + "-"; 
+                        }
+                    }
+                    // 뒤에 남은 일 수들 입력 및 중간에 , 넣기
+                    for (index = 0; index < calArray[3].length; index++) {
+                        if(!/\d{2}?/.exec(calArray[3][index])){
+                            calArray[3][index] = "0" + calArray[3][index]
+                        }
+                        textTimes = textTimes + calArray[3][index] + (index === calArray[3].length -1 ? "" : ",");
+                    }
+                    // 반환
+                    return data.user && {
+                        userId : data.user,
+                        time : Changetime,
+                        ts : data.ts,
+                        text : data.text,
+                        cate : calArray[4],
+                        textTime : textTimes,
+                        textTitle : calArray[0] + " " + calArray[4]
+                    }
+                } catch(err){
+                    console.log("Calendar init Reg err : " + err)
+                }
             }
         });
         try {
             await Calendar.bulkCreate(resultArray,{
                 individualHooks : true,
-            });
+            })
         } catch(err) {
             console.error("bulkcreate init err : " + err);
         }
+        await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
     } catch(error) {
-        console.log("slack channel history err : " + error);
+        console.log("slack channelCal history err : " + error);
     }
 });
 
@@ -317,28 +584,6 @@ router.post("/messageUpdate", async(req,res)=>{
         res.send(result.data);
     }catch(err){
         console.log("slack channel msg update err : " + err);
-    }
-});
-
-// 대화의 사용자 강퇴 --------------------------------------------------
-router.post("/conversationsKick", async(req,res)=>{
-    try {
-        const result = await axios({
-            method : "post",
-            url : "	https://slack.com/api/conversations.kick",
-            header : {
-                "Content-type" : "application/json",
-                "Authorization" : "Bearer " + req.body.p_token,
-            },
-            params : {
-                token : req.body.p_token,
-                channel : req.body.channel,
-                user : req.body.user,
-            }
-        });
-        res.send(result.data);
-    }catch(err){
-        console.log(err);
     }
 });
 
