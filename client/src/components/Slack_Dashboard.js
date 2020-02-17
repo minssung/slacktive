@@ -147,6 +147,9 @@ class Slack_Dashboard extends React.Component {
         await axios.post("http://localhost:5000/slackapi/channelHistory", {
             channel : "CS7RWKTT5",
         });
+        await axios.post("http://localhost:5000/slackapi/channelHistory", {
+            channel : "CSZTZ7TCL",
+        });
         await this.setState({
             lasttimedb : moment().format('MM월 DD일 HH시 mm분'),
             updateprogressing: false

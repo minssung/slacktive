@@ -6,10 +6,15 @@ import 'tui-calendar/dist/tui-calendar.css';
 import 'tui-date-picker/dist/tui-date-picker.css';
 import 'tui-time-picker/dist/tui-time-picker.css';
 
+const moment = require('moment');
+
 class TestCal extends React.Component {
     constructor(props) {
         super(props);
         this.calendarRef = React.createRef();
+        this.state = {
+            calendarDate : 'default'
+        }
     }
   
     // ---------- Instance method ---------- //
@@ -19,6 +24,7 @@ class TestCal extends React.Component {
         const calendar = this.calendarRef.current.getInstance();
   
         calendar.prev();
+        this.nowDate();
     };
 
     // 다음 달로 이동하는 버튼
@@ -26,6 +32,7 @@ class TestCal extends React.Component {
         const calendar = this.calendarRef.current.getInstance();
   
         calendar.next();
+        this.nowDate();
     };
 
     // 한 달 스케줄 보기
@@ -54,6 +61,20 @@ class TestCal extends React.Component {
         const calendar = this.calendarRef.current.getInstance();
 
         calendar.today();
+        this.nowDate();
+    }
+
+    // 달력 현재 날짜 표시
+    nowDate = () => {
+        const calendar = this.calendarRef.current.getInstance();
+
+        const date = calendar.getDate();
+        const momentdate = moment(date._date).format('YYYY.MM')
+        
+        this.setState({
+            calendarDate : momentdate
+        })
+        
     }
 
 
@@ -71,8 +92,13 @@ class TestCal extends React.Component {
         console.log(ev);
     }
 
+    componentDidMount() {
+        this.nowDate();
+    }
+
     render() {
-        const selectedView = 'month';     // default view
+        const { calendarDate } = this.state;
+        //const selectedView = 'month';     // default view
           
         return (
             <>
@@ -83,7 +109,7 @@ class TestCal extends React.Component {
                     <button onClick={this.monthChangeButton}>Month</button>
                     <button onClick={this.weekChangeButton}>Week</button>
                     <button onClick={this.dayChangeButton}>Daily</button>
-                    <span id="renderRange" className="render-range"></span> {/** 달력 현재 월 표시 */}
+                    <span>{calendarDate}</span> {/** 달력 현재 월 표시 */}
                 </div>
                 <Calendar
                     height="900px"
@@ -127,7 +153,7 @@ class TestCal extends React.Component {
                     ]}
                     useDetailPopup
                     useCreationPopup
-                    view={selectedView} // You can also set the `defaultView` option.
+                    view='month' // You can also set the `defaultView` option.
                     week={{
                         daynames: ['일', '월', '화', '수', '목', '금', '토'],
                         showTimezoneCollapseButton: true,

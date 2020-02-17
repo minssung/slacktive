@@ -86,8 +86,6 @@ router.post("/messagePost", async(req,res)=>{
 router.post("/channelHistory", async(req,res) =>{
     try {
         let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
-
-        console.log("History Update");
         
         const result = await axios({
             method : "get",
