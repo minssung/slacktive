@@ -1,9 +1,9 @@
 import React from 'react';
 import './App.css';
-import SlackLoginBtn from './components/SlackLoginBtn';
-import TuiCalendar from './components/TuiCalendar';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
-import SlackDash from './components/Slack_Dashboard';
+import SlackLoginBtn from './components/mainPage/SlackLoginBtn';
+import TuiCalendar from './components/mainPage/TuiCalendar';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import SlackDash from './components/mainPage/Slack_Dashboard';
 
 let token = "";
 function tokenState(tokenstate) {
@@ -13,9 +13,8 @@ function tokenState(tokenstate) {
 }
 function App() {
   return (
-    <div>
+    <div className="app-mainDiv">
         <Router>
-            <Switch>
             <div className="app-mainDiv">
                     {
                       !localStorage.getItem("usertoken") && token !== "on" ? 
@@ -40,7 +39,6 @@ function App() {
                       </div>
                     }
             </div>
-            </Switch>
         </Router>
     </div>
   );

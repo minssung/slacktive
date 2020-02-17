@@ -86,6 +86,7 @@ router.post("/messagePost", async(req,res)=>{
 // 채널의 메시지 내역 가져오기 ( 출퇴근 ) --------------------------------------------------
 router.post("/channelHistory", async(req,res) =>{
     try {
+        // 가장 최근 데이터 추출
         let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
         console.log("History Update");
         
@@ -98,28 +99,29 @@ router.post("/channelHistory", async(req,res) =>{
             params: {
                 token : configs.p_token,
                 channel : configs.channel_time,
-                oldest : historyOne.data.ts
+                oldest : historyOne.data.ts // 가장 최근 데이터 기준으로 다음 데이터 수집
             }
         });
         const resultSet = (result.data.messages).reverse();
-        let Changetime = "";
-        let timeCheck = "";
-        let timeArray = [];
-        let timeReg = [];
-        let indexText = [];
-        let stateSet = "";
+        let Changetime = "";    // 디비에 들어갈 리얼 타임
+        let timeCheck = "";     // 시간 비교 용도
+        let timeArray = [];     // 정규식 처리된 시간을 담을 배열
+        let timeReg = [];       // 시간을 정규식으로 처리
+        let stateSet = "";      // 상태 디비 입력 용도
         const resultArray = resultSet.map(data=> {
             Changetime = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             timeCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
+            // 출퇴근에 대한 정규식 처리
             timeReg = configs.timeAttenden.exec(data.text);
+            // 처리된 값 조건문 처리
             if(timeReg && timeReg[4]) {
+                // 처리된 값 배열에 새로 담기
                 for (let index = 0; index < timeReg.length; index++) {
+                    // 필요없는 내용
                     if(index === 0){
                         continue;
                     }
-                    if(configs.subTime.exec(timeReg[index])){
-                        timeReg[index] = timeReg[index].replace(indexText, "");
-                    }
+                    // 새로운 배열에 담기
                     timeArray[index-1] = timeReg[index];
                 }
                 // 단답 텍스트 변환
@@ -136,6 +138,7 @@ router.post("/channelHistory", async(req,res) =>{
                     default : 
                         break
                 }
+                console.log(timeArray)
                 // 본인 지정 시간대가 있을 경우
                 if(timeArray[0] && timeArray[0] < "11"){
                     stateSet = timeArray[3]
@@ -661,5 +664,9 @@ router.post("/authInfo", async(req,res)=>{
         console.log("slack auth identity test err : " + err);
     }
 });
+
+regFunc = async(type , data, ...args) => {
+
+}
 
 module.exports = router;

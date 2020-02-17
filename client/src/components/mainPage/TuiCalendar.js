@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from "moment";
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
-import configs from '../client_config'; // config 파일
+import configs from '../../client_config'; // config 파일
 
 class TestCal extends React.Component {
     constructor(props) {
