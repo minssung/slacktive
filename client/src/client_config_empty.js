@@ -6,6 +6,8 @@ var client_c = {
 
     channel_calendar : "",
     channel_times : "",
+
+    colorArray : [''],
 }
 
 module.exports = client_c;

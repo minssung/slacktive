@@ -1,8 +1,9 @@
 import React from 'react';
 import axios from 'axios';
 import Dashboard from './Dashboard/Dashboard';
-import './css/Contents.css';
-const moment = require('moment');
+import moment from 'moment';
+
+import loadMask from '../../../resource/loadmaskTest.gif'
 
 class Slack_Dashboard extends React.Component {
     constructor(props){
@@ -11,8 +12,11 @@ class Slack_Dashboard extends React.Component {
             // users list - state
             usersalldb : [],
             usertoken : [],
+            spanText : [],
             // time contents
             todayTimes : "",
+            // load mask
+            loading : "",
         }
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -20,28 +24,12 @@ class Slack_Dashboard extends React.Component {
     async componentDidMount(){
         await this.clockBtnApi();
         await this.setState({
-            usertoken : await this.usersTokenChecked()
+            usertoken : await this.props.Token
         })
-        const { usertoken } = this.state;
-        if(usertoken !== null){
-            await this.userListApi();   // user List Api
-        } else {
-            window.location.href = "/";
-        }
-    }
-    async usersTokenChecked(){
-        try {
-            const result = await axios("http://localhost:5000/verify",{
-                method : "get",
-                headers : {
-                    'content-type' : 'text/json',
-                    'x-access-token' : localStorage.getItem("usertoken")
-                }
-            });
-            return result.data.userid;
-        } catch(err){
-            console.log("dashboard jwt token verify err : " + err);
-        }
+        await this.userListApi();   // user List Api
+        await this.setState({
+            loading : "Loading",
+        })
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -49,8 +37,10 @@ class Slack_Dashboard extends React.Component {
     async userListApi(){
         try {
             const result = await axios.get(`http://localhost:5000/user/all`);
+            const stateText = await axios.get("http://localhost:5000/user/state");
             await this.setState({
-                usersalldb : result.data
+                usersalldb : result.data,
+                spanText : stateText.data
             });
         } catch(err){
             console.log("user List Api err : " + err);
@@ -72,7 +62,7 @@ class Slack_Dashboard extends React.Component {
         </div>
     }
     // ---------- clock Api & Render ----------
-    async clockBtnApi() {
+    async clockBtnApi(reroad) {
         try {
             const result = await axios.get("http://localhost:5000/updateHistorys");
             await this.setState({
@@ -81,25 +71,33 @@ class Slack_Dashboard extends React.Component {
         } catch(err) {
             console.log("click btn clock updat err : " + err)
         }
+        if(reroad){
+            window.location.href = "/"
+        }
     }
     clockContents() {
         const { todayTimes } = this.state;
         return <div className="slack-dash">
             <span>마지막 업데이트 날짜</span><br></br>
-            <span>{moment(todayTimes).format("YYYY-MM-DD")}</span>
-            <button type="button">갱신</button>
+            <span>{moment(todayTimes).format("YYYY-MM-DD HH:mm:ss")}</span>
+            <button type="button" onClick={this.clockBtnApi.bind(this, "reroad")}>갱신</button>
         </div>
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- rendering ---------- 
     render () {
-        const { usersalldb } = this.state;
+        const { spanText, loading } = this.state;
         return (
-            <div>
+            <div className="dash-boardDiv">
+                {
+                    !loading && <div className="loadMaskDiv">
+                        <img alt="Logind~" src={loadMask} className="loadMask"></img>
+                    </div>
+                }
                 <Dashboard contents={this.clockContents.bind(this)} />
                 {
-                    usersalldb.map((data,i)=>{
+                    spanText.map((data,i)=>{
                         return <Dashboard key={i} contents={this.usersListBoard.bind(this, data.state)}/>
                     })
                 }

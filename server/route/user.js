@@ -5,7 +5,8 @@ const models = require("../models");
 
 // DB Setting --------------------
 const User = models.user;
- 
+
+const stateQuery = "select max(id), state from users group by state";
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
 router.get("/all", async(req, res) => {
@@ -28,6 +29,16 @@ router.get("/one", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select user one err : " + err);
+    }
+});
+
+// DB Select State --------------------
+router.get("/state", async(req, res) => {
+    try {
+        let result = await models.sequelize.query(stateQuery, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select chat one err : " + err);
     }
 });
 

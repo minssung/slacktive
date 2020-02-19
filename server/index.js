@@ -108,17 +108,29 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
                 // axios.get("http://localhost:5000/");
 
                 // < ----------- 현재 시간의 date string ----------- >
-                let nowtimeString = new Date();
-                nowtimeString = moment().format('HH:mm')
+                let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
                 
+                // < ----------- 서버 스케줄러 ---------- >
+                // if (nowtimeString > '09:00' && nowtimeString < '19:00') {
+                //     cron.schedule('*/10 * * * *', async() => {
+                //         console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+                //         await axios.post("http://localhost:5000/slackapi/channelHistory");
+                //         await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+                //     });
+                // } else {
+                //     cron.schedule('*/2 * * *', async() => {
+                //         console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+                //         await axios.post("http://localhost:5000/slackapi/channelHistory");
+                //         await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+                //       });
+                // }
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }
         });
     });
 })
-
 // -------------------- slack 연동 login & access p_token created --------------------
 app.get('/login', async(req, res) => {
     try {
@@ -134,7 +146,6 @@ app.get('/login', async(req, res) => {
         console.log("login trying err : " + err);
     }
 });
-
 app.get('/login-access', async(req,res) => {
     try {
         const result = await axios({
@@ -187,6 +198,12 @@ app.get('/verify', (req,res)=>{
         res.send("err");
     }
 });
+
+// const sleep = (ms) => {
+//     return new Promise(resolve=>{
+//         setTimeout(resolve,ms)
+//     })
+// }
 // -------------------- ********** --------------------
 
 // -------------------- index Api --------------------

@@ -1,0 +1,38 @@
+.mypage-mainDiv {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 720px;
+}
+
+.mypage-upDiv {
+    height: 80%;
+}
+
+.mypage-progDiv {
+    border-bottom: 0.1px solid black;
+    width: 100%;
+    height: 20%;
+}
+
+.mypage-DashDiv {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 80%;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: space-around;
+}
+
+.mypage-Dash {
+    border: 0.1px solid black;
+    width: 40%;
+    height: 40%;
+}
+
+.mypage-downDiv {
+    border-top: 0.1px solid black;
+    width: 100%;
+    height: 20%;
+}
