@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from "moment";
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
-import configs from '../../client_config'; // config 파일
+import configs from '../../../client_config'; // config 파일
 
 class TestCal extends React.Component {
     constructor(props) {
@@ -14,15 +14,13 @@ class TestCal extends React.Component {
             scheduleItem : null,    // 캘린더에 표시되는 아이템들
             usertoken : "", // 유저 토큰 값
             user : [],  // 유저 데이터 정보 디비
-            // token state
-            tokenexpire : "",
         }
     }
     // 초기 마운트
     async componentDidMount(){
         // token verify
         await this.setState({
-            usertoken : await this.usersTokenChecked()
+            usertoken : await this.props.Token
         })
         const { usertoken } = this.state;
         // user Db setting
@@ -34,28 +32,6 @@ class TestCal extends React.Component {
         const { scheduleArray } = this.state;
         // calendar create mount
         await this.scheduleCreateMount(scheduleArray);
-    }
-    // 유저 토큰 확인
-    async usersTokenChecked(){
-        try {
-            const result = await axios("http://localhost:5000/verify",{
-                method : "get",
-                headers : {
-                    'content-type' : 'text/json',
-                    'x-access-token' : localStorage.getItem("usertoken")
-                }
-            });
-            if(result.data === "err"){
-                console.log("calendar jwt token verify err : tokenExpired -> remove token");
-                localStorage.removeItem("usertoken");
-                await this.setState({ tokenexpire : "off" });
-                return null;
-            }
-            await this.setState({ tokenexpire : "on" });
-            return result.data.userid;
-        } catch(err){
-            console.log("Tui calendar jwt token verify err : " + err);
-        }
     }
     // ------------------------------ Instance method ------------------------------ //
     // 이전 달로 이동하는 버튼
@@ -81,6 +57,7 @@ class TestCal extends React.Component {
         const calendar = this.calendarRef.current.getInstance();
         let dataText = configs.dataTitleReg.exec(data.title)
         let timeText = "";
+        let color = this.randomColors();
         if(moment(data.end._date).diff(data.start._date, "days") >= 1){
             timeText = "["+dataText[1]+"] "+ moment(data.start._date).format("YYYY[년] MM[월] DD") + "~" + moment(data.end._date).format("DD") + " " + dataText[2]
         } else {
@@ -101,8 +78,14 @@ class TestCal extends React.Component {
                 category: 'time',
                 isAllDay: configs.dataCateReg.exec(result.data[0].textTitle) ? true : data.isAllDay,
                 start : data.start._date,
-                end : data.end._date
+                end : data.end._date,
+                bgColor : color,
             }])
+        // calendar init moubt
+        await this.scheduleInitMount()
+        const { scheduleArray } = this.state;
+        // calendar create mount
+        await this.scheduleCreateMount(scheduleArray);
         } catch(err) {
             console.log("before create scd err : " + err);
         }
@@ -127,16 +110,10 @@ class TestCal extends React.Component {
             timeText = "["+dataText[1]+"] "+ moment(data.start._date).format("YYYY[년] MM[월] DD[일] ") + dataText[2]
             dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
         }
-        calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
-            title : data.changes.title  && data.changes.title,
-            start : data.changes.start && data.changes.start._date,
-            end : data.changes.end && data.changes.end._date,
-            isAllDay : data.changes.isAllDay && data.changes.isAllDay,
-        });
         try {
             const { user } = this.state;
-            let result = axios.get(`http://localhost:5000/calendar/one?id=${data.schedule.id}`);
-            let updateRe = axios.put("http://localhost:5000/calendar/update",{
+            let result = await axios.get(`http://localhost:5000/calendar/one?id=${data.schedule.id}`);
+            await axios.put("http://localhost:5000/calendar/update",{
                 id : data.schedule.id,
                 userId : user.data.id,
                 text : timeText,
@@ -144,14 +121,18 @@ class TestCal extends React.Component {
                 textTime : dbTimeText,
                 textTitle : data.changes.title
             });
-            await result;
-            await updateRe;
             await axios.post("http://localhost:5000/slackapi/messageUpdate",{
                 p_token : user.data.p_token,
                 channel : configs.channel_calendar,
                 text : timeText,
-                time : (await result).data.ts
+                time : result.data.ts
             })
+            calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
+                title : data.changes.title  && data.changes.title,
+                start : data.changes.start && data.changes.start._date,
+                end : data.changes.end && data.changes.end._date,
+                isAllDay : data.changes.isAllDay && data.changes.isAllDay,
+            });
         } catch(err){
             console.log("before scd update err : " + err);
         }
@@ -160,18 +141,16 @@ class TestCal extends React.Component {
     // 삭제 시 메시지 또한 삭제 됨
     beforeDeleteSchedule = async(data) => {
         const calendar = this.calendarRef.current.getInstance();
-        calendar.deleteSchedule(data.schedule.id, data.schedule.calendarId);
         try {
-            let deleteRe = axios.delete(`http://localhost:5000/calendar/delete?id=${data.schedule.id}`);
-            let result = axios.get(`http://localhost:5000/calendar/one?id=${data.schedule.id}`);
-            await deleteRe;
-            await result;
+            let result = await axios.get(`http://localhost:5000/calendar/one?id=${data.schedule.id}`);
+            await axios.delete(`http://localhost:5000/calendar/delete?id=${data.schedule.id}`);
             const { user } = this.state;
             await axios.post("http://localhost:5000/slackapi/messageDelete",{
                 p_token : user.data.p_token,
                 channel : configs.channel_calendar,
-                time : (await result).data.ts,
+                time : result.data.ts,
             })
+            calendar.deleteSchedule(data.schedule.id, data.schedule.calendarId);
         } catch(err) {
             console.log("before scd delete err : " + err)
         }
@@ -191,8 +170,10 @@ class TestCal extends React.Component {
         let startDate = "";
         let endDate = "";
         let regDays = [];
+        let color = "";
         try {
             scheduleArray.forEach(data => {
+                color = this.randomColors();
                 regDays = configs.dataTimeReg.exec(data.textTime)
                 let days = [];
                 let scheduleObj = {};
@@ -222,7 +203,8 @@ class TestCal extends React.Component {
                         category: 'time',
                         isAllDay: isAll,
                         start : startDate,
-                        end : endDate
+                        end : endDate,
+                        bgColor : color,
                     };
                     scheduleItem.push(scheduleObj)
                 // 컴마를 사용한 다수 일정 등록 시
@@ -256,7 +238,8 @@ class TestCal extends React.Component {
                                 category: 'time',
                                 isAllDay: isAll,
                                 start : startDate,
-                                end : endDate
+                                end : endDate,
+                                bgColor : color,
                             };
                             scheduleItem.push(scheduleObj)
                         }
@@ -272,7 +255,8 @@ class TestCal extends React.Component {
                         category: 'time',
                         isAllDay: isAll,
                         start : startDate,
-                        end : endDate
+                        end : endDate,
+                        bgColor : color,
                     };
                     scheduleItem.push(scheduleObj)
                 }
@@ -284,20 +268,23 @@ class TestCal extends React.Component {
             console.log("TUI Mount init Schedule err : " + err)
         }
     }
+    // 랜덤 컬러 생성 함수
+    randomColors() {
+        let num = Math.floor(Math.random() * 11);
+        let color = configs.colorArray[num]
+        return color;
+    }
     // ------------------------------ 렌더링 ------------------------------ //
     render() {
-        const { tokenexpire } = this.state
         return (
-            <div className="app-centerDiv">
+            <div className="tui-div">
                 <div>
-                    <span className="tokenprops">{this.props.tokenstate(tokenexpire)}</span>
-                    <button onClick={this.handleClickPrevButton}>Prev</button>
-                    <button onClick={this.handleClickNextButton}>Next</button>
-                    <button onClick={this.todayButton}>Today</button>
-                    <span id="renderRange" className="render-range"></span> {/** 달력 현재 월 표시 */}
+                    <button onClick={this.handleClickPrevButton}>이전 달</button>
+                    <button onClick={this.handleClickNextButton}>다음 달</button>
+                    <button onClick={this.todayButton}>오늘</button>
                 </div>
                 <Calendar
-                    height="700px"
+                    height="100%"
                     ref={this.calendarRef}
                     onBeforeCreateSchedule={this.beforeCreateSchedule}
                     onBeforeUpdateSchedule={this.beforeUpdateSchedule}
