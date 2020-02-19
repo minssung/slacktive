@@ -19,7 +19,7 @@ class mypage extends Component {
                 <div className="mypage-upDiv">
                     <div className="mypage-progDiv">
                         <span>내 현황</span>
-                        <div></div>
+                        <div className="mypage-progressBarDiv">a</div>
                     </div>
                     <div className="mypage-DashDiv">
                         <div className="mypage-Dash">b</div>

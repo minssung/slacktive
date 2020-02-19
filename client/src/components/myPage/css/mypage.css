@@ -11,15 +11,26 @@
 
 .mypage-progDiv {
     border-bottom: 0.1px solid black;
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    height: 20%;
+    height: 30%;
+}
+
+.mypage-progressBarDiv {
+    border: 0.1px solid black;
+    justify-self: center;
+    align-self: center;
+    border-radius: 30;
+    widows: 70%;
+    height: 70%;
 }
 
 .mypage-DashDiv {
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: 80%;
+    height: 70%;
     flex-wrap: wrap;
     justify-content: space-around;
     align-content: space-around;
