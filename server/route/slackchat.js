@@ -5,21 +5,7 @@ const models = require("../models");
 // DB Setting --------------------
 const Slack = models.slackchat;
 
-const queryFindAll = "SELECT `slackchat`.`id`, `slackchat`.`userId`, `slackchat`.`text`, `slackchat`.`time`, `slackchat`.`state`, `slackchat`.`createdAt`, `slackchat`.`updatedAt`, `user`.`username` AS `username`, `user`.`state` AS `userstate`FROM `slackchats` AS `slackchat` LEFT OUTER JOIN `users` AS `user` ON `slackchat`.`userId` = `user`.`id` ORDER BY `slackchat`.`id` ASC;"
 // ------------------------------------- DB CRUD -------------------------------------
-
-// DB SelectAll --------------------
-router.get("/allquery", async(req, res) => {
-    try {
-        const result = await models.sequelize.query(queryFindAll, {
-            type : models.sequelize.QueryTypes.SELECT,
-            raw : true
-        });
-        res.send(result);
-    } catch(err){
-        console.log("select chat all err : " + err);
-    }
-});
 
 // DB SelectAll --------------------
 router.get("/all", async(req, res) => {
@@ -68,32 +54,21 @@ router.get("/oneRow", async(req, res) => {
     }
 });
 
-// DB Selecte MAX ID --------------------
-router.get("/max", async(req, res) => {
-    try {
-        const result = await Slack.findAll({
-            attributes : [[models.sequelize.fn('max', models.sequelize.col('id')), 'maxID']]
-        })
-        res.send(result);
-    } catch(err){
-        console.log("select chat all err : " + err);
-    }
-});
-
 // DB FindOrCreate --------------------
 router.post("/create", async(req, res) => {
     try {
         let result = await Slack.findOrCreate({
             where : {
-                time : req.body.time,
-                userid : req.body.userid
+                ts : req.body.ts,
+                userId : req.body.userId
             },
             defaults : {
                 id : req.body.id,
-                userid: req.body.userid, 
+                userId: req.body.userId, 
                 text : req.body.text,
                 time : req.body.time,
                 state : req.body.state,
+                ts : req.body.ts,
             }
         });
         res.send(result);
@@ -106,12 +81,12 @@ router.post("/create", async(req, res) => {
 router.put("/update", async(req, res) => {
     try {
         const result = await Slack.update({ 
-            userid: req.body.userid, 
+            userId: req.body.userId, 
             text: req.body.text,
             state : req.body.state,
         }, {
             where: {
-                time : req.body.time
+                ts : req.body.ts
             }
         });
         res.send(result);
@@ -125,7 +100,7 @@ router.delete("/delete", async(req, res) => {
     try {
         let result = await Slack.destroy({
             where: {
-                time: req.query.time
+                ts: req.query.ts
             }
         });
         res.send(result);

@@ -13,6 +13,9 @@ let configs = require('./server_config');
 const moment = require('moment');
 const cron = require('node-cron');
 
+// ---------- mongoDB ---------- //
+const Agenda = require('agenda');
+
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
@@ -31,109 +34,83 @@ app.use("/calendar", calendar_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
-// const sleep = (ms) => {
-//     return new Promise(resolve=>{
-//         setTimeout(resolve,ms)
-//     })
-// }
+app.get('/', (req, res) => {
+    const today = moment(new Date()).format("YYYY-MM-DD");
+    let setDay1 = "2020-02-20";
+    let setDay2 = "2020-02-20,21";
+    let setDay3 = "2020-02-20~23";
 
-// app.get('/', async(req, res) => {
-//     // [준명] 3월 1일 or 1,2,3일 or 11월27일~12월 3일 휴가/병가/오전/오후반차/예비군/병원/동원/개인사유/압원
-//     // 출근/ㅊㄱ/퇴근/ㅌㄱ/야근/외근/ooㅇㄱ/10시20분출근/7시퇴근/
-    
-//     let slackMessage = "[준명] 20년 1월 25 27 28일 29일,30일,31일 휴가 개인사정";
-//     let holiday = /\[\s*(\S*)\s*\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?[\,*\s+]?)*)*\s*(\W*)/;
-//     let text = holiday.exec(slackMessage);
-//     let array = [];
-//     for (let index = 0; index < text.length; index++) {
-//         if(index === 0 || index === 5)
-//             continue;
-//         array.push(text[index]);
-//     }
-//     array[3] = text[4].split(/\s{1,}|\,|일/)
-//     let search = "";
-//     for (let index = 0; index < array[3].length; index++) {
-//         search = array[3].indexOf("")
-//         if(search!= -1)
-//         array[3].splice(search,1)
-//     }
-//     console.log(array);
+    let getDays = /(\d{4}-\d{2}-)(\d{2})([,~])?(\d{2})?/.exec(setDay2)
+    if(getDays[3]){
+        if(getDays[3] && getDays[3] === ","){
+            console.log(",!!")
+        } else {
+            console.log("~!!")
+        }
+    } else {
+        console.log("!!")
+    }
+    console.log(getDays)
+    res.send("Hello SlackApi World!");
+});
 
-//     let slackMsgTimes = "출근"
-//     let timeatten = /(\d*시)?\s*(\d*분)?\s*(\W*)?\s*(출근|ㅊㄱ|퇴근|ㅌㄱ|외근|ㅇㄱ|야근|예비군|민방위|개인사유|입원|병원)/;
-//     let timesTest = timeatten.exec(slackMsgTimes);
-//     let timearray = [];
-//     for (let index = 0; index < timesTest.length; index++) {
-//         if(index === 0)
-//             continue;
-//         timearray.push(timesTest[index]);
-//     }
-//     console.log(timearray);
-//     // await sleep(10000);
-//     res.send("Hello SlackApi World!");
-// });
+// ---------- MongoDB 연동 ---------- //
+const mongoConnectionString = 'mongodb://'+configs.host+':27017/agenda';
+const agenda = new Agenda({ db: { address: mongoConnectionString, options: { useUnifiedTopology: true, autoReconnect: false, reconnectTries: false, reconnectInterval: false } }});
+
+// ---------- Agenda 스케줄러 ---------- //
+try {
+    agenda.on('ready', () => {
+        console.log('Success agenda connecting');
+
+        agenda.define('First', {lockLifetime: 10000}, async job => {
+            console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            await axios.post("http://localhost:5000/slackapi/channelHistory");
+            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        });
+
+        agenda.define('Second', {lockLifetime: 10000}, async job => {
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            await axios.post("http://localhost:5000/slackapi/channelHistory");
+            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        });
+
+        agenda.define('Third', {lockLifetime: 10000}, async job => {
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            await axios.post("http://localhost:5000/slackapi/channelHistory");
+            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        });
+          
+        (async () => { // IIFE to give access to async/await
+        await agenda.start();
+        await agenda.every('*/10 9-18 * * *', 'First');
+        await agenda.every('19-23/2 * * *', 'Second');
+        await agenda.every('0-8/2 * * *', 'Third');
+        })();
+        
+    });
+} catch{err => {
+    console.error(err);
+    process.exit(-1);
+}};
 
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:true }).then(()=>{
+    models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
                 await axios.get("http://localhost:5000/slackapi/teamUsers");
-
-                // < ----------- 데이터 없을 때 초기 설정 ----------- >
-                // await axios.post("http://localhost:5000/slackapi/channelHistoryInit", {
-                //    channel : "CS7RWKTT5",
-                // });
-                // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
-                //     channel : "CSZTZ7TCL",
-                //  });
+                // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
+                // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
+                // axios.get("http://localhost:5000/");
 
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = new Date();
                 nowtimeString = moment().format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
-
-                // < ----------- 서버 스케줄러 ---------- >
-                // if(process.env.Second) {
-                //     cron.schedule('*/10 9-18 * * *', async() => {
-                //         console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory", {
-                //             channel : "CS7RWKTT5",
-                //         });
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
-                //             channel : "CSZTZ7TCL",
-                //         });
-                //         }, {
-                //             timezone: "Asia/Seoul"
-                //         });
-                    
-                //     cron.schedule('19-23/2 * * *', async() => {
-                //         console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory", {
-                //             channel : "CS7RWKTT5",
-                //         });
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
-                //             channel : "CSZTZ7TCL",
-                //         });
-                //         }, {
-                //             timezone: "Asia/Seoul"
-                //         });
-
-                //     cron.schedule('0-8/2 * * *', async() => {
-                //         console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory", {
-                //             channel : "CS7RWKTT5",
-                //         });
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal", {
-                //             channel : "CSZTZ7TCL",
-                //         });
-                //         }, {
-                //             timezone: "Asia/Seoul"
-                //         });
-                // }
                 
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
@@ -141,6 +118,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
         });
     });
 })
+
 // -------------------- slack 연동 login & access p_token created --------------------
 app.get('/login', async(req, res) => {
     try {
@@ -182,7 +160,7 @@ app.get('/login-access', async(req,res) => {
 });
 // -------------------- ********** --------------------
 
-// -------------------- token sign & token verify--------------------
+// -------------------- token sign & token verify --------------------
 function getToken(data){
     try {
         const getToken = jwt.sign({
@@ -210,3 +188,17 @@ app.get('/verify', (req,res)=>{
     }
 });
 // -------------------- ********** --------------------
+
+// -------------------- index Api --------------------
+app.get('/updateHistorys', async(req,res) => {
+    try {
+        const resultC = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        const resultH = axios.post("http://localhost:5000/slackapi/channelHistory");
+        const updatDate = new Date();
+        await resultC;
+        await resultH;
+        res.send(updatDate);
+    } catch(err) {
+        console.log("index api & history updat err : " + err)
+    }
+})

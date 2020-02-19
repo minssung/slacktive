@@ -10,15 +10,20 @@ class SlackLoginBtn extends React.Component {
             const url = new URL(window.location.href);
             const code = url.searchParams.get("code");
             if(code){
-                const result = await axios.get("http://localhost:5000/login-access",{
-                    params : {
-                        code
-                    }
-                });
-                console.log("jwt user token : "+result.data);
-                localStorage.setItem("usertoken", result.data);
-
-                window.location.href = "/";
+                try {
+                    const result = await axios.get("http://localhost:5000/login-access",{
+                        params : {
+                            code
+                        }
+                    });
+                    console.log("jwt user token : "+result.data);
+                    localStorage.setItem("usertoken", result.data);
+    
+                    window.location.href = "/";
+                } catch(err) {
+                    console.log("code already use err : " + err);
+                    window.location.href = "/";
+                }
             }
         }
     }

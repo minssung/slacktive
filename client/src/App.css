@@ -1,64 +1,71 @@
+/* ---------- app & web Main Disp  ---------*/
 .app-mainDiv {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-content: center;
     width: 100%;
+    height: 100%;
 }
 
-.slack-mainDiv {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-content: center;
-  width: 100%;
+.app-contentDiv {
+    border: .1px solid black;
+    display: inline-flex;
+    flex-direction: row;
+    overflow-y: scroll;
+    height: 100%;
 }
 
-.slacklogin-maindiv {
-  align-self: center;
-  padding-top: 320px;
+.app-rightDiv {
+    width: 10%;
+    border-right: .1px solid black;
+    flex-direction: column;
+    display: flex;
 }
 
-.slack-dashboardDiv {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
+.app-centerDiv {
+    width: 70%;
+    height: 100%;
 }
 
+.app-leftDiv {
+    flex-direction: column;
+    background-color: rgb(228, 228, 228);
+    display: flex;
+    width: 20%;
+    overflow-y: scroll;
+    height: 720px;
+}
+
+/* ---------- token verify disp span ----------*/
 .tokenprops {
   display: none;
 }
 
+.slack-mainDiv {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.slacklogin-maindiv {
+    align-self: center;
+    padding-top: 320px;
+}
+
 .slack-dash {
-  border: 1px solid black;
-  height: 250px;
-  flex-grow: 1;
-}
-
-@media (min-width : 651px) {
-    .slack-dash {
-      flex-basis: 45%;
-    }
-}
-
-@media (max-width : 650px) {
-    .slack-dash {
-      flex-basis: 65%;
-    }
-}
-
-.slack-dash-userlistdiv {
-  display: inline-flex;
-  align-content: space-around;
-  justify-content: space-around;
-  overflow-y: scroll;
-  width: 100%;
-  height: 100%;
-}
-
-.slack-dash-userlist-cate {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+    border: 1px solid black;
+    border-radius: 20px;
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 15px;
+    flex-wrap: wrap;
 }
