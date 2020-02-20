@@ -13,6 +13,9 @@ let configs = require('./server_config');
 const moment = require('moment');
 const cron = require('node-cron');
 
+// ---------- mongoDB ---------- //
+const Agenda = require('agenda');
+
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
@@ -51,6 +54,46 @@ app.get('/', (req, res) => {
     res.send("Hello SlackApi World!");
 });
 
+// ---------- MongoDB 연동 ---------- //
+const mongoConnectionString = 'mongodb://'+configs.host+':27017/agenda';
+const agenda = new Agenda({ db: { address: mongoConnectionString, options: { useUnifiedTopology: true, autoReconnect: false, reconnectTries: false, reconnectInterval: false } }});
+
+// ---------- Agenda 스케줄러 ---------- //
+try {
+    agenda.on('ready', () => {
+        console.log('Success agenda connecting');
+
+        agenda.define('First', {lockLifetime: 10000}, async job => {
+            console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            await axios.post("http://localhost:5000/slackapi/channelHistory");
+            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        });
+
+        agenda.define('Second', {lockLifetime: 10000}, async job => {
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            await axios.post("http://localhost:5000/slackapi/channelHistory");
+            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        });
+
+        agenda.define('Third', {lockLifetime: 10000}, async job => {
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            await axios.post("http://localhost:5000/slackapi/channelHistory");
+            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        });
+          
+        (async () => { // IIFE to give access to async/await
+        await agenda.start();
+        await agenda.every('*/10 9-18 * * *', 'First');
+        await agenda.every('19-23/2 * * *', 'Second');
+        await agenda.every('0-8/2 * * *', 'Third');
+        })();
+        
+    });
+} catch{err => {
+    console.error(err);
+    process.exit(-1);
+}};
+
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
@@ -59,7 +102,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                // await axios.get("http://localhost:5000/slackapi/teamUsers");
+                await axios.get("http://localhost:5000/slackapi/teamUsers");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
                 // axios.get("http://localhost:5000/");

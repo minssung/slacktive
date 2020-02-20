@@ -14,6 +14,7 @@ class TestCal extends React.Component {
             scheduleItem : null,    // 캘린더에 표시되는 아이템들
             usertoken : "", // 유저 토큰 값
             user : [],  // 유저 데이터 정보 디비
+            calendarDate : 'default' // 달력 월 표시
         }
     }
     // 초기 마운트
@@ -32,22 +33,36 @@ class TestCal extends React.Component {
         const { scheduleArray } = this.state;
         // calendar create mount
         await this.scheduleCreateMount(scheduleArray);
+        // 현재 달력 월
+        await this.nowDate();
     }
     // ------------------------------ Instance method ------------------------------ //
     // 이전 달로 이동하는 버튼
     handleClickPrevButton = async() => {
         const calendar = this.calendarRef.current.getInstance();
         calendar.prev();
+        this.nowDate();
     };
     // 다음 달로 이동하는 버튼
     handleClickNextButton = async() => {
         const calendar = this.calendarRef.current.getInstance();
         calendar.next();
+        this.nowDate();
     };
     // 오늘 날짜로 돌아오기
     todayButton = async() => {
         const calendar = this.calendarRef.current.getInstance();
         calendar.today();
+        this.nowDate();
+    }
+    // 달력 현재 날짜 표시
+    nowDate = () => {
+        const calendar = this.calendarRef.current.getInstance();
+        const date = calendar.getDate();
+        const momentdate = moment(date._date).format('YYYY.MM');
+        this.setState({
+            calendarDate : momentdate
+        });
     }
     // ------------------------------ Event ------------------------------ //
     // 새로운 일정 생성 시 동작
@@ -276,12 +291,15 @@ class TestCal extends React.Component {
     }
     // ------------------------------ 렌더링 ------------------------------ //
     render() {
+        const { calendarDate } = this.state;
+
         return (
             <div className="tui-div">
                 <div>
                     <button onClick={this.handleClickPrevButton}>이전 달</button>
                     <button onClick={this.handleClickNextButton}>다음 달</button>
                     <button onClick={this.todayButton}>오늘</button>
+                    <span>{calendarDate}</span> {/** 달력 현재 월 표시 */}
                 </div>
                 <Calendar
                     height="100%"
