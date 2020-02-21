@@ -11,9 +11,6 @@ const axios = require("axios");
 let jwt = require("jsonwebtoken");
 let configs = require('./server_config');
 const moment = require('moment');
-const cron = require('node-cron');
-
-// ---------- mongoDB ---------- //
 const Agenda = require('agenda');
 
 // -------------------- 초기 서버 ( app ) 설정 --------------------
@@ -70,13 +67,13 @@ try {
         });
 
         agenda.define('Second', {lockLifetime: 10000}, async job => {
-            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             await axios.post("http://localhost:5000/slackapi/channelHistory");
             await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
         });
 
         agenda.define('Third', {lockLifetime: 10000}, async job => {
-            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             await axios.post("http://localhost:5000/slackapi/channelHistory");
             await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
         });
@@ -84,8 +81,8 @@ try {
         (async () => { // IIFE to give access to async/await
         await agenda.start();
         await agenda.every('*/10 9-18 * * *', 'First');
-        await agenda.every('19-23/2 * * *', 'Second');
-        await agenda.every('0-8/2 * * *', 'Third');
+        await agenda.every('*/60 19-23/2 * * *', 'Second');
+        await agenda.every('*/60 0-8/2 * * *', 'Third');
         })();
         
     });
@@ -111,20 +108,6 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
                 let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
                 
-                // < ----------- 서버 스케줄러 ---------- >
-                // if (nowtimeString > '09:00' && nowtimeString < '19:00') {
-                //     cron.schedule('*/10 * * * *', async() => {
-                //         console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory");
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-                //     });
-                // } else {
-                //     cron.schedule('*/2 * * *', async() => {
-                //         console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory");
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-                //       });
-                // }
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }
