@@ -6,6 +6,7 @@ class mypage extends Component {
         super(props);
         this.state = {
             usertoken : null,
+            late : []
         }
     }
     async componentDidMount(){
@@ -13,6 +14,7 @@ class mypage extends Component {
             usertoken : await this.props.Token
         })
     }
+
     render() {
         return (
             <div className="mypage-mainDiv">
@@ -22,7 +24,11 @@ class mypage extends Component {
                         <div></div>
                     </div>
                     <div className="mypage-DashDiv">
-                        <div className="mypage-Dash">b</div>
+                        <div className="mypage-Dash">
+                            <div>지각 횟수</div>
+                            <div>없음</div>
+                            <div>지난달보다 2회 감소</div>
+                        </div>
                         <div className="mypage-Dash">c</div>
                         <div className="mypage-Dash">d</div>
                         <div className="mypage-Dash">e</div>

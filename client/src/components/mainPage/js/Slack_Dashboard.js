@@ -42,6 +42,7 @@ class Slack_Dashboard extends React.Component {
                 usersalldb : result.data,
                 spanText : stateText.data
             });
+            
         } catch(err){
             console.log("user List Api err : " + err);
         }

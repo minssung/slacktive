@@ -73,6 +73,10 @@ class TestCal extends React.Component {
         let dataText = configs.dataTitleReg.exec(data.title)
         let timeText = "";
         let color = this.randomColors();
+        
+        console.log(dataText);
+        
+
         if(moment(data.end._date).diff(data.start._date, "days") >= 1){
             timeText = "["+dataText[1]+"] "+ moment(data.start._date).format("YYYY[년] MM[월] DD") + "~" + moment(data.end._date).format("DD") + " " + dataText[2]
         } else {
@@ -113,6 +117,10 @@ class TestCal extends React.Component {
         let dataText = "";
         let dbTimeText = "";
         let timeText = "";
+        console.log(data);
+        console.log(moment(data.end._date).diff(data.start._date, "days"));
+        
+        
         if(data.changes && data.changes.title){
             dataText = configs.dataTitleReg.exec(data.changes.title)
         } else {
