@@ -4,7 +4,7 @@ const models = require("../models");
 
 // DB Setting --------------------
 const Slack = models.slackchat;
-
+const Op = models.Sequelize.Op;
 // ------------------------------------- DB CRUD -------------------------------------
 
 // DB SelectAll --------------------
@@ -22,6 +22,35 @@ router.get("/all", async(req, res) => {
         res.send(result);
     } catch(err){
         console.log("select chat all err : " + err);
+    }
+});
+
+// DB Select State AVG --------------------
+router.get("/state", async(req, res) => {
+    try {
+        let result = await Slack.count({
+            where : {
+                state : req.query.state,
+                userId : req.query.userid,
+                time : {
+                    [Op.substring] : req.query.time, 
+                }
+            }
+        })
+        res.send(result+"");
+    } catch (err){
+        console.log("select chat state err : " + err);
+    }
+});
+
+// DB Select time AVG --------------------
+router.get("/time", async(req, res) => {
+    try {
+        const query = `select SEC_TO_TIME(AVG(TIME_TO_SEC(date_format(time, '%T')))) as times from slackchats where state='${req.query.state}' and userId='${req.query.userid}' and time like '%${req.query.time}%'`
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result[0].times);
+    } catch (err){
+        console.log("select chat state err : " + err);
     }
 });
 

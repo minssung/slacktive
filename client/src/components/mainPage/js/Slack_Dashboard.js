@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import Dashboard from './Dashboard/Dashboard';
 import moment from 'moment';
-
 import loadMask from '../../../resource/loadmaskTest.gif'
 
 class Slack_Dashboard extends React.Component {
@@ -68,6 +67,7 @@ class Slack_Dashboard extends React.Component {
             await this.setState({
                 todayTimes : result.data
             })
+            await axios.get("http://localhost:5000/updatState");
         } catch(err) {
             console.log("click btn clock updat err : " + err)
         }

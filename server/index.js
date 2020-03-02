@@ -7,7 +7,6 @@ const chat_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
 const calendar_router = require("./route/calendar");
 const axios = require("axios");
-// const crypto = require("crypto");
 let jwt = require("jsonwebtoken");
 let configs = require('./server_config');
 const moment = require('moment');
@@ -35,22 +34,6 @@ app.use("/calendar", calendar_router);
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
-    const today = moment(new Date()).format("YYYY-MM-DD");
-    let setDay1 = "2020-02-20";
-    let setDay2 = "2020-02-20,21";
-    let setDay3 = "2020-02-20~23";
-
-    let getDays = /(\d{4}-\d{2}-)(\d{2})([,~])?(\d{2})?/.exec(setDay2)
-    if(getDays[3]){
-        if(getDays[3] && getDays[3] === ","){
-            console.log(",!!")
-        } else {
-            console.log("~!!")
-        }
-    } else {
-        console.log("!!")
-    }
-    console.log(getDays)
     res.send("Hello SlackApi World!");
 });
 
@@ -62,28 +45,47 @@ const agenda = new Agenda({ db: { address: mongoConnectionString, options: { use
 try {
     agenda.on('ready', () => {
         console.log('Success agenda connecting');
-
+        // 10분
         agenda.define('First', {lockLifetime: 10000}, async job => {
-            console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
-            await axios.post("http://localhost:5000/slackapi/channelHistory");
-            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            await History;
+            await HistoryCal;
+            await calendarStateUpdatFunc();
         });
-
+        // 2시간
         agenda.define('Second', {lockLifetime: 10000}, async job => {
-            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
-            await axios.post("http://localhost:5000/slackapi/channelHistory");
-            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            await History;
+            await HistoryCal;
+            await calendarStateUpdatFunc();
         });
-
+        // 2시간
         agenda.define('Third', {lockLifetime: 10000}, async job => {
-            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
-            await axios.post("http://localhost:5000/slackapi/channelHistory");
-            await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            await History;
+            await HistoryCal;
+            await calendarStateUpdatFunc();
         });
+        // 테스트용
+        // agenda.define('Test', {lockLifetime: 10000}, async job => {
+        //     console.log('5초 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
+        //     const History = axios.post("http://localhost:5000/slackapi/channelHistory");
+        //     const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+        //     await History;
+        //     await HistoryCal;
+        //     await calendarStateUpdatFunc();
+        // });
           
         (async () => { // IIFE to give access to async/await
         await agenda.start();
         await agenda.every('*/10 9-18 * * *', 'First');
+        //await agenda.every('*/05 * 9-18 * * *', 'Test');
         await agenda.every('19-23/2 * * *', 'Second');
         await agenda.every('0-8/2 * * *', 'Third');
         })();
@@ -102,29 +104,10 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                await axios.get("http://localhost:5000/slackapi/teamUsers");
+                // await axios.get("http://localhost:5000/slackapi/teamUsers");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
                 // axios.get("http://localhost:5000/");
-
-                // < ----------- 현재 시간의 date string ----------- >
-                let nowtimeString = moment(new Date()).format('HH:mm')
-                console.log('현재 시간 : ', nowtimeString);
-                
-                // < ----------- 서버 스케줄러 ---------- >
-                // if (nowtimeString > '09:00' && nowtimeString < '19:00') {
-                //     cron.schedule('*/10 * * * *', async() => {
-                //         console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory");
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-                //     });
-                // } else {
-                //     cron.schedule('*/2 * * *', async() => {
-                //         console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-                //         await axios.post("http://localhost:5000/slackapi/channelHistory");
-                //         await axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-                //       });
-                // }
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }
@@ -198,12 +181,6 @@ app.get('/verify', (req,res)=>{
         res.send("err");
     }
 });
-
-// const sleep = (ms) => {
-//     return new Promise(resolve=>{
-//         setTimeout(resolve,ms)
-//     })
-// }
 // -------------------- ********** --------------------
 
 // -------------------- index Api --------------------
@@ -219,3 +196,72 @@ app.get('/updateHistorys', async(req,res) => {
         console.log("index api & history updat err : " + err)
     }
 })
+// 갱신 버튼 누를 시 즉시 상태 업데이트 시도
+app.get('/updatState', async(req,res) => {
+    let text = "";
+    try {
+        await calendarStateUpdatFunc();
+        text = "업데이트 성공"
+    } catch (err) {
+        text = "업데이트 에러"
+    }
+    res.send(text)
+});
+
+// calendar 내용 토대로 오늘 날짜의 일정이 있는 사람의 상태를 체크 및 업뎃 -> 휴가, 병가, 미팅, 회의 등..
+async function calendarStateUpdatFunc() {
+    const todays = moment(new Date()).format('YYYY-MM-')
+    const today = moment(new Date()).format('YYYY-MM-DD')
+    try {
+        const result = await axios.get(`http://localhost:5000/calendar/allTime?textTime=${todays}`);
+        let resultSet = result.data
+        resultSet.forEach((data) => {
+            let getDays = /(\d{4}-\d{2}-)(\d{2}?([,~]?\d{2}?)*)/.exec(data.textTime)
+            let update = false;
+            // 0 : default
+            // 1 : 년-월-
+            // 2 : 일 수 배열 혹은 단일
+            // 3 : 단일 인지 복수 인지 여부를 나타낼 값
+            if(getDays[3]){
+                if(/\,{1,}/.exec(getDays[2])){
+                    getDays[2] = getDays[2].split(/[,~]/)
+                    // , 기준 일 시 배열로 나눠서 각각 오늘 날짜와 검증
+                    for (let index = 0; index < getDays[2].length; index++) {
+                        getDays[2][index] = todays + getDays[2][index]
+                        if(getDays[2][index] === today){
+                            update = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
+                    getDays[2] = getDays[2].split(/[,~]/)
+                    for (let index = 0; index < getDays[2].length; index++) {
+                        getDays[2][index] = todays + getDays[2][index]
+                    }
+                    if(moment(getDays[2][0]).diff(today) <= 0 && moment(getDays[2][getDays[2].length -1]).diff(today) >= 0){
+                        update = true;
+                    }
+                }
+            } else {
+                // 단일 날짜가 오늘 날짜인지 검증
+                if(data.textTime === today){
+                    update = true;
+                }
+            }
+            // 검증에서 true 일 시 업데이트
+            if(update){
+                models.user.update({
+                    id : data.userId,
+                    state : data.cate,
+                }, {
+                    where : {
+                        id : data.userId,
+                    }
+                })
+            }
+        });
+    } catch (err){
+        console.log("scheduler err code calendars selt : " + err);
+    }
+}

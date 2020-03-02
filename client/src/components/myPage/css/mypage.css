@@ -2,15 +2,14 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 720px;
+    height: 100%;
 }
 
 .mypage-upDiv {
-    height: 80%;
+    height: 90%;
 }
 
 .mypage-progDiv {
-    border-bottom: 0.1px solid black;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -18,12 +17,16 @@
 }
 
 .mypage-progressBarDiv {
-    border: 0.1px solid black;
-    justify-self: center;
+    border: 1px solid black;
+    border-radius: 30px;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     align-self: center;
-    border-radius: 30;
-    widows: 70%;
-    height: 70%;
+    width: 70%;
+    height: 60%;
 }
 
 .mypage-DashDiv {
@@ -37,13 +40,19 @@
 }
 
 .mypage-Dash {
-    border: 0.1px solid black;
+    border: 1px solid black;
+    border-radius: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     width: 40%;
-    height: 40%;
+    height: 30%;
 }
 
 .mypage-downDiv {
     border-top: 0.1px solid black;
+    overflow-y: scroll;
     width: 100%;
-    height: 20%;
+    height: 10%;
 }

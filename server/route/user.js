@@ -75,7 +75,8 @@ router.put("/update", async(req, res) => {
             useremail: req.body.useremail, 
             userphone : req.body.userphone,
             p_token : req.body.p_token,
-            state : req.body.state 
+            state : req.body.state,
+            holidaycount : req.body.holidaycount,
             }, {
             where: {
                 id : req.body.userid
