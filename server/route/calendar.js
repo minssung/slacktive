@@ -14,7 +14,7 @@ router.get("/all", async(req, res) => {
         const result = await Calendar.findAll({
             include : [{
                 model : models.user,
-                attributes : ['username']
+                attributes : ['username','usercolor']
             }],
             order : [[
                 'id' , 'ASC'

@@ -34,6 +34,10 @@ app.use("/calendar", calendar_router);
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
+    let text = "[조준명] 3,6,7일 휴가 및 외근"
+    let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
+    let re = text.match(reg)
+    //console.log(re);
     res.send("Hello SlackApi World!");
 });
 
@@ -72,20 +76,10 @@ try {
             await HistoryCal;
             await calendarStateUpdatFunc();
         });
-        // 테스트용
-        // agenda.define('Test', {lockLifetime: 10000}, async job => {
-        //     console.log('5초 마다 실행', moment(new Date()).format('MM-DD HH:mm:ss'));
-        //     const History = axios.post("http://localhost:5000/slackapi/channelHistory");
-        //     const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-        //     await History;
-        //     await HistoryCal;
-        //     await calendarStateUpdatFunc();
-        // });
           
         (async () => { // IIFE to give access to async/await
         await agenda.start();
         await agenda.every('*/10 9-18 * * *', 'First');
-        //await agenda.every('*/05 * 9-18 * * *', 'Test');
         await agenda.every('19-23/2 * * *', 'Second');
         await agenda.every('0-8/2 * * *', 'Third');
         })();
@@ -100,14 +94,14 @@ try {
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:false }).then(()=>{
+    models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
                 // await axios.get("http://localhost:5000/slackapi/teamUsers");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
-                // axios.get("http://localhost:5000/");
+                await axios.get("http://localhost:5000/");
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }

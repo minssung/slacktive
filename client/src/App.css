@@ -1,4 +1,4 @@
-/* ---------- app & web Main Disp  ---------*/
+/* ---------- app & web Main Disp  --------- */
 html, body, #root {
     margin: 0;
     height: 100%;
@@ -38,6 +38,55 @@ html, body, #root {
     height: 100%;
 }
 
+/* ---------- userInfo css ---------- */
+.app-userInfoDiv {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top : 0;
+    left : 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.281);
+    z-index: 1000;
+}
+
+.app-userInfo {
+    border: 1px solid black;
+    width: 300px;
+    height: 170px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+}
+
+.userInfo-colorDiv {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.userInfo-TagDiv {
+    padding-top: 20px;
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.userInfo-button {
+    margin-top: 20px;
+    width: 50%;
+}
+
+/* ---------- main css ---------- */
+
 .tui-div {
     width: 80%;
     height: 100%;
@@ -56,10 +105,37 @@ html, body, #root {
     height: 100%;
 }
 
-/* ---------- token verify disp span ----------*/
+.slack-mainDiv {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: center;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+
+.slack-dash {
+  border: 1px solid black;
+  border-radius: 20px;
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 15px;
+  flex-wrap: wrap;
+}
+
+/* ---------- token verify disp span ---------- */
 .slacklogin-maindiv {
-    align-self: center;
-    justify-items: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
 }
 
 .loadMaskDiv {
@@ -79,27 +155,4 @@ html, body, #root {
     top: 0px;
     left: 0px;
     opacity: 0.1;
-}
-
-.slack-mainDiv {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: center;
-    padding-bottom: 10px;
-    padding-top: 10px;
-}
-
-.slack-dash {
-    border: 1px solid black;
-    border-radius: 20px;
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
-    font-size: 15px;
-    flex-wrap: wrap;
 }
