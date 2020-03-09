@@ -22,6 +22,10 @@ var configs = {
 
     calendarReg : "",
     subCalReg : "",
+
+    Am0 : "",
+    Am1 : "",
+    Pm0 : "",
 }
 
 module.exports = configs;

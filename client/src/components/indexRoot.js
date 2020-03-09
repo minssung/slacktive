@@ -5,26 +5,113 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import SlackLoginBtn from './loginPage/js/SlackLoginBtn';
 import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
-import Mypage from './myPage/js/mypage'
+import Mypage from './myPage/js/mypage';
 
 class IndexRoot extends React.Component {
     constructor(props){
         super(props);
         this.state = {
             usertoken : this.usersTokenChecked(),
+            username : '',
+            onWorkTime : '',
+            vacationUser : [],
+            bgcolor: 'bg_1'
         }
     }
+
     async componentDidMount(){
         if(localStorage.getItem("usertoken")){
             try {
                 await this.setState({
                     usertoken : await this.usersTokenChecked()
+                });
+
+                // API 동시 호출을 위한 Promiss.all 패턴
+                const promiseArray = [this.usernameCheck(), this.onWorkTimeCheck(), this.tardyUser(), this.vacationUser()];
+                Promise.all(promiseArray).then((values) => {
+                    this.setState({
+                        username: values[0],
+                        onWorkTime: values[1],
+                        tardyUser: values[2],
+                        vacationUser: values[3]
+                    })
+                }, (err) => {
+                    console.log(err);
                 })
             } catch (err){
                 console.log("usertoken create err : " + err)
             }
         }
     }
+
+    // 지각자 체크
+    async tardyUser() {
+        const result = await axios.get('http://localhost:5000/user/tardyall');
+        const userCheck = result.data;
+        const tardyArray = userCheck.map((data) => {
+            return data.username
+        })
+        const newArray = tardyArray.join(', ');
+        return newArray
+    }
+
+    // 휴가자 체크
+    async vacationUser() {
+        const result = await axios.get('http://localhost:5000/user/vacationall');
+        const userCheck = result.data;
+        const vacationArray = userCheck.map((data) => {
+            return data.username
+        })
+        const newArray = vacationArray.join(', ');
+        return newArray
+    }
+
+    // 유저 이름 확인
+    async usernameCheck() {
+        const usertoken = this.state.usertoken;
+        const userCheck = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
+        return userCheck.data.username
+    }
+
+    // 유저 마지막 출근 시간 확인
+    async onWorkTimeCheck() {
+        const usertoken = this.state.usertoken;
+        const TimeCheck = await axios.get(`http://localhost:5000/slack/onworktime?userid=${usertoken}`);
+        const time = (TimeCheck.data.time).substring(11, 16);
+        const timeArray = time.split(':');
+        const editTime = timeArray[0]+'시 '+timeArray[1]+'분';
+        
+        // 마지막 출근 기록에 지각이 아닌 출근으로 저장되어 있을 경우
+        // 슬랙에 출근을 늦게 입력했을 때를 위해
+        // 문제점 : 아래 정규식 처리과정에서 시, 분 모두 처리할 경우 시 만 처리하는 부분에서 에러가 발생. ( 예외처리하여 실질적 문제는 없음 )
+        // 의문점 : Promise.all 패턴으로 하면 조건에 안맞더라도 무조건 순서대로 처리하는가?
+        if (TimeCheck.data.state === '출근') {
+            // 시 만 입력 되었을 때
+            try {
+                if (TimeCheck.data.text === (/(\d*시)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.exec(TimeCheck.data.text))[0]) {
+                    const time = (TimeCheck.data.text)
+                    const timeArray = time.split(' ');
+                    const editTime = timeArray[0];
+                    return editTime
+                }
+            } catch (err) {
+                console.log(err);
+            }
+            // 시, 분 모두 입력되었을 때
+            try {
+                if (TimeCheck.data.text === (/(\d*시)\s*(\d*분)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.exec(TimeCheck.data.text))[0]) {
+                    const time = (TimeCheck.data.text)
+                    const timeArray = time.split(' ');
+                    const editTime = timeArray[0] + ' ' + timeArray[1];
+                    return editTime
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        return editTime
+    }
+
     // 유저 토큰 확인
     async usersTokenChecked(){
         if(localStorage.getItem("usertoken")){
@@ -42,15 +129,33 @@ class IndexRoot extends React.Component {
                     window.location.href = "/"
                     return null;
                 }
-                return result.data.userid;
+                return result.data.userid; 
+                
             } catch(err){
                 console.log("client jwt token verify err : " + err);
             }
         }
         return null;
     }
+
+    bgBtn_1() {
+        this.setState({ bgcolor : 'bg_1' })
+    };
+
+    bgBtn_2() {
+        this.setState({ bgcolor : 'bg_2' })
+    };
+
+    bgBtn_3() {
+        this.setState({ bgcolor : 'bg_3' })
+    };
+
+    bgBtn_4() {
+        this.setState({ bgcolor : 'bg_4' })
+    };
+
     render() {
-        const { usertoken } = this.state;
+        const { usertoken, username, onWorkTime, tardyUser, vacationUser, bgcolor } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -59,23 +164,49 @@ class IndexRoot extends React.Component {
                             !localStorage.getItem("usertoken") ? 
                             <Route exact path="/"><SlackLoginBtn /></Route> 
                             :
-                            <div className="app-contentDiv">
-                                <div className="app-leftDiv">
-                                    <Link to="/">Calendar</Link>
-                                    <Link to="/my">my</Link>
-                                    <Link to="/cedar">Cedar</Link>
-                                    <Link to="/etc">...</Link>
-                                </div>
-                                <div className="app-rightDiv">
-                                    <Route exact path="/">
-                                        <TuiCalendar Token={usertoken}/>
-                                        <div className="app-dash">
-                                            <SlackDash Token={usertoken}></SlackDash>
-                                        </div>
-                                    </Route>
-                                    <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
-                                    <Route path="/cedar"></Route>
-                                    <Route path="/etc"></Route>
+                            <div className={bgcolor}>
+                                <div className="app-contentDiv">
+                                    <div className="app-leftDiv">
+                                        <Link to="/" onClick={this.bgBtn_1.bind(this)}>
+                                            <img src="img/Menu1.png" className="main-menu-1" alt="Calendar"/>
+                                        </Link>
+                                        <Link to="/my" onClick={this.bgBtn_2.bind(this)} activeClassName="selected">
+                                            <img src="img/Menu2.png" className="main-menu-2" alt="My"/>
+                                        </Link>
+                                        <Link to="/cedar" onClick={this.bgBtn_3.bind(this)}>
+                                            <img src="img/Menu3.png" className="main-menu-3" alt="Cedar"/>
+                                        </Link>
+                                        <Link to="/etc" onClick={this.bgBtn_4.bind(this)}>
+                                            <img src="img/Menu4.png" className="main-menu-4" alt="Etc"/>
+                                        </Link>
+                                    </div>
+                                    <div className="vertical"></div>
+                                    <div className="app-rightDiv">
+                                        <Route exact path="/">
+                                            <div className="intro">
+                                                {username}님, &nbsp;좋은아침!{<br></br>}
+                                                {onWorkTime}에 출근하셨네요
+                                            </div>
+                                            <div className="design">
+                                                <img className="cloud_1" src="img/cloud.png" alt="cloud_1"/>
+                                                <img className="cloud_2" src="img/cloud2.png" alt="cloud_2"/>
+                                                <img className="cloud_3" src="img/cloud3.png" alt="cloud_3"/>
+                                                <img className="task" src="img/developer.png" alt="task"></img>
+                                            </div>
+                                            <div className="people">
+                                                <span className="tardy">지각자&nbsp;&nbsp;&nbsp;{tardyUser}</span>
+                                                <span className="vacation">휴가자&nbsp;&nbsp;&nbsp;{vacationUser}</span>
+                                            </div>
+                                            <TuiCalendar Token={usertoken}/>
+                                            <div className="app-dash">
+                                                <SlackDash Token={usertoken}></SlackDash>
+                                            </div>
+                                        </Route>
+                                        <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
+                                        <Route path="/cedar"></Route>
+                                        <Route path="/etc"></Route>
+                                    </div>
+                                    
                                 </div>
                             </div>
                             }

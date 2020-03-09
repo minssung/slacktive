@@ -310,7 +310,7 @@ class TestCal extends React.Component {
                     <span>{calendarDate}</span> {/** 달력 현재 월 표시 */}
                 </div>
                 <Calendar
-                    height="100%"
+                    height="610px"
                     ref={this.calendarRef}
                     onBeforeCreateSchedule={this.beforeCreateSchedule}
                     onBeforeUpdateSchedule={this.beforeUpdateSchedule}

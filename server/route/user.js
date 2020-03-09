@@ -18,6 +18,34 @@ router.get("/all", async(req, res) => {
     }
 });
 
+// DB SelectAll 지각자 체크 --------------------
+router.get("/tardyall", async(req, res) => {
+    try {
+        const result = await User.findAll({
+            where : {
+                state : '지각'
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("select users all err : " + err)
+    }
+});
+
+// DB SelectAll 휴가자 체크 --------------------
+router.get("/vacationall", async(req, res) => {
+    try {
+        const result = await User.findAll({
+            where : {
+                state : '휴가'
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("select users all err : " + err)
+    }
+});
+
 // DB SelectOne --------------------
 router.get("/one", async(req, res) => {
     try {
@@ -75,7 +103,8 @@ router.put("/update", async(req, res) => {
             useremail: req.body.useremail, 
             userphone : req.body.userphone,
             p_token : req.body.p_token,
-            state : req.body.state 
+            state : req.body.state,
+            holidaycount : req.body.holidaycount,
             }, {
             where: {
                 id : req.body.userid

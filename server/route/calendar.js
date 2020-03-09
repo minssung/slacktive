@@ -5,6 +5,7 @@ const models = require("../models");
 
 // DB Setting --------------------
 const Calendar = models.calendar;
+const Op = models.Sequelize.Op;
  
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
@@ -25,6 +26,7 @@ router.get("/all", async(req, res) => {
     }
 });
 
+// DB SelectAll Users Calendar --------------------
 router.get("/allTime", async(req, res) => {
     try {
         const result = await Calendar.findAll({
@@ -36,7 +38,36 @@ router.get("/allTime", async(req, res) => {
                 'id' , 'ASC'
             ]],
             where : {
-                textTime : req.query.textTime
+                textTime : {
+                    [Op.like] : "%" + req.query.textTime + "%"
+                }
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("select Calendar all err : " + err)
+    }
+});
+
+// DB SelectAll One User Calendar --------------------
+router.get("/getTime", async(req, res) => {
+    try {
+        const result = await Calendar.findAll({
+            include : [{
+                model : models.user,
+                attributes : ['username']
+            }],
+            attributes : ['cate','textTime'],
+            order : [[
+                'id' , 'ASC'
+            ]],
+            where : {
+                textTime : {
+                    [Op.like] : "%" + req.query.textTime + "%",
+                },
+                userId : {
+                    [Op.like] : "%" + req.query.userId + "%",
+                },
             }
         });
         res.send(result);
