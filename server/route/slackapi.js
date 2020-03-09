@@ -105,11 +105,10 @@ router.post("/channelHistory", async(req,res) =>{
         const resultSet = (result.data.messages).reverse();
         let Changetime = "";    // 디비에 들어갈 리얼 타임
         let timeCheck = "";     // 시간 비교 용도
-        let timeArray = [];     // 정규식 처리된 시간을 담을 배열
         let timeReg = [];       // 시간을 정규식으로 처리
         let stateSet = "";      // 상태 디비 입력 용도
         let resultArray = [];
-        resultArray = regFunc("times",resultSet,Changetime,timeCheck,timeReg,timeArray,stateSet);
+        resultArray = regFunc("times",resultSet,Changetime,timeCheck,timeReg,stateSet);
         try {
             await Slackchat.bulkCreate(resultArray,{
                 individualHooks : true,
@@ -146,8 +145,7 @@ router.post("/channelHistoryCal", async(req,res) =>{
         let calReg = [];
         let textTimes = "";
         let search = "";
-        let toDayDate = new Date();
-        let resultArray = regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,toDayDate,search)
+        let resultArray = regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,search)
         try {
             await Calendar.bulkCreate(resultArray,{
                 individualHooks : true,
@@ -177,13 +175,12 @@ router.post("/channelHistoryInit", async(req,res) =>{
             }
         });
         const resultSet = (result.data.messages).reverse();
-        let Changetime = "";
-        let timeCheck = "";
-        let timeArray = [];
-        let timeReg = [];
-        let stateSet = "";
+        let Changetime = "";    // 디비에 들어갈 리얼 타임
+        let timeCheck = "";     // 시간 비교 용도
+        let timeReg = [];       // 시간을 정규식으로 처리
+        let stateSet = "";      // 상태 디비 입력 용도
         let resultArray = [];
-        resultArray = regFunc("times",resultSet,Changetime,timeCheck,timeReg,timeArray,stateSet);
+        resultArray = regFunc("times",resultSet,Changetime,timeCheck,timeReg,stateSet);
         try {
             await Slackchat.bulkCreate(resultArray,{
                 individualHooks : true,
@@ -217,8 +214,7 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
         let calReg = [];
         let textTimes = "";
         let search = "";
-        let toDayDate = new Date();
-        let resultArray = regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,toDayDate,search)
+        let resultArray = regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,search)
         try {
             await Calendar.bulkCreate(resultArray,{
                 individualHooks : true,
@@ -409,66 +405,53 @@ router.post("/authInfo", async(req,res)=>{
 
 // 정규식을 거쳐 처리하는 함수 --------------------------------------------------
 function regFunc(channel ,resultSet, ...args){
-    // 출퇴근의 처리
-    // args : 0 => real time
-    // args : 1 => check time
-    // args : 2 => time Reg
-    // args : 3 => times array
-    // args : 4 => state var
     if(channel === "times"){
+        // 출퇴근의 처리
+        // args : 0 => real time
+        // args : 1 => check time
+        // args : 2 => time Reg result
+        // args : 3 => state var
         let resultArray = resultSet.map(data=> {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
-            // 출퇴근에 대한 정규식 처리
-            args[2] = configs.timeAttenden.exec(data.text);
-            // 처리된 값 조건문 처리
-            if(args[2] && args[2][4]) {
-                // 처리된 값 배열에 새로 담기
-                for (let index = 0; index < args[2].length; index++) {
-                    // 필요없는 내용
-                    if(index === 0)
-                        continue;
-                    // 새로운 배열에 담기
-                    // 시 와 분 제거
-                    if(configs.subTime.exec(args[2][index])){
-                        args[2][index] = args[2][index].replace(configs.subTime, "");
-                    }
-                    args[3][index-1] = args[2][index];
-                }
-                // 단답 텍스트 변환
-                switch(args[3][3]){
-                    case "ㅊㄱ" :
-                        args[3][3] = "출근"
-                        break;
-                    case "ㅌㄱ" :
-                        args[3][3] = "퇴근"
-                        break;
-                    case "ㅇㄱ" : 
-                    args[3][3] = "외근"
-                        break;
-                    default : 
-                        break
+            // data.text 조건문 처리
+            if(configs.timeAttenden.test(data.text)) {
+                // 출퇴근에 대한 정규식 처리
+                args[2] = configs.timeAttenden.exec(data.text);
+                // 0번째 요소 제거
+                args[2].shift();
+                switch(args[2][2]){
+                    case "ㅊㄱ" : args[2][2] = "출근"; break;
+                    case "ㅌㄱ" : args[2][2] = "퇴근"; break;
+                    case "ㅇㄱ" : args[2][2] = "외근"; break;
                 }
                 try {
                     // 본인 지정 시간대가 있을 경우
-                    if(args[3][0] && parseInt(args[3][0]) < 11){
-                        args[4] = args[3][3]
+                    if(args[2][0] && parseInt(args[2][0]) <= 11) {
+                        args[3] = (/출근/.test(args[2][2])) ? "출근" : args[2][2]
+                        // 만약 분까지 입력 시에
+                        if(args[2][1]) {
+                            // 11시이상이며 0분을 넘었다면
+                            if(parseInt(args[2][0]) >= 11 && parseInt(args[2][1]) > 0) {
+                                args[3] = "지각"
+                            }
+                        }
                         // 지정 시간 없이 텍스트만 입력 시
                     } else {
                         // 11시 이전 8시 반 이후 지정 텍스트 같이 입력 시
-                        if (args[1] < configs.Am1 && args[1] > configs.Am0) {
-                            args[4] = args[3][3]
+                        if (args[1] <= configs.Am1 && args[1] >= configs.Am0) {
+                            args[3] = args[2][2]
                             // 11시 이후 입력 텍스트 경우
-                        } else if(args[1] > configs.Am1) {
-                            args[4] = (args[3][3] === "출근") ? "지각" : args[3][3]
+                        } else if(args[1] > configs.Am1 && args[1] <= configs.Pm0) {
+                            args[3] = (/출근/.test(args[2][2])) ? "지각" : args[2][2]
                             // 4시 50분 이후 입력 텍스트 경우
                         } else if(args[1] > configs.Pm0) {
-                            args[4] = (args[3][3] === "퇴근") ? "퇴근" : args[3][3]
+                            args[3] = (/퇴근/.test(args[2][2])) ? "퇴근" : args[2][2]
                         }
                     }
                     // 유저 상태 업데이트
                     User.update({
-                        state : args[4]
+                        state : args[3]
                     },{
                         where : { id : data.user }
                     })
@@ -482,7 +465,7 @@ function regFunc(channel ,resultSet, ...args){
                     time : args[0],
                     ts : data.ts,
                     text : data.text,
-                    state : args[4]
+                    state : args[3]
                 }
             } else {
                 console.log("Reg Times Input Err : retry input : " + 
@@ -490,57 +473,63 @@ function regFunc(channel ,resultSet, ...args){
             }
         });
         return resultArray;
-    // 일정용 처리
-    // args : 0 => real time
-    // args : 1 => cal Reg
-    // args : 2 => cal array
-    // args : 3 => text time
-    // args : 4 => today Date
-    // args : 5 => search
     } else if(channel === "calendar") {
+        // 일정용 처리
+        // args : 0 => real time
+        // args : 1 => cal Reg
+        // args : 2 => cal array
+        // args : 3 => text time
+        // args : 4 => search
         let index = 0;
         let resultArray = resultSet.map(data => {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = configs.calendarReg.exec(data.text);
             args[2] = [];
             args[3] = "";
-            if(args[1] && args[1][5]) {
+            if(configs.calendarReg.test(data.text)) {
                 try {
                     // 배열에다가 정규표현식으로 담기
                     for (index = 0; index < args[1].length; index++) {
+                        // 불필요한 요소 제거
                         if(index === 0 || index === 5)
                             continue;
+                            // args[2][0] : 이름
+                            // 1 : 년
+                            // 2 : 월
+                            // 3 : 일 수에 대한 다차원 배열
+                            // 4 : 내용
                             args[2].push(args[1][index]);
                     }
                     // 일 수를 배열로 받아서 변환
+                    // 일, 공백 한칸, ,기준으로 스플릿
                     args[2][3] = args[1][4].split(/\s{1,}|\,|일/)
                     for (index = 0; index < args[2][3].length; index++) {
-                        args[5] = args[2][3].indexOf("")
-                        if(args[5]!= -1)
-                        args[2][3].splice(args[5],1)
+                        args[4] = args[2][3].indexOf("")
+                        if(args[4]!= -1)
+                        args[2][3].splice(args[4],1)
                     }
-                    // 예 : 20년 입력시 2020으로 바꿈 & 입력 없을 시 현재 년도
+                    // 예 : 20년 입력시 2020으로 바꿈 & 입력 없을 시 작성한 년도
                     if(args[2][1]){
-                        if(!/\d{4}?/.exec(args[2][1])){
+                        if(!/\d{4}?/.test(args[2][1])){
                             args[2][1] = "20" + args[2][1]
                         }
                         args[2][1] = args[2][1].replace(/\년$/, "-");
                         args[3] = args[2][1]
                     } else {
-                        args[3] = (args[4].getFullYear()) + "-";
+                        args[3] = /^(\d{4}-)/.exec(args[0])[1]
                     }
                     // 예 : 1월 입력시 01로 바꿈 & 입력 없을 시 현재 월
                     if(args[2][2]){
-                        if(!/\d{2}?/.exec(args[2][2])){
+                        if(!/\d{2}?/.test(args[2][2])) {
                             args[2][2] = "0" + args[2][2]
                         }
                         args[2][2] = args[2][2].replace(/\월$/, "-");
                         args[3] = args[3] + args[2][2];
                     } else {
-                        if((args[4].getMonth() + 1) < 10){
-                            args[3] = args[3] + "0" + (args[4].getMonth() + 1) + "-"; 
+                        if(/^\d{4}-(\d{2})/.exec(args[0])[1] < 10) {
+                            args[3] = args[3] + /^\d{4}-(\d{2}-)/.exec(args[0])[1]
                         } else {
-                            args[3] = args[3] + (args[4].getMonth() + 1) + "-"; 
+                            args[3] = args[3] + /^\d{4}-(\d{2}-)/.exec(args[0])[1]
                         }
                     }
                     // 뒤에 남은 일 수들 입력 및 중간에 , 넣기
@@ -558,7 +547,6 @@ function regFunc(channel ,resultSet, ...args){
                         text : data.text,
                         cate : args[2][4],
                         textTime : args[3],
-                        textTitle : args[2][0] + " " + args[2][4]
                     }
                 } catch(err){
                     console.log("Calendar init Reg err : " + err)
@@ -569,6 +557,8 @@ function regFunc(channel ,resultSet, ...args){
             }
         });
         return resultArray;
+    } else if(channel === "general") {
+        
     }
 }
 

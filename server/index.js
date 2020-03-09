@@ -31,6 +31,10 @@ app.use("/calendar", calendar_router);
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
+    let text = "[조준명] 3,6,7일 휴가 및 외근"
+    let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
+    let re = text.match(reg)
+    //console.log(re);
     res.send("Hello SlackApi World!");
 });
 

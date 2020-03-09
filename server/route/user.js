@@ -102,8 +102,10 @@ router.put("/update", async(req, res) => {
             username: req.body.username,
             useremail: req.body.useremail, 
             userphone : req.body.userphone,
+            usertag : req.body.usertag,
             p_token : req.body.p_token,
             state : req.body.state,
+            usercolor : req.body.usercolor,
             holidaycount : req.body.holidaycount,
             }, {
             where: {

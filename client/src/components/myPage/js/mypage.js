@@ -144,7 +144,6 @@ class mypage extends Component {
             await this.setState({
                 holidayHistorys : result.data,
             });
-            console.log(result.data)
         } catch(err) {
             console.log("Holiday Usage History err : " + err);
         }
@@ -180,8 +179,8 @@ class mypage extends Component {
                         setTimes = /(\d{4}-\d{2}-\d{2})/.exec(data.textTime);
                         return <div key={i}>
                             <span>{data.cate}</span>
-                            <span>{moment(today).diff(setTimes[1], 'days') < 0 && <span>[예정]</span>}</span>
-                            <span>{data.textTime}</span>
+                            <span>{moment(today).diff(setTimes[1], 'days') < 0 && <span> [예정]</span>}</span>
+                            <span> {data.textTime}</span>
                         </div>
                     })
                     }
