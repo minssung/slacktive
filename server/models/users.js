@@ -27,6 +27,9 @@ module.exports = (sequelize, DataTypes) => {
         usercolor : {
             type: DataTypes.STRING,
         },
+        userchannel : {
+            type: DataTypes.STRING,
+        },
         p_token : {
             type: DataTypes.STRING,
         },

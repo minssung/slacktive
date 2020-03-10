@@ -15,15 +15,17 @@ class IndexRoot extends React.Component {
             onWorkTime : '',
             vacationUser : [],
             bgcolor: 'bg_1',
-            userinfoSet : true,
+            userinfoSet : true, // 사용자 추가 설정 여부
             userinfo : {
-                color : "",
-                tag : "",
+                color : "", // 사용자 컬러
+                tag : "",   // 사용자 부서
+                prvCh : "", // 사용자 채널
             },
             preColor : "#ff0000",
         }
         this.tag = React.createRef();
         this.color = React.createRef();
+        this.prvCh = React.createRef();
     }
 
     async componentDidMount(){
@@ -173,13 +175,26 @@ class IndexRoot extends React.Component {
 
     // 유저 정보 등록
     async clickUserInfoSave() {
+        if(!this.tag.current.value) {
+            alert("부서를 선택하세요.")
+            return;
+        }
+        if(!this.color.current.value) {
+            alert("색상을 선택하세요.")
+            return;
+        }
+        if(!this.prvCh.current.value) {
+            alert("개인 슬랙 채널 ID를 입력하세요.")
+            return;
+        }
         try {
             await axios.put("http://localhost:5000/user/update",{
                 userid : this.state.usertoken,
                 usertag : this.tag.current.value,
                 usercolor : this.color.current.value,
+                userchannel : this.prvCh.current.value,
             });
-            console.log("user info set success : " + this.color.current.value, this.tag.current.value, this.state.usertoken)
+            console.log("user info set success : " + this.color.current.value, this.tag.current.value, this.state.usertoken, this.prvCh.current.value)
             await this.setState({
                 userinfoSet : true,
             })
@@ -188,14 +203,20 @@ class IndexRoot extends React.Component {
             console.log("user Info set err : " + err);
         }
     }
-    // 컬러 변경 여부 체크용    
-    async colorChange(e) {
-        this.setState({
-            preColor : e.target.value,
-        })
+    // 컬러 및 채널 아이디 입력 인풋 변경 감지용  
+    async inputChange(e) {
+        if(e.target.name === "color"){
+            this.setState({
+                preColor : e.target.value,
+            })
+        } else {
+            this.setState({
+                prvCh : e.target.value,
+            })
+        }
     }
     render() {
-        const { usertoken,userinfoSet,preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor } = this.state;
+        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -210,7 +231,7 @@ class IndexRoot extends React.Component {
                                         <Link to="/" onClick={this.bgBtn_1.bind(this)}>
                                             <img src="img/Menu1.png" className="main-menu-1" alt="Calendar"/>
                                         </Link>
-                                        <Link to="/my" onClick={this.bgBtn_2.bind(this)} activeClassName="selected">
+                                        <Link to="/my" onClick={this.bgBtn_2.bind(this)}>
                                             <img src="img/Menu2.png" className="main-menu-2" alt="My"/>
                                         </Link>
                                         <Link to="/cedar" onClick={this.bgBtn_3.bind(this)}>
@@ -229,7 +250,11 @@ class IndexRoot extends React.Component {
                                                 <div className="app-userInfo">
                                                     <div className="userInfo-colorDiv">
                                                         <span className="userInfo-colorText">당신의 일정에 표시할 색을 선택하세요.</span>
-                                                        <input type="color" ref={this.color} onChange={this.colorChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
+                                                        <input type="color" name="color" ref={this.color} onChange={this.inputChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
+                                                    </div>
+                                                    <div className="userInfo-colorDiv">
+                                                        <span className="userInfo-colorText">당신만의 메시지를 받을 슬랙 본인 채널ID를 입력하세요.</span>
+                                                        <input type="text" name="prvCh" ref={this.prvCh} onChange={this.inputChange.bind(this)} value={prvCh} className="userInfo-colorInput"></input>
                                                     </div>
                                                     <div className="userInfo-TagDiv">
                                                         <span className="userInfo-TagText">당신의 부서를 선택하세요.</span>

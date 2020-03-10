@@ -21,7 +21,6 @@ class Slack_Dashboard extends React.Component {
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- user Token verify & Mount & axios ---------- 
     async componentDidMount(){
-        await this.clockBtnApi();
         await this.setState({
             usertoken : await this.props.Token
         })
@@ -54,7 +53,7 @@ class Slack_Dashboard extends React.Component {
                 usersalldb.map((data,i)=>{
                     return <span key={i}>
                         {
-                            data.state === spanText && data.username
+                            data.state === spanText ? <span>{data.username},</span> : <div></div>
                         }
                     </span>
                 })

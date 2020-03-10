@@ -18,9 +18,11 @@ class TestCal extends React.Component {
         this.radioBtn = React.createRef();
         this.time = React.createRef();
         this.selectRadio = React.createRef();
+        this.etcText = React.createRef();
         //  userinfo popup refs
         this.state = {
             scheduleArray : [], // 캘린터 아이템에 넣기 전 푸시용
+            generalsArray : [], // 일정 아이템에 넣기 전 푸시용
             scheduleItem : null,    // 캘린더에 표시되는 아이템들
             usertoken : "", // 유저 토큰 값
             user : [],  // 유저 데이터 정보 디비
@@ -36,7 +38,7 @@ class TestCal extends React.Component {
             end_date : "",
             in_data : {},
             popupInvSchedule : "none",
-            userGet : false,
+            userGet : true,
             // popup update state
             updateData : [],
             updateTF : false,
@@ -55,9 +57,9 @@ class TestCal extends React.Component {
         })
         // calendar init moubt
         await this.scheduleInitMount()
-        const { scheduleArray } = this.state;
+        const { scheduleArray,generalsArray } = this.state;
         // calendar create mount
-        await this.scheduleCreateMount(scheduleArray);
+        await this.scheduleCreateMount(scheduleArray,generalsArray);
         // 현재 달력 월
         await this.nowDate();
     }
@@ -106,8 +108,8 @@ class TestCal extends React.Component {
     // 캘린더 상에서 일정 등록 시 필요 양식 => 예) oo 휴가/반차
     createScheduleItems = async(data) => {
         const calendar = this.calendarRef.current.getInstance();
-        const { user } = this.state;
-        if(this.state.selectCal){
+        const { user,selectCal } = this.state;
+        if(selectCal){
             let timeText = "";
             if(moment(data.endDate).diff(data.startDate, "days") >= 1){
                 timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD") + "~" + moment(data.endDate).format("DD") + " " + data.radio
@@ -120,7 +122,7 @@ class TestCal extends React.Component {
                     p_token : user.data.p_token,
                     text : timeText
                 })
-                let result = await axios.post("http://localhost:5000/slackapi/channelHistoryCal")
+                const result = await axios.post("http://localhost:5000/slackapi/channelHistoryCal")
                 calendar.createSchedules([{
                     id: result.data[0].id,
                     calendarId: '0',
@@ -129,17 +131,46 @@ class TestCal extends React.Component {
                     isAllDay: configs.dataCateReg.test(data.radio) ? true : false,
                     start : data.startDate,
                     end : data.endDate,
+                    bgColor : "#ffffff",
+                    color : "#ffffff",
                 }])
-            // calendar init mount
-            await this.scheduleInitMount()
-            // calendar create mount
-            await this.scheduleCreateMount(this.state.scheduleArray);
             } catch(err) {
                 console.log("before create scd err : " + err);
             }
         } else {
-
+            try {
+                await axios.post("http://localhost:5000/slackapi/messagePost",{
+                    channel : user.data.userchannel,
+                    p_token : user.data.p_token,
+                    text : `[${data.title}] ${data.content} / ${data.startDate}~${data.endDate} / 참여자 : ${data.partner}`
+                })
+                const result = await axios.post("http://localhost:5000/generals/create",{
+                    title : data.title,
+                    content : data.content,
+                    partner : data.partner,
+                    textTime : data.startDate + "~" + data.endDate,
+                    userId : user.data.id,
+                    location : data.location,
+                });
+                calendar.createSchedules([{
+                    id : result.data.id,
+                    calendarId: '99',
+                    title: data.title,
+                    category: "general",
+                    start : data.startDate,
+                    end : data.endDate,
+                    bgColor : "#ffffff",
+                    color : "#ffffff",
+                }]);
+                console.log("create generals success");
+            } catch(err) {
+                console.log("before create gnr err : " + err);
+            }
         }
+        // calendar init mount
+        await this.scheduleInitMount()
+        // calendar create mount
+        await this.scheduleCreateMount(this.state.scheduleArray,this.state.generalsArray);
     }
     // 일정 수정 시
     // 수정 시 슬랙의 메시지도 수정
@@ -200,13 +231,18 @@ class TestCal extends React.Component {
     beforeDeleteSchedule = async(id, c_id) => {
         const calendar = this.calendarRef.current.getInstance();
         try {
-            let result = await axios.get(`http://localhost:5000/calendar/one?id=${id}`);
-            await axios.delete(`http://localhost:5000/calendar/delete?id=${id}`);
+            let scheduleResult = [];
+            if(c_id !== "99") {
+                scheduleResult = await axios.get(`http://localhost:5000/calendar/one?id=${id}`);
+                await axios.delete(`http://localhost:5000/calendar/delete?id=${id}`);
+            } else {
+                await axios.delete(`http://localhost:5000/generals/delete?id=${id}`);
+            }
             const { user } = this.state;
             await axios.post("http://localhost:5000/slackapi/messageDelete",{
                 p_token : user.data.p_token,
                 channel : configs.channel_calendar,
-                time : result.data.ts,
+                time : scheduleResult.data.ts,
             })
             calendar.deleteSchedule(id, c_id);
             this.setState({
@@ -220,20 +256,21 @@ class TestCal extends React.Component {
     async scheduleInitMount() {
         // calendar db select all -> init
         let schedulesDB = await axios.get("http://localhost:5000/calendar/all");
+        let generalsDB = await axios.get("http://localhost:5000/generals/all");
         await this.setState({
-            scheduleArray : schedulesDB.data
+            scheduleArray : schedulesDB.data,
+            generalsArray : generalsDB.data,
         })
     }
     // 캘린더 스케줄 마운트 및 정규식 표현 처리
-    async scheduleCreateMount(scheduleArray) {
-        const { user } = this.state;
+    async scheduleCreateMount(datasS,datasG) {
         let scheduleItem = [];
         let startDate = "";
         let endDate = "";
         let regDays = [];
         let color = "";
         try {
-            scheduleArray.forEach(data => {
+            datasS.forEach(data => {
                 color = data.user.usercolor ? data.user.usercolor : "#ffffff";
                 regDays = configs.dataTimeReg.exec(data.textTime)
                 let days = [];
@@ -322,12 +359,28 @@ class TestCal extends React.Component {
                     scheduleItem.push(scheduleObj)
                 }
             })
-            await this.setState({
-                scheduleItem
+            datasG.forEach(data=>{
+                color = data.user.usercolor ? data.user.usercolor : "#ffffff";
+                let textTimes = data.textTime.split("~");
+                let scheduleObj = {};
+                scheduleObj = {
+                    id: data.id,
+                    calendarId: '99',
+                    title: data.title,
+                    category: "time",
+                    isAllDay: false,
+                    start : textTimes[0]+"",
+                    end : textTimes[1]+"",
+                    bgColor : color,
+                };
+                scheduleItem.push(scheduleObj)
             })
         } catch(err) {
-            console.log("TUI Mount init Schedule err : " + err)
+            console.log("TUI Mount init err : " + err)
         }
+        await this.setState({
+            scheduleItem
+        })
     }
     selectCalendars(e) {
         this.setState({
@@ -340,7 +393,7 @@ class TestCal extends React.Component {
         return <div className="popup-border" style={{
             display : popupInv
         }}>
-            <div>
+            <div className="popup-selectBox">
                 <div>
                     휴가관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="holiday" checked={selectCal ? true : false}></input>
                     일정관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="calendar" checked={!selectCal ? true : false}></input>
@@ -353,7 +406,8 @@ class TestCal extends React.Component {
                         오후반차<input type="radio" name="cal" value="오후 반차" className="popup-radioBtn"></input>
                         병가<input type="radio" name="cal" value="병가" className="popup-radioBtn"></input>
                         대휴<input type="radio" name="cal" value="대휴" className="popup-radioBtn"></input>
-                        기타 시 입력<input type="text" name="cal" className="popup-radioETC"></input>
+                        기타<input type="radio" name="cal" value="기타" className="popup-radioETC"></input>
+                        <input type="text" name="cal" ref={this.etcText} className="popup-radioETC"></input>
                     </form> 
                     :
                     <div>
@@ -398,12 +452,17 @@ class TestCal extends React.Component {
             saveData : {},
         })
         if(selectCal){
-            let radioNode = this.radioBtn
-            for (let index = 0; index < radioNode.current.elements.length; index++) {
-                if(radioNode.current.elements[index].checked){
+            let radioValue = "";
+            for (let index = 0; index < this.radioBtn.current.elements.length; index++) {
+                if(this.radioBtn.current.elements[index].checked){
+                    if(index === 5) {
+                        radioValue = this.etcText.current.value;
+                    } else {
+                        radioValue = this.radioBtn.current.elements[index].value;
+                    }
                     await this.setState({
                         saveData : {
-                            radio : this.radioBtn.current.elements[index].value,
+                            radio : radioValue,
                             startDate : moment(times[0]).format("YYYY-MM-DD"),
                             endDate : moment(times[1]).format("YYYY-MM-DD"),
                         }
@@ -418,8 +477,8 @@ class TestCal extends React.Component {
                     location : this.location.current.value,
                     content : this.content.current.value,
                     partner : this.partner.current.value,
-                    startDate : moment(times[0]).format("YYYY-MM-DD"),
-                    endDate : moment(times[1]).format("YYYY-MM-DD"),
+                    startDate : times[0],
+                    endDate : times[1],
                 }
             })
         }
@@ -444,16 +503,39 @@ class TestCal extends React.Component {
     // 스케줄 클릭 시
     clickSchedule = async(e) =>{ 
         await this.setState({
-            in_data : {
-                id : e.schedule.id,
-                c_id : e.schedule.calendarId,
-                title : e.schedule.title,
-                start : moment(e.schedule.start._date).format("YYYY-MM-DD HH:mm"),
-                end : moment(e.schedule.end._date).format("YYYY-MM-DD HH:mm"),
-            }
+            in_data : {},
         })
+        if(e.schedule.calendarId !== "99") {
+            await this.setState({
+                in_data : {
+                    id : e.schedule.id,
+                    c_id : e.schedule.calendarId,
+                    title : e.schedule.title,
+                    start : moment(e.schedule.start._date).format("YYYY-MM-DD HH:mm"),
+                    end : moment(e.schedule.end._date).format("YYYY-MM-DD HH:mm"),
+                }
+            })
+        } else {
+            try {
+                const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${e.schedule.id}`);
+                await this.setState({
+                    in_data : {
+                        id : generalResult.data.id,
+                        c_id : e.schedule.calendarId,
+                        title : generalResult.data.title,
+                        location : generalResult.data.location,
+                        content : generalResult.data.content,
+                        partner : generalResult.data.partner,
+                        start : moment(e.schedule.start._date).format("YYYY-MM-DD HH:mm"),
+                        end : moment(e.schedule.end._date).format("YYYY-MM-DD HH:mm"),
+                    }
+                })
+            } catch (err) {
+                console.log("click schedule info err : " + err)
+            }
+        }
         await this.popupScheduleUser();
-        this.setState({
+        await this.setState({
             popupInvSchedule : this.state.popupInvSchedule === "none" ? "flex" : "none",
             popupInv : "none",
         });
@@ -461,7 +543,13 @@ class TestCal extends React.Component {
     async popupScheduleUser() {
         const { usertoken,in_data } = this.state
         try {
-            const result = await axios.get(`http://localhost:5000/calendar/one?id=${in_data.id}`);
+            let select = "";
+            if(in_data.c_id === "99")
+                select = "general"
+            else {
+                select = "calendar"
+            }
+            const result = await axios.get(`http://localhost:5000/slackapi/userGetVerify?id=${in_data.id}&select=${select}`)
             if(result.data.userId === usertoken){
                 await this.setState({
                     userGet : true,
@@ -482,8 +570,21 @@ class TestCal extends React.Component {
             display : this.state.popupInvSchedule,
         }}>
             <div className="schedulePopup-titleDiv">
-                <span className="schedulePopup-titleText">{in_data.title}</span>
+                제목 : <span className="schedulePopup-titleText">{in_data.title}</span>
             </div>
+            {
+                in_data.c_id === "99" && <>
+                    <div className="schedulePopup-titleDiv">
+                        장소 : <span className="schedulePopup-titleText">{in_data.location}</span>
+                    </div>
+                    <div className="schedulePopup-titleDiv">
+                        내용 : <span className="schedulePopup-titleText">{in_data.content}</span>
+                    </div>
+                    <div className="schedulePopup-titleDiv">
+                        참여자 : <span className="schedulePopup-titleText">{in_data.partner}</span>
+                    </div>
+                </>
+            }
             <div className="schedulePopup-timeDiv">
                 <span className="schedulePopup-time">{in_data.start}</span><br></br>
                 <span className="schedulePopup-time">{in_data.end}</span>

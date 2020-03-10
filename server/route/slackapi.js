@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
 const configs = require("../server_config");
-
 const axios = require('axios');
 const models = require("../models");
 const moment = require('moment');
@@ -11,6 +9,7 @@ moment.tz.setDefault("Asia/Seoul");
 const User = models.user;
 const Slackchat = models.slackchat;
 const Calendar = models.calendar;
+const General = models.general;
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -180,7 +179,7 @@ router.post("/channelHistoryInit", async(req,res) =>{
         let timeReg = [];       // 시간을 정규식으로 처리
         let stateSet = "";      // 상태 디비 입력 용도
         let resultArray = [];
-        resultArray = regFunc("times",resultSet,Changetime,timeCheck,timeReg,stateSet);
+        resultArray = regFunc("times",resultSet,"init",Changetime,timeCheck,timeReg,stateSet);
         try {
             await Slackchat.bulkCreate(resultArray,{
                 individualHooks : true,
@@ -214,7 +213,7 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
         let calReg = [];
         let textTimes = "";
         let search = "";
-        let resultArray = regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,search)
+        let resultArray = regFunc("calendar",resultSet,"init",Changetime,calReg,calArray,textTimes,search)
         try {
             await Calendar.bulkCreate(resultArray,{
                 individualHooks : true,
@@ -403,8 +402,23 @@ router.post("/authInfo", async(req,res)=>{
     }
 });
 
+// 해당 데이터의 유저 조회 --------------------------------------------------
+router.get("/userGetVerify", async(req,res)=>{
+    let result = [];
+    try {
+        if(req.query.select === "calendar"){
+            result = await Calendar.findOne({ where : { id : req.query.id } });
+        } else {
+            result = await General.findOne({ where : { id : req.query.id } });
+        }
+    }catch(err){
+        console.log("user Get verify err : " + err);
+    }
+    res.send(result)
+});
+
 // 정규식을 거쳐 처리하는 함수 --------------------------------------------------
-function regFunc(channel ,resultSet, ...args){
+function regFunc(channel ,resultSet,init, ...args){
     if(channel === "times"){
         // 출퇴근의 처리
         // args : 0 => real time
@@ -468,6 +482,9 @@ function regFunc(channel ,resultSet, ...args){
                     state : args[3]
                 }
             } else {
+                if(!init){
+                    errMessageMe(data,channel);
+                }
                 console.log("Reg Times Input Err : retry input : " + 
                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss")  + " , err Msg : " + data.text)
             }
@@ -552,13 +569,60 @@ function regFunc(channel ,resultSet, ...args){
                     console.log("Calendar init Reg err : " + err)
                 }
             } else {
+                if(!init){
+                    errMessageMe(data,channel);
+                }
                 console.log("Reg Calendars Input Err : retry input : " + 
                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss") + " , err Msg : " + data.text)
             }
         });
         return resultArray;
-    } else if(channel === "general") {
-        
+    }
+}
+
+// 정규식에 어긋난 내용은 개인 슬랙 채널에 메시지를 보냄
+errMessageMe = async(data,channel) => {
+    try {
+        const user = await User.findOne({
+            where : {
+                id : data.user,
+            }
+        });
+        await axios({
+            method : "post",
+            url : "https://slack.com/api/chat.postMessage",
+            header : {
+                "Content-type" : "application/json",
+                "Authorization" : "Bearer " + user.dataValues.p_token,
+            },
+            params : {
+                token : user.dataValues.p_token,
+                channel : user.dataValues.userchannel,
+                text : "양식에 맞지 않는 메시지 : " + data.text + " 이(가) 등록되지 않았습니다.",
+                as_user: true
+            }
+        });
+        let textChannel = "";
+        if(channel === "times") {
+            textChannel = configs.channel_time;
+        } else {
+            textChannel = configs.channel_calendar;
+        }
+        await axios({
+            method : "post",
+            url : "	https://slack.com/api/chat.delete",
+            header : {
+                "Content-type" : "application/json",
+                "Authorization" : "Bearer " + user.dataValues.p_token,
+            },
+            params : {
+                token : user.dataValues.p_token,
+                channel : textChannel,
+                ts : data.ts,
+            }
+        });
+    } catch(err){
+        console.log("reg post me message err : " + err);
     }
 }
 

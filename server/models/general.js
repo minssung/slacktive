@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        location: {
+            type: DataTypes.STRING,
+        },
         content: {
             type: DataTypes.STRING,
             allowNull: false
@@ -19,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         partner: {
             type: DataTypes.STRING,
         },
-        time: {
+        textTime: {
             type: DataTypes.STRING,
             allowNull: false,
         },
