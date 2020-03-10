@@ -49,16 +49,19 @@ class Slack_Dashboard extends React.Component {
     usersListBoard(spanText){
         const { usersalldb } = this.state;
         return <div className="slack-dash">
-            <span>{spanText}</span>
-            {
+            <span className="schedule_Title">{spanText}</span>
+            <div className="schedule_User_row">
+            {   
                 usersalldb.map((data,i)=>{
-                    return <span key={i}>
+                    return <span key={i} className="schedule_User">
                         {
                             data.state === spanText && data.username
                         }
                     </span>
                 })
             }
+            </div>
+            <span className="schedule_Time">시간</span>
         </div>
     }
     // ---------- clock Api & Render ----------
@@ -96,7 +99,7 @@ class Slack_Dashboard extends React.Component {
                         <img alt="Logind~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
-                <Dashboard contents={this.clockContents.bind(this)} />
+                {/* <Dashboard contents={this.clockContents.bind(this)} /> */}
                 {
                     spanText.map((data,i)=>{
                         return <Dashboard key={i} contents={this.usersListBoard.bind(this, data.state)}/>

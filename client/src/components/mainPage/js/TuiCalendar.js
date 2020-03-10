@@ -226,7 +226,6 @@ class TestCal extends React.Component {
     }
     // 캘린더 스케줄 마운트 및 정규식 표현 처리
     async scheduleCreateMount(scheduleArray) {
-        const { user } = this.state;
         let scheduleItem = [];
         let startDate = "";
         let endDate = "";

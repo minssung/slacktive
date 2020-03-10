@@ -21,6 +21,7 @@ class IndexRoot extends React.Component {
                 tag : "",
             },
             preColor : "#ff0000",
+            task : '',
         }
         this.tag = React.createRef();
         this.color = React.createRef();
@@ -87,6 +88,9 @@ class IndexRoot extends React.Component {
     async usernameCheck() {
         const usertoken = this.state.usertoken;
         const userCheck = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
+        this.setState({
+            task : userCheck.data.usertag
+        });
         return userCheck.data.username
     }
 
@@ -195,7 +199,7 @@ class IndexRoot extends React.Component {
         })
     }
     render() {
-        const { usertoken,userinfoSet,preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor } = this.state;
+        const { usertoken,userinfoSet,preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, task } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -210,7 +214,7 @@ class IndexRoot extends React.Component {
                                         <Link to="/" onClick={this.bgBtn_1.bind(this)}>
                                             <img src="img/Menu1.png" className="main-menu-1" alt="Calendar"/>
                                         </Link>
-                                        <Link to="/my" onClick={this.bgBtn_2.bind(this)} activeClassName="selected">
+                                        <Link to="/my" onClick={this.bgBtn_2.bind(this)}>
                                             <img src="img/Menu2.png" className="main-menu-2" alt="My"/>
                                         </Link>
                                         <Link to="/cedar" onClick={this.bgBtn_3.bind(this)}>
@@ -253,13 +257,22 @@ class IndexRoot extends React.Component {
                                                 <img className="cloud_1" src="img/cloud.png" alt="cloud_1"/>
                                                 <img className="cloud_2" src="img/cloud2.png" alt="cloud_2"/>
                                                 <img className="cloud_3" src="img/cloud3.png" alt="cloud_3"/>
-                                                <img className="task" src="img/developer.png" alt="task"></img>
+                                                {
+                                                    task === '개발팀' &&
+                                                    <img className="task" src="img/developer.png" alt="task"/>
+                                                }
                                             </div>
                                             <div className="people">
                                                 <span className="tardy">지각자&nbsp;&nbsp;&nbsp;{tardyUser}</span>
                                                 <span className="vacation">휴가자&nbsp;&nbsp;&nbsp;{vacationUser}</span>
                                             </div>
                                             <TuiCalendar Token={usertoken}/>
+                                            <div className="design_2">
+                                                <img className="zandi" src="img/zandi.png" alt="zandi" />
+                                                <img className="tree" src="img/tree.png" alt="tree" />
+                                                <img className="cat" src="img/cat.png" alt="cat" />
+                                                <img className="Todaycard" src="img/Todaycard.png" alt="Todaycard" />
+                                            </div>
                                             <div className="app-dash">
                                                 <SlackDash Token={usertoken}></SlackDash>
                                             </div>
