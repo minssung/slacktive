@@ -6,7 +6,7 @@ const config = require("../server_config");
  
 const db = {};
  
-const sequelize = new Sequelize(config.database, config.user, config.password, { host: config.host, dialect: config.dialect });
+const sequelize = new Sequelize(config.database, config.user, config.password, { host: config.host, dialect: config.dialect, timezone: '+09:00' });
 
 sequelize.authenticate().then(() => {
     console.log("연결 성공");

@@ -1,22 +1,13 @@
 import React from 'react';
-import Time from './components/Time';
 import './App.css';
-import Workbtn from './components/Workbtn';
+import IndexRoot from './components/indexRoot';
 
 function App() {
-  return (
-    <div className="container">
-        {/* 현재 시간 */}
-        <div className="time_box">
-            <div className="time"><Time></Time></div>
+    return (
+        <div className="app-firstDiv">
+            <IndexRoot></IndexRoot>
         </div>
-        
-        {/* 출근 버튼 */}
-        <div className="work">
-            <Workbtn></Workbtn>
-        </div>
-    </div>
-  );
+    );
 }
 
 export default App;

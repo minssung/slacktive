@@ -1,36 +1,43 @@
 module.exports = (sequelize, DataTypes) => {
- 
     const User = sequelize.define("user", {
-        userid : {
+        id : {
             type: DataTypes.STRING,
+            primaryKey : true,
             allowNull: false
         },
         username: {
             type: DataTypes.STRING,
             allowNull: false
         },
+        usertag : {
+            type: DataTypes.STRING,
+        },
         useremail: {
             type: DataTypes.STRING,
-            allowNull: false
         },
         userphone: {
             type: DataTypes.STRING,
-            allowNull: false
-        },
-        totalcount : {
-            type: DataTypes.INTEGER,
-            allowNull: false
         },
         state : {
             type: DataTypes.STRING,
-            allowNull: false
+        },
+        holidaycount : {
+            type: DataTypes.DOUBLE,
+        },
+        usercolor : {
+            type: DataTypes.STRING,
+        },
+        userchannel : {
+            type: DataTypes.STRING,
+        },
+        p_token : {
+            type: DataTypes.STRING,
         },
     });
-
-    //User.associate = function(models) {
-        //models.user.hasMany(models.group);
-        //models.user.belongsTo(models.group);
-    //};
- 
+    User.associate = function(models) {
+        User.hasMany(models.slackchat)
+        User.hasMany(models.calendar)
+        User.hasMany(models.general)
+    }
     return User;
 };

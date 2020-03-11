@@ -2,74 +2,73 @@
 const express = require("express");
 const router = express.Router();
 const models = require("../models");
-const _ = require("lodash");
 
 // DB Setting --------------------
 const User = models.user;
 
-// DB Insert --------------------
-router.get("/init", async(req, res) => {
-    const users = [{
-        userid : 'ABCDEF',
-        username : "HongGilDong",
-        useremail : "aaa@a.com",
-        userphone : "000-0000-0000",
-        totalcount : 0,
-        state : "출근"
-    }];
-
-    await User.sync ({ force : true });
-
-    for (const user of users) {
-        await User.create ({ 
-            "userid" : user.userid, 
-            "username" : user.username,
-            "useremail" : user.useremail,
-            "userphone" : user.userphone,
-            "totalcount" : user.totalcount,
-            "state" : user.state });
-    }
-    res.send(true);
-});
- 
+const stateQuery = "select max(id), state from users group by state";
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
-router.get("/", async(req, res) => {
-    let result = await User.findAll({
-    });
-    res.send(result);
+router.get("/all", async(req, res) => {
+    try {
+        const result = await User.findAll();
+        res.send(result);
+    } catch(err) {
+        console.log("select users all err : " + err)
+    }
+});
+
+// DB SelectAll 지각자 체크 --------------------
+router.get("/tardyall", async(req, res) => {
+    try {
+        const result = await User.findAll({
+            where : {
+                state : '지각'
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("select users all err : " + err)
+    }
+});
+
+// DB SelectAll 휴가자 체크 --------------------
+router.get("/vacationall", async(req, res) => {
+    try {
+        const result = await User.findAll({
+            where : {
+                state : '휴가'
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("select users all err : " + err)
+    }
 });
 
 // DB SelectOne --------------------
-router.get("/:id", async(req, res) => {
-    let result = await User.findOne({
-        where: {
-            id: req.params.id
-        }
-    });
-    res.send(result);
+router.get("/one", async(req, res) => {
+    try {
+        const result = await User.findOne({
+            where : {
+                id : req.query.userid
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("select user one err : " + err);
+    }
 });
 
-/*
-// DB Create --------------------
-router.post("/", async(req, res) => {
-    let result = false;
-    try{
-        await User.create({
-            userid: req.body.userid, 
-            username: req.body.username, 
-            useremail : req.body.useremail,
-            userphone : req.body.userphone,
-            totalcount : 0,
-            state : "출근"});
-        //await result_user.createGroup({groupName: req.body.groupName});
-        result = true;
-    }catch(err) {
-        console.error(err);
+// DB Select State --------------------
+router.get("/state", async(req, res) => {
+    try {
+        let result = await models.sequelize.query(stateQuery, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select chat one err : " + err);
     }
-    res.send(result);
 });
-*/
 
 // DB FineOrCreate --------------------
 router.post("/create", async(req, res) => {
@@ -77,17 +76,11 @@ router.post("/create", async(req, res) => {
     try{
         await User.findOrCreate({
             where : {
-                userid : req.body.userid,
-                username : req.body.username
+                id : req.body.userid,
             },
             defaults : {
-                id : req.body.id,
-                userid: req.body.userid, 
+                id : req.body.userid,
                 username: req.body.username, 
-                useremail : req.body.useremail,
-                userphone : req.body.userphone,
-                totalcount : 0,
-                state : "출근"
             }
         }).spread((none, created)=>{
             if(created){
@@ -95,43 +88,52 @@ router.post("/create", async(req, res) => {
             }
         });
     }catch(err) {
-        console.error(err);
+        console.error("created user err : " + err);
     }
     res.send(result);
 });
 
 // DB Update --------------------
-router.put("/:id", async(req, res) => {
+router.put("/update", async(req, res) => {
     let result = null;
     try {
         await User.update({ 
+            id : req.body.userid,
             username: req.body.username,
             useremail: req.body.useremail, 
             userphone : req.body.userphone,
-            totalcount : req.body.totalcount,
-            state : req.body.state }, {
+            usertag : req.body.usertag,
+            p_token : req.body.p_token,
+            state : req.body.state,
+            usercolor : req.body.usercolor,
+            userchannel : req.body.userchannel,
+            holidaycount : req.body.holidaycount,
+            }, {
             where: {
-              id : req.params.id
+                id : req.body.userid
             }
-          }).then((res) => {
-              return result;
-          });
+        });
+        result = true;
     } catch(err) {
-        console.error(err);
+        console.error("user update err : " + err);
+        result = false;
     }
+    console.log("update : " + result);
     res.send(result);
 });
 
 // DB Delete --------------------
-router.delete("/:id", async(req, res) => {
-    let result = await User.destroy({
-        where: {
-            id: req.params.id
-        }
-    }).then(() => {
-        console.log("Done");
-      });
-    res.send(result);
+router.delete("/delete", async(req, res) => {
+    try {
+        let result = await User.destroy({
+            where: {
+                id: req.query.userid
+            }
+        });
+        res.send(result);
+    } catch(err) {
+        console.log("delete user err : " + err);
+    }
 });
 
 // Module Exports --------------------

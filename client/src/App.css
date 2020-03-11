@@ -1,184 +1,466 @@
-.time {
-  text-align: center;
-  margin: 50px 50px;
-  font-size: 23pt;
-  font-weight: 600;
+/* ---------- app & web Main Disp  --------- */
+html, body, #root {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
 }
 
-.time_box {
-  margin: 80px 400px;
-  border: 2px solid lightgray;
+.app-firstDiv {
+    height: 100%;
+    
 }
 
-.work {
-  text-align: center;
+.bg_1 {
+    height: 100%;
+    background-image: linear-gradient(to bottom, #7ea4ef, #94d0f2);
 }
 
-.workbtn {
-  font-size: 20pt;
-  padding: 5px 25px;
+.bg_2 {
+    height: 100%;
+    background-image: linear-gradient(to bottom, #6879d0, #d3968e);
 }
 
-@media (min-width: 1050px) and (max-width: 1300px) {
-  .time_box {
-    margin: 80px 200px;
-  }
-
+.bg_3 {
+    height: 100%;
+    background-image: linear-gradient(to bottom, #266197, #bca8c3);
 }
 
-@media (min-width: 750px) and (max-width: 1049px) {
-  .time_box {
-    margin: 80px 200px;
-  }
-
+.bg_4 {
+    height: 100%;
+    background-image: linear-gradient(to bottom, #adc1ee, #e2c5f8);
 }
 
-@media (min-width: 350px) and (max-width: 749px) {
-  .time {
-    font-size: 15pt;
-  }
-
-  .time_box {
-    margin: 80px 150px 70px;
-  }
-
-  .workbtn {
-    font-size: 12pt;
-  }
+.app-mainDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    height: 100%;
 }
 
-@media (min-width: 350px) and (max-width: 665px) {
-  .time {
-    font-size: 12pt;
-  }
-
-  .time_box {
-    margin: 80px 150px 60px;
-  }
-
-  .workbtn {
-    font-size: 9pt;
-  }
+.app-contentDiv {
+    display: inline-flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
 }
 
-@media (min-width: 350px) and (max-width: 631px) {
-  .time {
-    font-size: 12pt;
-  }
-
-  .time_box {
-    margin: 80px 150px 60px;
-  }
-
-  .workbtn {
-    font-size: 9pt;
-  }
+.app-leftDiv {
+    width: 90px;
+    flex-direction: column;
+    display: flex;
+    padding-top: 84px;
+    align-items: center;
+    justify-content: top;
+    box-shadow: 3px 2px 8px 0 rgba(0, 0, 0, 0.16);
 }
 
-@media (min-width: 350px) and (max-width: 531px) {
-  .time {
-    font-size: 9pt;
-    margin: 25px 25px;
-  }
-
-  .time_box {
-    margin: 80px 100px 60px;
-  }
-
-  .workbtn {
-    font-size: 6pt;
-  }
+.app-leftDiv a {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 50px;
 }
 
-/* .App {
-  text-align: center;
+.app-rightDiv {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    height: 100%;
+    overflow: auto;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* ---------- userInfo css ---------- */
+.app-userInfoDiv {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top : 0;
+    left : 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.281);
+    z-index: 1000;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.app-userInfo {
+    border: 1px solid black;
+    width: 300px;
+    height: 170px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.userInfo-colorDiv {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }
 
-.App-link {
-  color: #61dafb;
+.userInfo-TagDiv {
+    padding-top: 20px;
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.userInfo-button {
+    margin-top: 20px;
+    width: 50%;
 }
 
-li {
-  text-align: left;
-  animation-duration: 1s;
-  animation-name: fade;
+/* ---------- main css ---------- */
+
+.tui-div {
+    width: 90%;
+    height: 100%;
+    margin-top: 20px;
 }
 
-li > span{
-  margin-left: 15px;
-  float: right;
+.app-dash {
+    flex-direction: row;
+    background-color: #faefe0;
+    display: flex;
+    width: 100%;
+    z-index: 1;
+    /* margin-top: 30px; */
 }
 
-li > span:hover{
-  color: #09d3ac;
-  cursor: pointer;
+.dash-boardDiv {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    margin-left: 20px;
+    margin-right: 20px;
+    overflow-x: scroll;
 }
 
-@keyframes fade{
-  from{
-      opacity: 0
-  }
-  to{
-      opacity: 1;
-  }
+/* ---------- token verify disp span ---------- */
+.slacklogin-maindiv {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
 }
 
-.loadmask{
-  position: absolute;
-  width:100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: rgba(11,11,11,0.8);
+.loadMaskDiv {
+    z-index: 2;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
 }
 
-.loadmask img{
-  width: 400px;
-  position: relative;
-  top: 50%;
-  transform: translate(0%,-50%);
+.loadMask {
+    z-index: 1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    opacity: 0.1;
 }
 
-.countUpDown {
-  user-select: none;
+.slack-mainDiv {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    margin-right: -2.5%;
+    width: 186px;
+    height: 110px;
 }
 
-.countUpDown:hover {
-  color: skyblue;
-  cursor: pointer;
+.slack-dash {
+    background-color: white;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 15px;
+    align-items: flex-start;
+    /* justify-content: center;
+    flex-wrap: wrap; */
 }
 
-.viewAndhide {
-  display: none;
-} */
+/* 메뉴 그림 css */
+.main-menu-1 {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.main-menu-2 {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.main-menu-3 {
+    width: 30px;
+    height: 33px;
+    object-fit: contain;
+}
+
+.main-menu-4 {
+    width: 28px;
+    height: 4px;
+    object-fit: contain;
+}
+
+/* 메뉴 옆 그림자 */
+.vertical {
+    width: 3px;
+    height: 100%;
+    -webkit-filter: blur(14px);
+    filter: blur(14px);
+    background-color: rgba(0, 0, 0, 0.2);
+    z-index: 3;
+}
+
+.vertical_checked_1 {
+    width: 5px;
+    height: 60px;
+    background-color: #ffffff;
+    margin-left: -5px;
+    margin-top: 72px;
+}
+
+.vertical_checked_2 {
+    width: 5px;
+    height: 60px;
+    background-color: #ffffff;
+    margin-left: -5px;
+    margin-top: 154px;
+}
+
+.vertical_checked_3 {
+    width: 5px;
+    height: 60px;
+    background-color: #ffffff;
+    margin-left: -5px;
+    margin-top: 236px;
+}
+
+.vertical_checked_4 {
+    width: 5px;
+    height: 60px;
+    background-color: #ffffff;
+    margin-left: -5px;
+    margin-top: 318px;
+}
+
+/* 인트로 css */
+.intro {
+    width: 47%;
+    height: 70px;
+    text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    font-family: 12LotteMartDream;
+    font-size: 30px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.17;
+    letter-spacing: normal;
+    color: #ffffff;
+    align-self: flex-start;
+    padding: 50px 30% 0px 5%;
+}
+
+/* 지각자, 휴가자 배경 css */
+.people {
+    width: 88%;
+    height: 43px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.17);
+    margin-top: 30px;
+    padding: 11px;
+}
+
+.tardy {
+    width: 48px;
+    height: 18px;
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #ffffff;
+    padding-left: 1%;
+}
+
+.vacation {
+    width: 48px;
+    height: 18px;
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #ffffff;
+    padding-left: 20%;
+}
+
+/* design CSS */
+.design {
+    /* height: 100%; */
+    position: relative;
+}
+
+.cloud_1 {
+    width: 89px;
+    height: 50px;
+    object-fit: contain;
+    position: absolute;
+    top: -30px;
+    left: -50px;
+}
+
+.cloud_2 {
+    width: 51px;
+    height: 29px;
+    object-fit: contain;
+    opacity: 0.6;
+    position: absolute;
+    top: 53px;
+    left: 150px;
+}
+
+.cloud_3 {
+    width: 35px;
+    height: 22px;
+    object-fit: contain;
+    opacity: 0.8;
+    position: absolute;
+    top: -100px;
+    left: 270px;
+}
+
+.task {
+    width: 85px;
+    height: 85px;
+    object-fit: contain;
+    position: absolute;
+    top: -80px;
+    left: 226px;
+}
+
+.design_2 {
+    width: 100%;
+    margin-top: 23px;
+    position: relative;
+    display: flex;
+}
+
+.zandi {
+    width: 677px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.tree {
+    width: 129px;
+    height: 63px;
+    object-fit: contain;
+    position: absolute;
+    left: 25px;
+}
+
+.cat {
+    width: 64px;
+    height: 32px;
+    object-fit: contain;
+    position: absolute;
+    bottom: 0px;
+    right: 130px;
+}
+
+.Todaycard{
+    width: 122px;
+    height: 91px;
+    object-fit: contain;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+}
+
+.card_container {
+    display: flex;
+    flex-direction: row;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    /* margin-left: 20px;
+    margin-right: 20px; */
+    margin-left: 10px;
+    font-size: 15px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.card_color {
+    width: 10px;
+    height: 110px;
+    background-color: yellowgreen;
+}
+
+/* 오늘의 카드 디자인 */
+
+.schedult_Title {
+    font-family: NanumBarunGothic;
+    font-size: 13px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #000000;
+}
+
+.schedule_User {
+    font-family: NanumBarunGothic;
+    font-size: 13px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #000000;
+    padding-top: 20px;
+}
+
+.schedule_Time {
+    font-family: NanumBarunGothic;
+    font-size: 13px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #777777;
+    padding-top: 10px;
+}
+
+.schedule_User_row {
+    display: flex;
+    flex-direction: row;
+}
