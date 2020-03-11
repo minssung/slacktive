@@ -397,7 +397,7 @@ class TestCal extends React.Component {
     }
     // 일정 등록을 위한 팝업 창
     popupCreate() {
-        const { startDate,endDate,popupInv,updateData,updateTF,selectCal,in_data } = this.state;
+        const { startDate,endDate,popupInv,updateData,updateTF,selectCal } = this.state;
         return <div className="popup-border" style={{
             display : popupInv
         }}>

@@ -23,6 +23,7 @@ class IndexRoot extends React.Component {
             },
             preColor : "#ff0000",
             task : '',
+            vertical : 'vertical_checked_1',
         }
         this.tag = React.createRef();
         this.color = React.createRef();
@@ -162,19 +163,19 @@ class IndexRoot extends React.Component {
     }
 
     bgBtn_1() {
-        this.setState({ bgcolor : 'bg_1' })
+        this.setState({ bgcolor : 'bg_1', vertical : 'vertical_checked_1'})
     };
 
     bgBtn_2() {
-        this.setState({ bgcolor : 'bg_2' })
+        this.setState({ bgcolor : 'bg_2', vertical : 'vertical_checked_2' })
     };
 
     bgBtn_3() {
-        this.setState({ bgcolor : 'bg_3' })
+        this.setState({ bgcolor : 'bg_3', vertical : 'vertical_checked_3' })
     };
 
     bgBtn_4() {
-        this.setState({ bgcolor : 'bg_4' })
+        this.setState({ bgcolor : 'bg_4', vertical : 'vertical_checked_4' })
     };
 
     // 유저 정보 등록
@@ -220,7 +221,7 @@ class IndexRoot extends React.Component {
         }
     }
     render() {
-        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task } = this.state;
+        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task, vertical } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -245,6 +246,7 @@ class IndexRoot extends React.Component {
                                             <img src="img/Menu4.png" className="main-menu-4" alt="Etc"/>
                                         </Link>
                                     </div>
+                                    <div className={vertical}></div>
                                     <div className="vertical"></div>
                                     <div className="app-rightDiv">
                                         <Route exact path="/">
