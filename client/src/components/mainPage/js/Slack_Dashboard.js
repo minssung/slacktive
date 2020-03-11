@@ -16,6 +16,8 @@ class Slack_Dashboard extends React.Component {
             todayTimes : "",
             // load mask
             loading : "",
+            // general db
+
         }
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -47,17 +49,22 @@ class Slack_Dashboard extends React.Component {
     }
     usersListBoard(spanText){
         const { usersalldb } = this.state;
+        console.log(spanText);
+        
         return <div className="slack-dash">
-            <span>{spanText}</span>
-            {
+            <span className="schedule_Title">{spanText}</span>
+            <div className="schedule_User_row">
+            {   
                 usersalldb.map((data,i)=>{
-                    return <span key={i}>
+                    return <span key={i} className="schedule_User">
                         {
-                            data.state === spanText ? <span>{data.username},</span> : <div></div>
+                            data.state === spanText && data.username
                         }
                     </span>
                 })
             }
+            </div>
+            <span className="schedule_Time">시간</span>
         </div>
     }
     // ---------- clock Api & Render ----------

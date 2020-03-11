@@ -6,6 +6,7 @@ const models = require("../models");
 // DB Setting --------------------
 const General = models.general;
 const Op = models.Sequelize.Op;
+const stateQuery = "select max(id), state from generals group by state";
  
 // ------------------------------------- DB CRUD -------------------------------------
 // DB SelectAll --------------------
@@ -175,6 +176,16 @@ router.delete("/delete", async(req, res) => {
         console.log("delete General err : " + err);
     }
     res.send(result);
+});
+
+// DB Select State --------------------
+router.get("/state", async(req, res) => {
+    try {
+        let result = await models.sequelize.query(stateQuery, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select chat one err : " + err);
+    }
 });
 
 // Module Exports --------------------
