@@ -6,6 +6,7 @@ const user_router = require("./route/user");
 const chat_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
 const calendar_router = require("./route/calendar");
+const generals_router = require("./route/generals");
 const axios = require("axios");
 let jwt = require("jsonwebtoken");
 let configs = require('./server_config');
@@ -27,13 +28,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/user", user_router);
 app.use("/slack", chat_router);
 app.use("/calendar", calendar_router);
+app.use("/generals", generals_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
-    let text = "[조준명] 3,6,7일 휴가 및 외근"
-    let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    let re = text.match(reg)
+    //let text = "[조준명] 3,6,7일 휴가 및 외근"
+    //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
+    //let re = text.match(reg)
     //console.log(re);
     res.send("Hello SlackApi World!");
 });
@@ -98,8 +100,6 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
                 // await axios.get("http://localhost:5000/slackapi/teamUsers");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
-                // axios.get("http://localhost:5000/");
-
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);

@@ -16,12 +16,13 @@ class Slack_Dashboard extends React.Component {
             todayTimes : "",
             // load mask
             loading : "",
+            // general db
+
         }
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- user Token verify & Mount & axios ---------- 
     async componentDidMount(){
-        await this.clockBtnApi();
         await this.setState({
             usertoken : await this.props.Token
         })
@@ -48,6 +49,8 @@ class Slack_Dashboard extends React.Component {
     }
     usersListBoard(spanText){
         const { usersalldb } = this.state;
+        console.log(spanText);
+        
         return <div className="slack-dash">
             <span className="schedule_Title">{spanText}</span>
             <div className="schedule_User_row">
@@ -99,7 +102,7 @@ class Slack_Dashboard extends React.Component {
                         <img alt="Logind~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
-                {/* <Dashboard contents={this.clockContents.bind(this)} /> */}
+                <Dashboard contents={this.clockContents.bind(this)} />
                 {
                     spanText.map((data,i)=>{
                         return <Dashboard key={i} contents={this.usersListBoard.bind(this, data.state)}/>
