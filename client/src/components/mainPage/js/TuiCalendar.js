@@ -4,7 +4,8 @@ import moment from "moment";
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
 import configs from '../../../client_config'; // config 파일
-import '../css/popup.css'
+import '../css/popupCrt.css'    // 팝업 생성
+import '../css/popupConfirm.css'    // 팝업 확인
 
 class TestCal extends React.Component {
     constructor(props) {
@@ -17,7 +18,6 @@ class TestCal extends React.Component {
         this.partner = React.createRef();
         this.radioBtn = React.createRef();
         this.time = React.createRef();
-        this.selectRadio = React.createRef();
         this.etcText = React.createRef();
         //  userinfo popup refs
         this.state = {
@@ -40,7 +40,7 @@ class TestCal extends React.Component {
             popupInvSchedule : "none",
             userGet : true,
             // popup update state
-            updateData : [],
+            updateData : {},
             updateTF : false,
         }
     }
@@ -101,6 +101,7 @@ class TestCal extends React.Component {
         this.setState({
             popupInv : this.state.popupInv === "none" ? "flex" : "none",
             popupInvSchedule : "none",
+            in_data : {},
         });
     }
     // 새로운 일정 생성 시 동작
@@ -230,20 +231,27 @@ class TestCal extends React.Component {
     // 삭제 시 메시지 또한 삭제 됨
     beforeDeleteSchedule = async(id, c_id) => {
         const calendar = this.calendarRef.current.getInstance();
+        const { user } = this.state;
         try {
             let scheduleResult = [];
             if(c_id !== "99") {
                 scheduleResult = await axios.get(`http://localhost:5000/calendar/one?id=${id}`);
                 await axios.delete(`http://localhost:5000/calendar/delete?id=${id}`);
-            } else {
-                await axios.delete(`http://localhost:5000/generals/delete?id=${id}`);
-            }
-            const { user } = this.state;
-            await axios.post("http://localhost:5000/slackapi/messageDelete",{
+                await axios.post("http://localhost:5000/slackapi/messageDelete",{
                 p_token : user.data.p_token,
                 channel : configs.channel_calendar,
                 time : scheduleResult.data.ts,
             })
+            } else {
+                const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${id}`);
+                console.log(generalResult)
+                await axios.post("http://localhost:5000/slackapi/messagePost",{
+                    channel : user.data.userchannel,
+                    p_token : user.data.p_token,
+                    text : `이전에 등록한 일정 -> 제목 : [${generalResult.data.title}] / 날짜 : ${generalResult.data.textTime}이 캘린더에서 삭제되었습니다.`
+                });
+                await axios.delete(`http://localhost:5000/generals/delete?id=${id}`);
+            }
             calendar.deleteSchedule(id, c_id);
             this.setState({
                 popupInvSchedule : "none",
@@ -389,14 +397,14 @@ class TestCal extends React.Component {
     }
     // 일정 등록을 위한 팝업 창
     popupCreate() {
-        const { startDate,endDate,popupInv,updateData,updateTF,selectCal } = this.state;
+        const { startDate,endDate,popupInv,updateData,updateTF,selectCal,in_data } = this.state;
         return <div className="popup-border" style={{
             display : popupInv
         }}>
             <div className="popup-selectBox">
                 <div>
-                    휴가관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="holiday" checked={selectCal ? true : false}></input>
-                    일정관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="calendar" checked={!selectCal ? true : false}></input>
+                    휴가관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="holiday"></input>
+                    일정관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="calendar"></input>
                 </div>
                 {
                     selectCal ? 
@@ -490,6 +498,10 @@ class TestCal extends React.Component {
         } else {
             this.createScheduleItems(this.state.saveData);
         }
+        this.setState({
+            updateTF : false,
+            updateData : {},
+        })
     }
     // 팝업 창의 취소 버튼 누를 시
     clickCancel() {
@@ -497,7 +509,8 @@ class TestCal extends React.Component {
             popupInv : "none",
             popupInvSchedule : "none",
             updateTF : false,
-            updateData : [],
+            updateData : {},
+            in_data : {},
         })
     }
     // 스케줄 클릭 시
@@ -538,8 +551,11 @@ class TestCal extends React.Component {
         await this.setState({
             popupInvSchedule : this.state.popupInvSchedule === "none" ? "flex" : "none",
             popupInv : "none",
+            updateTF : false,
+            updateData : {},
         });
     }
+    // 스케줄 클릭 시 해당 유저의 스케줄인지 체크
     async popupScheduleUser() {
         const { usertoken,in_data } = this.state
         try {
@@ -604,7 +620,9 @@ class TestCal extends React.Component {
             </div>
         </div>
     }
+    // 수정 버튼을 눌렀을 시 수정용 스태이트 값 변환
     async popupUpdate(data) {
+        console.log(data)
         await this.setState({
             updateData : data,
             updateTF : true,
