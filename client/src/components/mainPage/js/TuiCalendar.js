@@ -398,57 +398,61 @@ class TestCal extends React.Component {
     // 일정 등록을 위한 팝업 창
     popupCreate() {
         const { startDate,endDate,popupInv,updateData,updateTF,selectCal,in_data } = this.state;
-        return <div className="popup-border" style={{
+        return <div className="popup-crt-main" style={{
             display : popupInv
         }}>
-            <div className="popup-selectBox">
+            <div className="popup-crt-header">
+                <span className="popup-crt-headerTitle">일정 등록하기</span>
+                <span className="popup-crt-headerCancel">x</span>
+            </div>
+            <div className="popup-crt-hAndBLine"></div>
+            <div className="popup-crt-body">
+                <span className="popup-crt-bodyText">제목</span>
+                <span className="popup-crt-bodyTextContent">제목에 들어갈 내용</span>
                 <div>
-                    휴가관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="holiday"></input>
-                    일정관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="calendar"></input>
+                    <span className="popup-crt-bodyText">시작일</span>
+                    <span className="popup-crt-bodyText">시작시간</span>
                 </div>
-                {
-                    selectCal ? 
-                    <form className="popup-radioGroup" ref={this.radioBtn}>
-                        휴가<input type="radio" name="cal" value="휴가" className="popup-radioBtn"></input>
-                        오전반차<input type="radio" name="cal" value="오전 반차" className="popup-radioBtn"></input>
-                        오후반차<input type="radio" name="cal" value="오후 반차" className="popup-radioBtn"></input>
-                        병가<input type="radio" name="cal" value="병가" className="popup-radioBtn"></input>
-                        대휴<input type="radio" name="cal" value="대휴" className="popup-radioBtn"></input>
-                        기타<input type="radio" name="cal" value="기타" className="popup-radioETC"></input>
-                        <input type="text" name="cal" ref={this.etcText} className="popup-radioETC"></input>
-                    </form> 
-                    :
-                    <div>
-                        <div>
-                            <span>제목</span>
-                            <input type="text" ref={this.title}></input>
-                        </div>
-                        <div>
-                            <span>장소</span>
-                            <input type="text" ref={this.location}></input>
-                        </div>
-                        <div>
-                            <span>내용</span>
-                            <input type="text" ref={this.content}></input>
-                        </div>
-                        <div>
-                            <span>참여자</span>
-                            <input type="text" ref={this.partner}></input>
-                        </div>
+                <div>
+                    <span className="popup-crt-bodyTextContent">2020. 03. 03 (수)</span>
+                    <span className="popup-crt-bodyTextContent">오전 3:00</span>
+                    <input type="checkbox"></input> 종료일과 같음
+                </div>
+                <div>
+                    <span className="popup-crt-bodyText">종료일</span>
+                    <span className="popup-crt-bodyText">종료시간</span>
+                </div>
+                <div>
+                    <span className="popup-crt-bodyTextContent">2020. 03. 03 (수)</span>
+                    <span className="popup-crt-bodyTextContent">오전 3:00</span>
+                </div>
+                <span className="popup-crt-bodyText">카테고리</span>
+                <div className="popup-crt-bodyCateContent">
+                    <div className="popup-crt-bodyCateMark"></div>
+                    <span className="popup-crt-bodyTextContent">출장 / 미팅</span>
+                </div>
+                <span className="popup-crt-bodyText">참여인원</span>
+                <div className="popup-crt-bodyPartnerContent">
+                    <div className="popup-crt-bodyPartnerBox">
+                        <img className="popup-crt-bodyPartnerImg"></img>
+                        <span className="popup-crt-bodyTextContent">이름</span>
                     </div>
-                }
-                <div className="popup-times" ref={this.time}>
-                    <span className="popup-startTime">{updateTF ? updateData.start : startDate}</span>~
-                    <span className="popup-endTime">{updateTF ? updateData.end : endDate}</span>
+                    <div className="popup-crt-bodyPartnerBox">
+                        <img className="popup-crt-bodyPartnerImg"></img>
+                        <span className="popup-crt-bodyTextContent">이름</span>
+                    </div>
+                    <div className="popup-crt-bodyPartnerBox">
+                        <img className="popup-crt-bodyPartnerImg"></img>
+                        <span className="popup-crt-bodyTextContent">이름</span>
+                    </div>
                 </div>
-                <div className="popup-save">
-                    <button className="popup-saveBtn" onClick={this.clickSave.bind(this)}>
-                        <span className="popup-saveText">저장</span>
-                    </button>
-                    <button className="popup-saveBtn" onClick={this.clickCancel.bind(this)}>
-                        <span className="popup-saveText">취소</span>
-                    </button>
-                </div>
+                <span className="popup-crt-bodyText">메모 사항</span>
+                <textarea className="popup-crt-bodyMemoContent"></textarea>
+            </div>
+            <div className="popup-crt-btns">
+            <button className="popup-crt-btnCreate">
+                    <span className="popup-confirm-bodyMemoContent">등록</span>
+                </button>
             </div>
         </div>
     }
@@ -582,41 +586,49 @@ class TestCal extends React.Component {
     // 스케줄용 팝업 창
     popupSchedule() {
         const { in_data,userGet } = this.state;
-        return <div className="schedulePopup-mainDIv" style={{
+        return <div className="popup-confirm-main" style={{
             display : this.state.popupInvSchedule,
         }}>
-            <div className="schedulePopup-titleDiv">
-                제목 : <span className="schedulePopup-titleText">{in_data.title}</span>
+            <div className="popup-confirm-header">
+                <span className="popup-confirm-headerTitle">일정 확인</span>
+                <span className="popup-confirm-headerCancel">x</span>
             </div>
-            {
-                in_data.c_id === "99" && <>
-                    <div className="schedulePopup-titleDiv">
-                        장소 : <span className="schedulePopup-titleText">{in_data.location}</span>
+            <div className="popup-confirm-hAndBLine"></div>
+            <div className="popup-confirm-body">
+                <span className="popup-confirm-bodyText">제목</span>
+                <span className="popup-confirm-bodyTextContent">제목에 들어갈 내용</span>
+                <span className="popup-confirm-bodyText">시간</span>
+                <span className="popup-confirm-bodyTextContent">2020. 03. 03 (수) 오전 3:00 ~ 2020. 03. 04 (목) 오전 3:00</span>
+                <span className="popup-confirm-bodyText">카테고리</span>
+                <div className="popup-confirm-bodyCateContent">
+                    <div className="popup-confirm-bodyCateMark"></div>
+                    <span className="popup-confirm-bodyTextContent">출장 / 미팅</span>
+                </div>
+                <span className="popup-confirm-bodyText">참여인원</span>
+                <div className="popup-confirm-bodyPartnerContent">
+                    <div className="popup-confirm-bodyPartnerBox">
+                        <img className="popup-confirm-bodyPartnerImg"></img>
+                        <span className="popup-confirm-bodyTextContent">이름</span>
                     </div>
-                    <div className="schedulePopup-titleDiv">
-                        내용 : <span className="schedulePopup-titleText">{in_data.content}</span>
+                    <div className="popup-confirm-bodyPartnerBox">
+                        <img className="popup-confirm-bodyPartnerImg"></img>
+                        <span className="popup-confirm-bodyTextContent">이름</span>
                     </div>
-                    <div className="schedulePopup-titleDiv">
-                        참여자 : <span className="schedulePopup-titleText">{in_data.partner}</span>
+                    <div className="popup-confirm-bodyPartnerBox">
+                        <img className="popup-confirm-bodyPartnerImg"></img>
+                        <span className="popup-confirm-bodyTextContent">이름</span>
                     </div>
-                </>
-            }
-            <div className="schedulePopup-timeDiv">
-                <span className="schedulePopup-time">{in_data.start}</span><br></br>
-                <span className="schedulePopup-time">{in_data.end}</span>
+                </div>
+                <span className="popup-confirm-bodyText">메모 사항</span>
+                <span className="popup-confirm-bodyTextContent">메모 내용</span>
             </div>
-            <div className="schedulePopup-btnsDiv">
-                {
-                userGet && <>
-                    <button type="button" className="schedulePopup-btn" onClick={this.popupUpdate.bind(this, in_data)}>
-                        <span>수정</span>
-                    </button>
-                    <button type="button" className="schedulePopup-btn" onClick={this.beforeDeleteSchedule.bind(this, in_data.id, in_data.c_id)}>
-                        <span>삭제</span>
-                    </button>
-                </>
-                }
-                <button type="button" className="schedulePopup-btn" onClick={this.clickCancel.bind(this)}><span>취소</span></button>
+            <div className="popup-confirm-btns">
+                <button className="popup-confirm-btnUpdat">
+                    <span className="popup-confirm-btnUpdatText">수정</span>
+                </button>
+                <button className="popup-confirm-btnDelet">
+                    <span className="popup-confirm-btnDeletText">삭제</span>
+                </button>
             </div>
         </div>
     }
