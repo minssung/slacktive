@@ -1,7 +1,7 @@
 #/ ignore files
 /node_modules
-/docker-compose.yml
-/package-lock.json
+# /docker-compose.yml
+# /package-lock.json
 
-/server/server_config.js
-/server/reg_config.js
+# /server/server_config.js
+# /server/reg_config.js
