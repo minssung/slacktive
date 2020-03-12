@@ -646,7 +646,7 @@ class TestCal extends React.Component {
     }
     // ------------------------------ 렌더링 ------------------------------ //
     render() {
-        // 팝업 창 처음부터 렌더링
+        // 팝업 창 처음부터 렌더
         const popupmini = this.popupCreate();
         const popupschedule = this.popupSchedule();
         const { calendarDate } = this.state;
