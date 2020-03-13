@@ -2,7 +2,7 @@ var configs = {
     database : "cedar_slack",
     user : "root",
     password : "multi1004",
-    host : "172.17.0.1",
+    host : "localhost",
     dialect : "mysql",
     b_token : "xoxb-891877255443-920415436790-HejG1RR0VWl7zeKF2UK1q5zv",    // app 토큰
     p_token : "xoxp-891877255443-903345006064-918149810816-13c225d442b28a4616610dc158bdb43f",
