@@ -49,7 +49,7 @@ class Slack_Dashboard extends React.Component {
     }
     usersListBoard(spanText){
         const { usersalldb } = this.state;
-        console.log(spanText);
+        // console.log(spanText);
         
         return <div className="slack-dash">
             <span className="schedule_Title">{spanText}</span>
