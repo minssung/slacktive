@@ -96,13 +96,13 @@ try {
 const PORT = process.env.PORT || 5000;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:false }).then(()=>{
+    models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                // await axios.get("http://localhost:5000/slackapi/teamUsers");
-                // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
-                // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
+                await axios.get("http://localhost:5000/slackapi/teamUsers");
+                await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
+                await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
@@ -121,7 +121,7 @@ app.get('/login', async(req, res) => {
             params : {
                 scope : 'chat:write:user,users:read',
                 client_id : configs.c_id,
-                redirect_uri : "http://localhost:3000",
+                redirect_uri : "http://dev.cedar.kr:2222",
             }
         });
         res.send(result.data);
@@ -138,7 +138,7 @@ app.get('/login-access', async(req,res) => {
                 client_id : configs.c_id,
                 client_secret : configs.c_s_id,
                 code : req.query.code,
-                redirect_uri : "http://localhost:3000",
+                redirect_uri : "http://dev.cedar.kr:2222",
             }
         });
         await axios.put("http://localhost:5000/user/update",{
