@@ -8,6 +8,7 @@ import configs from '../../../client_config'; // config 파일
 import '../css/popupCrt.css'    // 팝업 생성
 import '../css/popupConfirm.css'    // 팝업 확인
 import arrow from '../css/arrow.png';   // 카테고리의 화살표
+import loadMask from '../../../resource/loadmaskTest.gif'   // loadmask
 
 moment.locale('en');    // ko -> 한글 버전. => moment.js에서 한글로 변환하는게 잘 안되고 오류가 있음 ( invalid err )
 
@@ -56,6 +57,8 @@ class TestCal extends React.Component {
             updateTF : false,   // 수정 버튼을 누를 경우
             updateID : "",  // 업뎃 시 아이디
             updateCID : "", // 업뎃 시 캘린더 아이디
+            // load mask
+            loading : "",
         }
     }
     // 초기 마운트
@@ -109,9 +112,8 @@ class TestCal extends React.Component {
                 // 물결을 사용한 다수 일정 등록 시
                 if(/~/.test(data.textTime)) {
                     days = data.textTime.split(/~/)
-                    days[1] = regDays[0] + days[1]
                     startDate = moment(days[0] + timeAm).format()
-                    endDate = moment(days[days.length -1] + timePm).format()
+                    endDate = moment(days[1] + timePm).format()
                     scheduleObj = {
                         id: data.id,
                         calendarId: '0',
@@ -198,7 +200,8 @@ class TestCal extends React.Component {
             console.log("TUI Mount init err : " + err)
         }
         this.setState({
-            scheduleItem
+            scheduleItem,
+            loading : "load",
         })
     }
     // ------------------------------ Instance method ------------------------------ //
@@ -251,12 +254,15 @@ class TestCal extends React.Component {
     createScheduleItems = async(data) => {
         const calendar = this.calendarRef.current.getInstance();
         const { user,currentTag } = this.state;
+        this.setState({
+            loading : "",
+        })
         // 휴가 관련 = 2
         if(currentTag.num === 2) {
             let timeText = "";
             // 날짜 차이가 1인 경우
             if(moment(data.endDate).diff(data.startDate, "days") >= 1){
-                timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD") + "~" + moment(data.endDate).format("DD") + " " + data.title
+                timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일]") + "~" + moment(data.endDate).format("YYYY[년] MM[월] DD[일]") + " " + data.title
             // 날짜 차이가 없는 경우 = 종료일과 같음
             } else {
                 timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일] ") + data.title
@@ -269,19 +275,13 @@ class TestCal extends React.Component {
                     text : timeText
                 })
                 // 채널 내역 갱신
-                const result = await axios.post("http://localhost:5000/slackapi/channelHistoryCal")
-                // 스케줄 아이템 생성
-                calendar.createSchedules([{
-                    id: result.data[0].id,
-                    calendarId: '0',
-                    title: user.data.username + " " + data.title,
-                    category: 'time',
-                    isAllDay: configs.dataCateReg.test(data.title) ? true : false,
-                    start : data.startDate,
-                    end : data.endDate,
-                    bgColor : "#ffffff",
-                    color : "#ffffff",
-                }])
+                await axios.post("http://localhost:5000/slackapi/channelHistoryCal")
+                // 새로 마운트
+                // calendar init mount
+                await this.scheduleInitMount()
+                // 새로 재생성
+                // calendar create mount
+                this.scheduleCreateMount(this.state.scheduleArray,this.state.generalsArray);
             } catch(err) {
                 console.log("before create scd err : " + err);
             }
@@ -332,13 +332,10 @@ class TestCal extends React.Component {
             } catch(err) {
                 console.log("before create gnr err : " + err);
             }
+            this.setState({
+                loading : "load",
+            })
         }
-        // // 새로 마운트
-        // // calendar init mount
-        // await this.scheduleInitMount()
-        // // 새로 재생성
-        // // calendar create mount
-        // this.scheduleCreateMount(this.state.scheduleArray,this.state.generalsArray);
     }
     // 일정 수정 시
     // 수정 시 슬랙의 메시지도 수정
@@ -353,8 +350,8 @@ class TestCal extends React.Component {
         if(data.dir) {
             if(data.state === "휴가관련") {
                 if(moment(data.endDate).diff(data.startDate, "days") >= 1){
-                    timeText = `[${user.data.username}] ${moment(data.startDate).format("YYYY[년] MM[월] DD")}~${moment(data.endDate).format("DD[일]")} ${data.title}`
-                    dbTimeText = moment(data.startDate).format("YYYY-MM-DD") + "~" + moment(data.endDate).format("DD")
+                    timeText = `[${user.data.username}] ${moment(data.startDate).format("YYYY[년] MM[월] DD[일]")}~${moment(data.endDate).format("YYYY[년] MM[월] DD[일]")} ${data.title}`
+                    dbTimeText = moment(data.startDate).format("YYYY-MM-DD") + "~" + moment(data.endDate).format("YYYY-MM-DD")
                 } else {
                     timeText = `[${user.data.username}] ${moment(data.startDate).format("YYYY[년] MM[월] DD[일]")} ${data.title}`
                     dbTimeText = moment(data.startDate).format("YYYY-MM-DD");
@@ -416,8 +413,8 @@ class TestCal extends React.Component {
             if(data.schedule.calendarId !== "99") {
                 dataText = (/\S*\s*(.*)/.exec(data.schedule.title))[1];
                 if(moment(data.end._date).diff(data.start._date, "days") >= 1){
-                    timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD")}~${moment(data.end._date).format("DD[일]")} ${dataText}`
-                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD") + "~" + moment(data.end._date).format("DD")
+                    timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")}~${moment(data.end._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
+                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD") + "~" + moment(data.end._date).format("YYYY-MM-DD")
                 } else {
                     timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
                     dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
@@ -487,33 +484,35 @@ class TestCal extends React.Component {
                 scheduleResult = await axios.get(`http://localhost:5000/calendar/one?id=${id}`);
                 // 디비에서 삭제
                 const delt = axios.delete(`http://localhost:5000/calendar/delete?id=${id}`);
+                // 캘린더상에서 삭제
+                calendar.deleteSchedule(id, c_id);
+                // 팝업 창 내리기
+                this.setState({ popupInvSchedule : "none", })
                 // 슬랙에서 삭제
-                const deltPost = axios.post("http://localhost:5000/slackapi/messageDelete",{
+                axios.post("http://localhost:5000/slackapi/messageDelete",{
                     p_token : user.data.p_token,
                     channel : configs.channel_calendar,
                     time : scheduleResult.data.ts,
                 })
-                await delt; await deltPost;
+                await delt;
             // 캘린더 아이디가 99인 값 -> 일정용
             } else {
                 // 해당 아이디 조회
                 const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${id}`);
                 // 디비에서 삭제
                 const delt = axios.delete(`http://localhost:5000/generals/delete?id=${id}`);
+                // 캘린더상에서 삭제
+                calendar.deleteSchedule(id, c_id);
+                // 팝업 창 내리기
+                this.setState({ popupInvSchedule : "none", })
                 // 삭제 되었다는 메시지 보내기
-                const deltPost = axios.post("http://localhost:5000/slackapi/messagePost",{
+                axios.post("http://localhost:5000/slackapi/messagePost",{
                     channel : user.data.userchannel,
                     p_token : user.data.p_token,
                     text : `이전에 등록한 일정 -> 제목 : [${generalResult.data.title}] / 날짜 : ${generalResult.data.textTime}이 캘린더에서 삭제되었습니다.`
                 });
-                await delt; await deltPost;
+                await delt;
             }
-            // 캘린더상에서 삭제
-            calendar.deleteSchedule(id, c_id);
-            // 팝업 창 내리기
-            this.setState({
-                popupInvSchedule : "none",
-            })
         } catch(err) {
             console.log("before scd delete err : " + err)
         }
@@ -682,7 +681,6 @@ class TestCal extends React.Component {
         await this.setState({
             saveData : {},
         })
-        console.log(partnerSelt)
         if(currentTag.num === 2){
             await this.setState({
                 saveData : {
@@ -752,7 +750,6 @@ class TestCal extends React.Component {
         } else {
             try {
                 const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${e.schedule.id}`);
-                console.log(generalResult.data.partner)
                 cateTag.forEach(data=>{
                     if(data.name === generalResult.data.tag) {
                         color = data.color;
@@ -883,9 +880,14 @@ class TestCal extends React.Component {
         // 팝업 창 처음부터 렌더
         const popupmini = this.popupCreate();
         const popupschedule = this.popupSchedule();
-        const { calendarDate } = this.state;
+        const { calendarDate,loading } = this.state;
         return (
             <div className="tui-div">
+                {
+                    !loading && <div className="loadMaskDiv">
+                        <img alt="Logind~" src={loadMask} className="loadMask"></img>
+                    </div>
+                }
                 <div>
                     <button onClick={this.handleClickPrevNextButton.bind(this,"pre")}>이전 달</button>
                     <button onClick={this.handleClickPrevNextButton.bind(this,"nex")}>다음 달</button>
