@@ -57,8 +57,8 @@ try {
         // 10분
         agenda.define('First', {lockLifetime: 10000}, async job => {
             console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
-            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            const History = axios.post("http://192.168.0.40:3333/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://192.168.0.40:3333/slackapi/channelHistoryCal");
             await History;
             await HistoryCal;
             await calendarStateUpdatFunc();
@@ -66,8 +66,8 @@ try {
         // 2시간
         agenda.define('Second', {lockLifetime: 10000}, async job => {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
-            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            const History = axios.post("http://192.168.0.40:3333/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://192.168.0.40:3333/slackapi/channelHistoryCal");
             await History;
             await HistoryCal;
             await calendarStateUpdatFunc();
@@ -75,8 +75,8 @@ try {
         // 2시간
         agenda.define('Third', {lockLifetime: 10000}, async job => {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
-            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            const History = axios.post("http://192.168.0.40:3333/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://192.168.0.40:3333/slackapi/channelHistoryCal");
             await History;
             await HistoryCal;
             await calendarStateUpdatFunc();
@@ -105,14 +105,14 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
             if (process.env.NODE_ENV === undefined) {
                 console.log('undefined 일 때');
             }
-            if (process.env.NODE_ENV === 'developer') {
+            if (process.env.NODE_ENV === 'development') {
                 console.log('developer 일 때');
             }
             console.log(`app running on port ${PORT}`);
             try {
-                await axios.get("http://dev.cedar.kr:3333/slackapi/teamUsers");
-                await axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryInitCal");
-                await axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryInit");
+                await axios.get("http://192.168.0.40:3333/slackapi/teamUsers");
+                await axios.post("http://192.168.0.40:3333/slackapi/channelHistoryInitCal");
+                await axios.post("http://192.168.0.40:3333/slackapi/channelHistoryInit");
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
@@ -151,7 +151,7 @@ app.get('/login-access', async(req,res) => {
                 redirect_uri : "http://dev.cedar.kr:2222",
             }
         });
-        await axios.put("http://dev.cedar.kr:3333/user/update",{
+        await axios.put("http://192.168.0.40:3333/user/update",{
             userid : result.data.user_id,
             p_token : result.data.access_token,
         });
