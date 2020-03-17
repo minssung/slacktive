@@ -17,7 +17,7 @@ const Agenda = require('agenda');
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.header("Access-Control-Allow-Origin", "dev.cedar.kr:2222");
+    res.header("Access-Control-Allow-Origin", "http://dev.cedar.kr:2222");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
     next();
@@ -110,9 +110,9 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
             }
             console.log(`app running on port ${PORT}`);
             try {
-                await axios.get("http://localhost:5000/slackapi/teamUsers");
-                await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
-                await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
+                await axios.get("http://dev.cedar.kr:3333/slackapi/teamUsers");
+                await axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryInitCal");
+                await axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryInit");
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')

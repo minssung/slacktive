@@ -49,7 +49,7 @@ class IndexRoot extends React.Component {
                 }, (err) => {
                     console.log("promise all err : " + err);
                 })
-                const userOne = await axios.get(`http://localhost:5000/user/one?userid=${this.state.usertoken}`);
+                const userOne = await axios.get(`http://dev.cedar.kr:3333/user/one?userid=${this.state.usertoken}`);
                 if(!userOne.data.usertag){
                     await this.setState({
                         userinfoSet : false
@@ -193,7 +193,7 @@ class IndexRoot extends React.Component {
             return;
         }
         try {
-            await axios.put("http://localhost:5000/user/update",{
+            await axios.put("http://dev.cedar.kr:3333/user/update",{
                 userid : this.state.usertoken,
                 usertag : this.tag.current.value,
                 usercolor : this.color.current.value,
