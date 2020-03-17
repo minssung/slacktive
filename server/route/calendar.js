@@ -144,7 +144,6 @@ router.put("/update", async(req, res) => {
             text: req.body.text,
             cate : req.body.cate,
             textTime : req.body.textTime,
-            textTitle : req.body.textTitle,
             }, {
             where: {
                 id : req.body.id,

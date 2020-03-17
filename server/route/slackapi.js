@@ -24,6 +24,7 @@ router.get("/teamUsers", async(req,res)=>{
                 token : configs.b_token,
             }
         });
+        console.log(result.data)
         const resultSet = result.data.members;
         const array = resultSet.map((data)=>{
             return {
@@ -490,7 +491,7 @@ function regFunc(channel ,resultSet,init, ...args){
             }
         });
         return resultArray;
-    } else if(channel === "calendar") {
+    } else {
         // 일정용 처리
         // args : 0 => real time
         // args : 1 => cal Reg
@@ -510,7 +511,6 @@ function regFunc(channel ,resultSet,init, ...args){
                         // 불필요한 요소 제거
                         if(index === 0 || index === 5)
                             continue;
-                            // args[2][0] : 이름
                             // 1 : 년
                             // 2 : 월
                             // 3 : 일 수에 대한 다차원 배열
@@ -564,6 +564,7 @@ function regFunc(channel ,resultSet,init, ...args){
                         text : data.text,
                         cate : args[2][4],
                         textTime : args[3],
+                        state : "휴가관련",
                     }
                 } catch(err){
                     console.log("Calendar init Reg err : " + err)

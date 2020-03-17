@@ -122,7 +122,6 @@ router.post("/create", async(req, res) => {
                 partner : req.body.partner,
                 state : req.body.state,
                 textTime : req.body.textTime,
-                location : req.body.location,
                 userId : req.body.userId,
             }
         });

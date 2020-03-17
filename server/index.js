@@ -34,12 +34,6 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    // let text = moment().format()
-    // moment.locale('ko')
-    // let mom = moment(text).format("YYYY. M. D (ddd) LT");
-    // console.log(mom)
-    // let dp = moment(mom, "YYYY/MM/DD")
-    // console.log(moment(dp).format("YYYY-M-D LT"))
     res.send("Hello SlackApi World!");
 });
 
