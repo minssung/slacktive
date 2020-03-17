@@ -140,7 +140,7 @@ class IndexRoot extends React.Component {
     async usersTokenChecked(){
         if(localStorage.getItem("usertoken")){
             try {
-                const result = await axios("http://localhost:5000/verify",{
+                const result = await axios("http://dev.cedar.kr:3333/verify",{
                     method : "get",
                     headers : {
                         'content-type' : 'text/json',

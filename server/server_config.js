@@ -2,7 +2,7 @@ var configs = {
     database : "cedar_slack",
     user : "root",
     password : "multi1004",
-    host : "localhost",
+    host : "dev.cedar.kr",
     dialect : "mysql",
     b_token : "xoxb-891877255443-926835312512-ZiU3sDMtdB9UsWkb7Mhco2SN",    // app 토큰
     p_token : "xoxp-891877255443-891877703267-918404747189-88d14373fb7dd56dc65f21d839f7eb6b",
@@ -21,6 +21,10 @@ var configs = {
     Am0 : "08:30",
     Am1 : "11:00",
     Pm0 : "16:50",
+
+    // 개발용, 배포용
+    dev : 'development',
+    product : 'production'
 }
 
 module.exports = configs;

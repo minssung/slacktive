@@ -22,7 +22,7 @@ class SlackLoginBtn extends React.Component {
                     await this.setState({
                         loading : "Loding"
                     })
-                    const result = await axios.get("http://localhost:5000/login-access",{
+                    const result = await axios.get("http://dev.cedar.kr:3333/login-access",{
                         params : {
                             code
                         }
@@ -42,7 +42,8 @@ class SlackLoginBtn extends React.Component {
         await this.setState({
             loading : "Loding"
         })
-        window.location.href = "http://localhost:5000/login"
+        console.log('로그인페이지 넘어가기 전');
+        window.location.href = "http://dev.cedar.kr:3333/login"
     }
     render() {
         const { loading } = this.state;

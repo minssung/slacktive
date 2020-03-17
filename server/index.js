@@ -17,6 +17,7 @@ const Agenda = require('agenda');
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Origin", "dev.cedar.kr:2222");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
     next();
@@ -42,6 +43,8 @@ app.get('/', (req, res) => {
     // console.log(moment(dp).format("YYYY-M-D LT"))
     res.send("Hello SlackApi World!");
 });
+
+
 
 // ---------- MongoDB 연동 ---------- //
 const mongoConnectionString = 'mongodb://'+configs.host+':27017/agenda';
@@ -93,11 +96,18 @@ try {
 }};
 
 // -------------------- 초기 포트 및 서버 실행 --------------------
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3333;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
     models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
+            console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
+            if (process.env.NODE_ENV === undefined) {
+                console.log('undefined 일 때');
+            }
+            if (process.env.NODE_ENV === 'developer') {
+                console.log('developer 일 때');
+            }
             console.log(`app running on port ${PORT}`);
             try {
                 await axios.get("http://localhost:5000/slackapi/teamUsers");
@@ -141,7 +151,7 @@ app.get('/login-access', async(req,res) => {
                 redirect_uri : "http://dev.cedar.kr:2222",
             }
         });
-        await axios.put("http://localhost:5000/user/update",{
+        await axios.put("http://dev.cedar.kr:3333/user/update",{
             userid : result.data.user_id,
             p_token : result.data.access_token,
         });
