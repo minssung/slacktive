@@ -5,11 +5,13 @@ import axios from 'axios';
 import loadMask from '../../../resource/loadmaskTest.gif'
 import MyDashboard from './My_Dashboard/MyDashboard';
 
-if (process.env.NODE_ENV === 'production') {
-    var configs = require('./server_config');
-} else if (process.env.NODE_ENV === 'development') {
-    var configs = require('./devServer_config');
-}
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../../../client_config');
+// } else if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../../../devClient_config');
+// }
 
 class mypage extends Component {
     constructor(props){

@@ -16,7 +16,8 @@ const Agenda = require('agenda');
 console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'production') {
     var configs = require('./server_config');
-} else if (process.env.NODE_ENV === 'development') {
+}
+if (process.env.NODE_ENV === 'development') {
     var configs = require('./devServer_config');
 }
 
@@ -103,7 +104,7 @@ try {
 }};
 
 // -------------------- 초기 포트 및 서버 실행 --------------------
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || configs.port;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
     models.sequelize.sync({ force:true }).then(()=>{

@@ -7,11 +7,14 @@ import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
 
 console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
-if (process.env.NODE_ENV === 'production') {
-    var configs = require('./server_config');
-} else if (process.env.NODE_ENV === 'development') {
-    var configs = require('./devServer_config');
-}
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../client_config');
+// }
+// if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../devClient_config');
+// }
 
 class IndexRoot extends React.Component {
     constructor(props){

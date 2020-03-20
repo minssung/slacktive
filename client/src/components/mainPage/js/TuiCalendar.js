@@ -3,15 +3,17 @@ import axios from 'axios';
 import moment from "moment";
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
-import configs from '../../../client_config'; // config 파일
+//import configs from '../../../client_config'; // config 파일
 import '../css/popupCrt.css'    // 팝업 생성
 import '../css/popupConfirm.css'    // 팝업 확인
 
-if (process.env.NODE_ENV === 'production') {
-    var configs = require('./server_config');
-} else if (process.env.NODE_ENV === 'development') {
-    var configs = require('./devServer_config');
-}
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../../../client_config');
+// } else if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../../../devClient_config');
+// }
 
 class TestCal extends React.Component {
     constructor(props) {

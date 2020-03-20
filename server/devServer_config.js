@@ -25,6 +25,7 @@ var configs = {
     // API 호출 도메인
     domain : 'http://localhost:5000',
     redirectDomain : "http://localhost:3000",
+    port : 5000
     
 }
 

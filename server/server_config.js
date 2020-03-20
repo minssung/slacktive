@@ -25,6 +25,7 @@ var configs = {
     // API 호출 도메인
     domain : "http://dev.cedar.kr:3333",
     redirectDomain : "http://dev.cedar.kr:2222",
+    port : 3333
 
 }
 
