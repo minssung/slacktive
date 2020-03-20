@@ -23,7 +23,8 @@ var configs = {
     Pm0 : "16:50",
 
     // API 호출 도메인
-    domain : '',
+    domain : "http://dev.cedar.kr:3333",
+    redirectDomain : "http://dev.cedar.kr:2222",
 
 }
 

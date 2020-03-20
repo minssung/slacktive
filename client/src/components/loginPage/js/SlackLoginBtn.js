@@ -2,6 +2,12 @@ import React from 'react';
 import axios from 'axios';
 import loadMask from '../../../resource/loadmaskTest.gif'
 
+if (process.env.NODE_ENV === 'production') {
+    var configs = require('./server_config');
+} else if (process.env.NODE_ENV === 'development') {
+    var configs = require('./devServer_config');
+}
+
 class SlackLoginBtn extends React.Component {
     constructor(props){
         super(props);
@@ -22,7 +28,7 @@ class SlackLoginBtn extends React.Component {
                     await this.setState({
                         loading : "Loding"
                     })
-                    const result = await axios.get("http://192.168.0.40:3333/login-access",{
+                    const result = await axios.get(configs.domain+"/login-access",{
                         params : {
                             code
                         }
@@ -42,7 +48,7 @@ class SlackLoginBtn extends React.Component {
         await this.setState({
             loading : "Loding"
         })
-        window.location.href = "http://192.168.0.40:3333/login"
+        window.location.href = configs.domain+"/login"
     }
     render() {
         const { loading } = this.state;

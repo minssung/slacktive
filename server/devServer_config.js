@@ -21,6 +21,10 @@ var configs = {
     Am0 : "08:30",
     Am1 : "11:00",
     Pm0 : "16:50",
+
+    // API 호출 도메인
+    domain : 'http://localhost:5000',
+    redirectDomain : "http://localhost:3000",
     
 }
 

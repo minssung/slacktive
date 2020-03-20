@@ -6,6 +6,13 @@ import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
 
+console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'production') {
+    var configs = require('./server_config');
+} else if (process.env.NODE_ENV === 'development') {
+    var configs = require('./devServer_config');
+}
+
 class IndexRoot extends React.Component {
     constructor(props){
         super(props);
@@ -67,7 +74,7 @@ class IndexRoot extends React.Component {
 
     // 지각자 체크
     async tardyUser() {
-        const result = await axios.get('http://localhost:5000/user/tardyall');
+        const result = await axios.get(configs.domain+"/user/tardyall");
         const userCheck = result.data;
         const tardyArray = userCheck.map((data) => {
             return data.username
@@ -78,7 +85,7 @@ class IndexRoot extends React.Component {
 
     // 휴가자 체크
     async vacationUser() {
-        const result = await axios.get('http://localhost:5000/user/vacationall');
+        const result = await axios.get(configs.domain+"/user/vacationall");
         const userCheck = result.data;
         const vacationArray = userCheck.map((data) => {
             return data.username
@@ -90,7 +97,7 @@ class IndexRoot extends React.Component {
     // 유저 이름 확인
     async usernameCheck() {
         const usertoken = this.state.usertoken;
-        const userCheck = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
+        const userCheck = await axios.get(`${configs.domain}/user/one?userid=${usertoken}`);
         this.setState({
             task : userCheck.data.usertag
         });
@@ -100,7 +107,7 @@ class IndexRoot extends React.Component {
     // 유저 마지막 출근 시간 확인
     async onWorkTimeCheck() {
         const usertoken = this.state.usertoken;
-        const TimeCheck = await axios.get(`http://localhost:5000/slack/onworktime?userid=${usertoken}`);
+        const TimeCheck = await axios.get(`${configs.domain}/slack/onworktime?userid=${usertoken}`);
         const time = (TimeCheck.data.time).substring(11, 16);
         const timeArray = time.split(':');
         const editTime = timeArray[0]+'시 '+timeArray[1]+'분';

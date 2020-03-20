@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const configs = require("../server_config");
+//const configs = require("../server_config");
 const axios = require('axios');
 const models = require("../models");
 const moment = require('moment');
@@ -10,6 +10,12 @@ const User = models.user;
 const Slackchat = models.slackchat;
 const Calendar = models.calendar;
 const General = models.general;
+
+if (process.env.NODE_ENV === 'production') {
+    var configs = require('../server_config');
+} else if (process.env.NODE_ENV === 'development') {
+    var configs = require('../devServer_config');
+}
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -86,7 +92,7 @@ router.post("/messagePost", async(req,res)=>{
 router.post("/channelHistory", async(req,res) =>{
     try {
         // 가장 최근 데이터 추출
-        let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
+        let historyOne = await axios.get(configs.domain+"/slack/oneRow");
         console.log("History Update");
         
         const result = await axios({
@@ -124,7 +130,7 @@ router.post("/channelHistory", async(req,res) =>{
 // 채널의 메시지 내역 가져오기 ( 일정용 ) --------------------------------------------------
 router.post("/channelHistoryCal", async(req,res) =>{
     try {
-        let historyOne = await axios.get("http://localhost:5000/calendar/oneRow");
+        let historyOne = await axios.get(configs.domain+"/calendar/oneRow");
         console.log("calendar History Update");
         const result = await axios({
             method : "get",
