@@ -1,8 +1,8 @@
 var configs = {
-    database : "slack",
-    user : "cedar",
-    password : "tlejroqkfwk",
-    host : "192.168.0.40",
+    database : "cedar_slack",
+    user : "root",
+    password : "multi1004",
+    host : "localhost",
     dialect : "mysql",
     b_token : "xoxb-891877255443-926835312512-0DPrg5HQzjs8YR6bgqWzmf4X",    // app 토큰
     p_token : "xoxp-891877255443-891877703267-1007165528342-ad3527f8fe466c5ab2cc83e24f123c33",
@@ -21,10 +21,7 @@ var configs = {
     Am0 : "08:30",
     Am1 : "11:00",
     Pm0 : "16:50",
-
-    // API 호출 도메인
-    domain : '',
-
+    
 }
 
 module.exports = configs;

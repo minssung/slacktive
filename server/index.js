@@ -9,9 +9,16 @@ const calendar_router = require("./route/calendar");
 const generals_router = require("./route/generals");
 const axios = require("axios");
 let jwt = require("jsonwebtoken");
-let configs = require('./server_config');
+//let configs = require('./server_config');
 const moment = require('moment');
 const Agenda = require('agenda');
+
+console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'production') {
+    var configs = require('./server_config');
+} else if (process.env.NODE_ENV === 'development') {
+    var configs = require('./devServer_config');
+}
 
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
@@ -101,18 +108,11 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
     models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
-            console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
-            if (process.env.NODE_ENV === undefined) {
-                console.log('undefined 일 때');
-            }
-            if (process.env.NODE_ENV === 'development') {
-                console.log('developer 일 때');
-            }
             console.log(`app running on port ${PORT}`);
             try {
-                await axios.get("http://192.168.0.40:3333/slackapi/teamUsers");
-                await axios.post("http://192.168.0.40:3333/slackapi/channelHistoryInitCal");
-                await axios.post("http://192.168.0.40:3333/slackapi/channelHistoryInit");
+                await axios.get("http://dev.cedar.kr:3333/slackapi/teamUsers");
+                await axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryInitCal");
+                await axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryInit");
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
@@ -151,7 +151,7 @@ app.get('/login-access', async(req,res) => {
                 redirect_uri : "http://dev.cedar.kr:2222",
             }
         });
-        await axios.put("http://192.168.0.40:3333/user/update",{
+        await axios.put("http://dev.cedar.kr:3333/user/update",{
             userid : result.data.user_id,
             p_token : result.data.access_token,
         });
@@ -196,8 +196,8 @@ app.get('/verify', (req,res)=>{
 // -------------------- index Api --------------------
 app.get('/updateHistorys', async(req,res) => {
     try {
-        const resultC = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-        const resultH = axios.post("http://localhost:5000/slackapi/channelHistory");
+        const resultC = axios.post("http://dev.cedar.kr:3333/slackapi/channelHistoryCal");
+        const resultH = axios.post("http://dev.cedar.kr:3333/slackapi/channelHistory");
         const updatDate = new Date();
         await resultC;
         await resultH;
@@ -223,7 +223,7 @@ async function calendarStateUpdatFunc() {
     const todays = moment(new Date()).format('YYYY-MM-')
     const today = moment(new Date()).format('YYYY-MM-DD')
     try {
-        const result = await axios.get(`http://localhost:5000/calendar/allTime?textTime=${todays}`);
+        const result = await axios.get(`http://dev.cedar.kr:3333/calendar/allTime?textTime=${todays}`);
         let resultSet = result.data
         
         resultSet.forEach((data) => {
