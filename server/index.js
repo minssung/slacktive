@@ -9,26 +9,16 @@ const calendar_router = require("./route/calendar");
 const generals_router = require("./route/generals");
 const axios = require("axios");
 let jwt = require("jsonwebtoken");
-//let configs = require('./server_config');
 const moment = require('moment');
 const Agenda = require('agenda');
 
-console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');
-
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('./server_config');
-// }
-// if (process.env.NODE_ENV === 'development') {
-//     var configs = require('./devServer_config');
-// }
 
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    // res.header("Access-Control-Allow-Origin", "http://dev.cedar.kr:2222");
+    res.header("Access-Control-Allow-Origin", configs.redirectDomain);
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
     next();
@@ -45,13 +35,6 @@ app.use("/generals", generals_router);
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', (req, res) => {
-    //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    // let text = moment().format()
-    // moment.locale('ko')
-    // let mom = moment(text).format("YYYY. M. D (ddd) LT");
-    // console.log(mom)
-    // let dp = moment(mom, "YYYY/MM/DD")
-    // console.log(moment(dp).format("YYYY-M-D LT"))
     res.send("Hello SlackApi World!");
 });
 

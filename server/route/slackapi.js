@@ -33,6 +33,11 @@ router.get("/teamUsers", async(req,res)=>{
                 token : configs.b_token,
             }
         });
+        try {
+            result.data.ok === true
+        } catch (err) {
+            console.log('어딘가 문제가 있군 그래', err);
+        }
         const resultSet = result.data.members;
         const array = resultSet.map((data)=>{
             return {
@@ -62,10 +67,10 @@ router.get("/teamUsers", async(req,res)=>{
                     }
                 });
         }
-        console.log("qmqmq")
         res.send(array);
     } catch(err){
         console.log("db created err : " + err);
+        res.status(500).send(err);
     }
 });
 

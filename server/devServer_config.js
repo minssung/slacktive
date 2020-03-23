@@ -4,11 +4,11 @@ var configs = {
     password : "multi1004",
     host : "localhost",
     dialect : "mysql",
-    b_token : "xoxb-891877255443-920415436790-lO14rUeNfh2Gwf5aulBZfxa4",    // app 토큰
-    p_token : "xoxp-891877255443-903345006064-985515730113-0cdcc4b499041bb5259ddc9dd37f71c1",
-    bearer_p_token : "Bearer xoxp-891877255443-903345006064-985515730113-0cdcc4b499041bb5259ddc9dd37f71c1",
-    c_id : "891877255443.917690987700",             // app client 아이디
-    c_s_id : "a3d91f285b22bfbb47c29f13fdd12c5c",    // app secret 아이디
+    b_token : "xoxb-891877255443-1018466406144-HAo1S1KkpF0Z4WfnqOWatDZw",    // app 토큰
+    p_token : "xoxp-891877255443-903345006064-1020678747494-5725c360817dd864e772f849be189cbd",
+    bearer_p_token : "Bearer xoxp-891877255443-903345006064-1020678747494-5725c360817dd864e772f849be189cbd",
+    c_id : "891877255443.1020233666183",             // app client 아이디
+    c_s_id : "41b20749c5abaddff0218a565ed76a00",    // app secret 아이디
     channel_time : "CSZTZ7TCL",     // 출퇴근
     channel_calendar : "CS7RWKTT5", // 일정용
     secretKey : "akdom",

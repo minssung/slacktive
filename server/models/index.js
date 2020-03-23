@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const basename  = path.basename(__filename);
 const Sequelize = require("sequelize");
+
+// 로컬에서 배포 실행용
 // const config = require("../server_config");
 
 let config = {};
