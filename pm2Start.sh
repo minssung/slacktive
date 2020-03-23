@@ -1,3 +1,3 @@
-pm2 start ecosystem.config.js
-cd client
-pm2 start ecosystem.client.js
+pm2 start ecosystem.config.js --env production
+cd client/build
+pm2 start ecosystem.config.js --env production

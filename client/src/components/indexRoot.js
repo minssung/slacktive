@@ -5,7 +5,8 @@ import SlackLoginBtn from './loginPage/js/SlackLoginBtn';
 import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
-
+console.log(process);
+console.log(process.env);
 console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
