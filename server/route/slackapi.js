@@ -11,11 +11,14 @@ const Slackchat = models.slackchat;
 const Calendar = models.calendar;
 const General = models.general;
 
-if (process.env.NODE_ENV === 'production') {
-    var configs = require('../server_config');
-} else if (process.env.NODE_ENV === 'development') {
-    var configs = require('../devServer_config');
-}
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../devServer_config') : configs = require('../server_config');
+
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../server_config');
+// } else if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../devServer_config');
+// }
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -59,6 +62,7 @@ router.get("/teamUsers", async(req,res)=>{
                     }
                 });
         }
+        console.log("qmqmq")
         res.send(array);
     } catch(err){
         console.log("db created err : " + err);

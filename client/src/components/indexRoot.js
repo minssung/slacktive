@@ -6,15 +6,8 @@ import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
 
-console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('../client_config');
-// }
-// if (process.env.NODE_ENV === 'development') {
-//     var configs = require('../devClient_config');
-// }
 
 class IndexRoot extends React.Component {
     constructor(props){
@@ -59,7 +52,7 @@ class IndexRoot extends React.Component {
                 }, (err) => {
                     console.log("promise all err : " + err);
                 })
-                const userOne = await axios.get(`http://dev.cedar.kr:3333/user/one?userid=${this.state.usertoken}`);
+                const userOne = await axios.get(`${configs.domain}/user/one?userid=${this.state.usertoken}`);
                 if(!userOne.data.usertag){
                     await this.setState({
                         userinfoSet : false
@@ -150,7 +143,7 @@ class IndexRoot extends React.Component {
     async usersTokenChecked(){
         if(localStorage.getItem("usertoken")){
             try {
-                const result = await axios("http://dev.cedar.kr:3333/verify",{
+                const result = await axios(configs.domain+"/verify",{
                     method : "get",
                     headers : {
                         'content-type' : 'text/json',
@@ -203,7 +196,7 @@ class IndexRoot extends React.Component {
             return;
         }
         try {
-            await axios.put("http://dev.cedar.kr:3333/user/update",{
+            await axios.put(configs.domain+"/user/update",{
                 userid : this.state.usertoken,
                 usertag : this.tag.current.value,
                 usercolor : this.color.current.value,

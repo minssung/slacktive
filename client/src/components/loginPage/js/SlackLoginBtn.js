@@ -4,11 +4,6 @@ import loadMask from '../../../resource/loadmaskTest.gif'
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('../../../client_config');
-// } else if (process.env.NODE_ENV === 'development') {
-//     var configs = require('../../../devClient_config');
-// }
 
 class SlackLoginBtn extends React.Component {
     constructor(props){
@@ -25,6 +20,7 @@ class SlackLoginBtn extends React.Component {
         if(!localStorage.getItem("usertoken")){
             const url = new URL(window.location.href);
             const code = url.searchParams.get("code");
+            console.log(code);
             if(code){
                 try {
                     await this.setState({
@@ -37,11 +33,10 @@ class SlackLoginBtn extends React.Component {
                     });
                     console.log("jwt user token : "+result.data);
                     localStorage.setItem("usertoken", result.data);
-    
                     window.location.href = "/";
                 } catch(err) {
                     console.log("code already use err : " + err);
-                    window.location.href = "/";
+                    process.exit(1);
                 }
             }
         }

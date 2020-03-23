@@ -14,18 +14,21 @@ const moment = require('moment');
 const Agenda = require('agenda');
 
 console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
-if (process.env.NODE_ENV === 'production') {
-    var configs = require('./server_config');
-}
-if (process.env.NODE_ENV === 'development') {
-    var configs = require('./devServer_config');
-}
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');
+
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('./server_config');
+// }
+// if (process.env.NODE_ENV === 'development') {
+//     var configs = require('./devServer_config');
+// }
 
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.header("Access-Control-Allow-Origin", "http://dev.cedar.kr:2222");
+    // res.header("Access-Control-Allow-Origin", "http://dev.cedar.kr:2222");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
     next();
@@ -110,6 +113,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
     models.sequelize.sync({ force:true }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
+            console.log(configs);
             try {
                 await axios.get(configs.domain+"/slackapi/teamUsers");
                 await axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
