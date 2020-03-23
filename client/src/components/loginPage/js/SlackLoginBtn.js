@@ -2,13 +2,13 @@ import React from 'react';
 import axios from 'axios';
 import loadMask from '../../../resource/loadmaskTest.gif'
 
-// let configs = {};
-// process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
-if (process.env.NODE_ENV === 'production') {
-    var configs = require('../../../client_config');
-} else if (process.env.NODE_ENV === 'development') {
-    var configs = require('../../../devClient_config');
-}
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../../../client_config');
+// } else if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../../../devClient_config');
+// }
 
 class SlackLoginBtn extends React.Component {
     constructor(props){
