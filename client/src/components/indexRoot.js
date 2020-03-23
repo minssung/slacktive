@@ -7,6 +7,8 @@ import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
 
 console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
+// console.log('REACT_APP: ', REACT_APP_NODE_ENV);
+
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
 // if (process.env.NODE_ENV === 'production') {
