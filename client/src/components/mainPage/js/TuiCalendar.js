@@ -10,6 +10,11 @@ import '../css/popupConfirm.css'    // 팝업 확인
 import arrow from '../css/arrow.png';   // 카테고리의 화살표
 import loadMask from '../../../resource/loadmaskTest.gif'   // loadmask
 
+import Timekeeper from 'react-timekeeper';
+import 'react-daypicker/lib/DayPicker.css';
+import DayPicker from 'react-daypicker';
+import charImg from '../css/char.png';
+
 moment.locale('en');    // ko -> 한글 버전. => moment.js에서 한글로 변환하는게 잘 안되고 오류가 있음 ( invalid err )
 
 class TestCal extends React.Component {
@@ -32,23 +37,26 @@ class TestCal extends React.Component {
             saveData : {},  // 등록 및 수정으로 저장 시
             popupInv : "none",  // 팝업 창 제어용
             title : "", // 제목
-            checkBoxDays : false,   // 종료일과 같음 버튼
             partnerInput : "",  // 파트너 검색 인풋
             partnerDrop : "none",   // 파트너 리스트 창 제어용
             partnerData : [],   // db에서 가져와 담을 값
             partnerSelt : [],   // 선택한 파트너 값
             memoArea : "",  // 메모
             cateClick : false,  // 카테고리 리스트 창 제어용
+            showTimeStart : false,
+            showTimeEnd : false,
+            showDateStart : false,
+            showDateEnd : false,
             // 드롭다운의 리스트들
             cateTag : [
-                {name : "출장 / 미팅", color : "greenyellow", num : 0},
-                {name : "회의", color : "turquoise", num : 1},
-                {name : "휴가관련", color : "gold", num : 2},
-                {name : "생일", color : "thistle", num : 3},
-                {name : "기타", color : "violet", num : 4},
+                {name : "출장 / 미팅", color : configs.colors[0], num : 0},
+                {name : "회의", color : configs.colors[1], num : 1},
+                {name : "휴가관련", color : configs.colors[2], num : 2},
+                {name : "생일", color : configs.colors[3], num : 3},
+                {name : "기타", color : configs.colors[4], num : 4},
             ],
             // 드롭다운의 현재 보여질 리스트 항목
-            currentTag : { name : "출장 / 미팅", color : "greenyellow", num : 0 },
+            currentTag : { name : "출장 / 미팅", color : configs.colors[0], num : 0 },
             // popup schedule state
             in_data : {},   // 데이터를 넘겨주거나 보여줄 때
             popupInvSchedule : "none",
@@ -62,7 +70,7 @@ class TestCal extends React.Component {
         }
     }
     // 초기 마운트
-    async componentDidMount(){
+    async componentDidMount() {
         // token verify
         await this.setState({
             usertoken : await this.props.Token
@@ -234,10 +242,9 @@ class TestCal extends React.Component {
             endDate : moment(e.end._date).format("YYYY-MM-DD HH:mm"),
             endTime : moment(e.end._date).format("LT"),
             title : "",
-            currentTag : { name : "출장 / 미팅", color : "greenyellow", num : 0 },
+            currentTag : { name : "출장 / 미팅", color : configs.colors[0], num : 0 },
             partnerInput : "",
             memoArea : "",
-            partnerInput : "",
             partnerData : [],
             partnerSelt : [],
             partnerDrop : "none",
@@ -261,7 +268,7 @@ class TestCal extends React.Component {
         if(currentTag.num === 2) {
             let timeText = "";
             // 날짜 차이가 1인 경우
-            if(moment(data.endDate).diff(data.startDate, "days") >= 1){
+            if(moment(data.endDate).diff(data.startDate, "days") >= 1) {
                 timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일]") + "~" + moment(data.endDate).format("YYYY[년] MM[월] DD[일]") + " " + data.title
             // 날짜 차이가 없는 경우 = 종료일과 같음
             } else {
@@ -325,8 +332,7 @@ class TestCal extends React.Component {
                     category: "time",
                     start : data.startDate,
                     end : data.endDate,
-                    bgColor : "#ffffff",
-                    color : "#ffffff",
+                    bgColor : user.data.usercolor,
                 }]);
                 await post;
             } catch(err) {
@@ -541,19 +547,39 @@ class TestCal extends React.Component {
     titleInput(e) {
         this.setState({ title : e.target.value, })
     }
-    dateTime(selt) {
-
+    // 시계 모달로 입력받은 값 
+    dateTime(e) {
+        const { showTimeEnd, showTimeStart} = this.state;
+        if(showTimeStart) {
+            this.setState({ startTime : e.formattedSimple + " " + e.meridiem.toUpperCase() })
+        }
+        if(showTimeEnd) {
+            this.setState({ endTime : e.formattedSimple + " " + e.meridiem.toUpperCase() })
+        }
+    }
+    // 시계 팝업 제어용
+    setShowTime(bool) {
+        if(bool === "end") {
+            this.setState({ showTimeEnd : true })
+        } else if(bool === "start"){
+            this.setState({ showTimeStart : true})
+        } else {
+            this.setState({ showTimeStart : bool, showTimeEnd : bool })
+        }
+    }
+    // 달력 팝업 제어용
+    setShowDate(bool) {
+        if(bool === "end") {
+            this.setState({ showDateEnd : true })
+        } else if(bool === "start"){
+            this.setState({ showDateStart : true})
+        } else {
+            this.setState({ showDateStart : bool, showDateEnd : bool })
+        }
     }
     // 파트너 인풋 값
-    partnerInput(e) {
-        this.setState({ partnerInput : e.target.value })
-    }
-    // 파트너 삭제 버튼
-    partnerCancel(id) {
-        this.setState({ partnerSelt : this.state.partnerSelt.filter(val => val.id !== id) })
-    }
-    // 검색 버튼 누를 시
-    async searchPartner() {
+    async partnerInput(e) {
+        await this.setState({ partnerInput : e.target.value })
         const { partnerInput } = this.state;
         if(partnerInput) {
             try {
@@ -565,22 +591,34 @@ class TestCal extends React.Component {
                 console.log("search Partner api err : " + err);
             }
             this.setState({ partnerDrop : "flex" });
+        } else {
+            this.setState({ partnerDrop : "none" });
         }
+    }
+    // 파트너 삭제 버튼
+    partnerCancel(id) {
+        this.setState({ partnerSelt : this.state.partnerSelt.filter(val => val.id !== id) })
     }
     // 해당 파트너 클릭 시
     partnerClick(data) {
         this.setState({ 
-            partnerDrop : "none", 
-            partnerSelt : this.state.partnerSelt.concat(data) 
+            partnerDrop : "none",
+            partnerInput : "",
+            partnerSelt : this.state.partnerSelt.concat(data)   // state 값에 추가
         });
-    }
-    // 종료일과 같음 버튼 클릭 시
-    checkBoxDays(e) {
-        this.setState({ checkBoxDays : e.target.checked })
     }
     // 일정 등록을 위한 팝업 창
     popupCreate() {
-        const { startDate,endDate,popupInv,cateClick,cateTag,currentTag,memoArea,partnerInput,title,startTime,endTime,updateTF,partnerDrop,partnerData,partnerSelt } = this.state;
+        const { 
+            startDate,endDate,startTime,endTime,    // 시간 관련
+            popupInv,   // 팝업 창 제어
+            cateClick,cateTag,currentTag,   // 태그 관련    
+            memoArea,title,     // 메모와 타이틀
+            partnerInput,partnerDrop,partnerData,partnerSelt,   // 파트너 등록 관련
+            updateTF,    // 수정 시
+            showTimeStart,showDateStart,
+            showTimeEnd,showDateEnd,
+        } = this.state;
         return <div className="popup-crt-main" style={{
             display : popupInv
         }}>
@@ -597,19 +635,54 @@ class TestCal extends React.Component {
                     <span className="popup-crt-bodyText">시작시간</span>
                 </div>
                 <div className="popup-crt-bodyTimeDate">
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText">{moment(startDate).format("YYYY. MM. DD (ddd)")}</span>
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.dateTime.bind(this,"start")}>{startTime}</span>
-                    <div>
-                        <input type="checkbox" className="popup-crt-bodyTimeDateChk" onChange={this.checkBoxDays.bind(this)}></input> 종료일과 같음
-                    </div>
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText" onClick={this.setShowDate.bind(this,"start")}>{moment(startDate).format("YYYY. MM. DD (ddd)")}</span>
+                    {
+                        showDateStart && 
+                        <div className="popup-crt-datePicker">
+                            <DayPicker onDayClick={(day) => this.setState({ startDate : day })} />
+                            <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}><span>close</span></div>
+                        </div>
+                    }
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.setShowTime.bind(this,"start")}>{startTime}</span>
+                    {
+                        showTimeStart &&
+                        <div className="popup-crt-timePicker">
+                            <Timekeeper
+                                onChange={this.dateTime.bind(this)}
+                                switchToMinuteOnHourSelect
+                                closeOnMinuteSelect={true}
+                                hour24Mode
+                            />
+                            <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}><span>close</span></div>
+                        </div>
+                    }
                 </div>
                 <div className="popup-crt-bodyTime">
                     <span className="popup-crt-bodyText popup-crt-bodyDateText">종료일</span>
                     <span className="popup-crt-bodyText">종료시간</span>
                 </div>
                 <div className="popup-crt-bodyTimeDate">
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText">{moment(endDate).format("YYYY. MM. DD (ddd)")}</span>
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.dateTime.bind(this,"end")}>{endTime}</span>
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText" onClick={this.setShowDate.bind(this,"end")}>{moment(endDate).format("YYYY. MM. DD (ddd)")}</span>
+                    {
+                        showDateEnd && 
+                        <div className="popup-crt-datePicker">
+                            <DayPicker onDayClick={(day) => this.setState({ endDate : day })} />
+                            <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}>close</div>
+                        </div>
+                    }
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.setShowTime.bind(this,"end")}>{endTime}</span>
+                    {
+                        showTimeEnd &&
+                        <div className="popup-crt-timePicker">
+                            <Timekeeper
+                                onChange={this.dateTime.bind(this)}
+                                switchToMinuteOnHourSelect
+                                closeOnMinuteSelect={true}
+                                hour24Mode
+                            />
+                            <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}>close</div>
+                        </div>
+                    }
                 </div>
                 <span className="popup-crt-bodyText">카테고리</span>
                 <div className="popup-crt-bodyCateContent">
@@ -637,7 +710,7 @@ class TestCal extends React.Component {
                 </div>
                 <span className="popup-crt-bodyText">참여인원</span>
                 <div className="popup-crt-bodyPartnerDiv">
-                    <img onClick={this.searchPartner.bind(this)} alt="" className="popup-crt-bodyPartnerInputImg"></img>
+                    <img alt="char" src={charImg} className="popup-crt-bodyPartnerInputImg"></img>
                     <input type="text" className="popup-crt-bodyPartnerInput" onChange={this.partnerInput.bind(this)} value={partnerInput}></input>
                 </div>
                 <div className="popup-crt-bodyPartnerDroplist" style={{ display : partnerDrop }}>
@@ -646,7 +719,7 @@ class TestCal extends React.Component {
                         partnerData.map((data,i)=> {
                             return <div key={i} className="popup-crt-bodyPartnerBoxRow" onClick={this.partnerClick.bind(this,data)}>
                                 <div className="popup-crt-bodyPartnerSpaceDiv">
-                                    <img className="popup-crt-bodyPartnerImg"></img>
+                                    <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
                                     <span className="popup-crt-bodyTextContent">{data.username}</span>
                                 </div>
                             </div>
@@ -658,9 +731,9 @@ class TestCal extends React.Component {
                         partnerSelt &&
                         partnerSelt.map((data,i)=> {
                             return <div key={i} className="popup-crt-bodyPartnerBox">
-                                <button className="popup-crt-bodyPartnerDelt" onClick={this.partnerCancel.bind(this,data.id)}><span className="popup-crt-bpdt">x</span></button>
-                                <img className="popup-crt-bodyPartnerImg"></img>
+                                <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
                                 <span className="popup-crt-bodyTextContent">{data.username}</span>
+                                <button className="popup-crt-bodyPartnerDelt" onClick={this.partnerCancel.bind(this,data.id)}><span className="popup-crt-bpdt">x</span></button>
                             </div>
                         })
                     }
@@ -678,6 +751,14 @@ class TestCal extends React.Component {
     // 팝업 창의 저장 버튼 누를 시
     async clickSave(updateTF) {
         const { currentTag,startDate,endDate,memoArea,title,startTime,endTime,partnerSelt } = this.state
+        if(moment(endDate).diff(startDate, "days") < 0) {
+            alert("날짜 입력이 잘못되었습니다. 다시 시도해주세요.");
+            return;
+        }
+        if(!title) {
+            alert("제목을 입력해주세요.");
+            return;
+        }
         await this.setState({
             saveData : {},
         })
@@ -739,7 +820,7 @@ class TestCal extends React.Component {
                     c_id : e.schedule.calendarId,
                     title : calendarResult.data.cate,
                     tag : calendarResult.data.state,
-                    color : "gold",
+                    color : configs.colors[2],
                     num : 0,
                     start : moment(e.schedule.start._date).format("YYYY-MM-DD HH:mm"),
                     end : moment(e.schedule.end._date).format("YYYY-MM-DD HH:mm"),
@@ -829,7 +910,7 @@ class TestCal extends React.Component {
                         in_data.partner &&
                         in_data.partner.map((data,i)=>{
                             return <div key={i} className="popup-confirm-bodyPartnerBox">
-                                <img className="popup-confirm-bodyPartnerImg"></img>
+                                <img src={charImg} alt="char" className="popup-confirm-bodyPartnerImg"></img>
                                 <span className="popup-confirm-bodyTextContent">{data.username}</span>
                             </div>
                         })
@@ -885,7 +966,7 @@ class TestCal extends React.Component {
             <div className="tui-div">
                 {
                     !loading && <div className="loadMaskDiv">
-                        <img alt="Logind~" src={loadMask} className="loadMask"></img>
+                        <img alt="Loging~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
                 <div>

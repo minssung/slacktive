@@ -148,6 +148,9 @@ class mypage extends Component {
             console.log("Holiday Usage History err : " + err);
         }
     }
+    myDash() {
+        console.log("a")
+    }
     // ------------------------------ rendering ------------------------------
     render() {
         const { loading,holidayHistorys,today } = this.state;           // 로드 마스크, 휴가 사용 내역, 오늘 날짜

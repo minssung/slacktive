@@ -33,7 +33,7 @@ router.get("/allTime", async(req, res) => {
         const result = await General.findAll({
             include : [{
                 model : models.user,
-                attributes : ['username']
+                attributes : ['username','usertag']
             }],
             order : [[
                 'id' , 'ASC'

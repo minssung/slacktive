@@ -32,7 +32,7 @@ app.use("/generals", generals_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
-app.get('/', (req, res) => {
+app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
     res.send("Hello SlackApi World!");
 });
@@ -97,7 +97,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
                 // await axios.get("http://localhost:5000/slackapi/teamUsers");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
-                // await axios.get("http://localhost:5000/")
+                await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
@@ -115,7 +115,7 @@ app.get('/login', async(req, res) => {
             params : {
                 scope : 'chat:write:user,users:read',
                 client_id : configs.c_id,
-                redirect_uri : "http://localhost:3000",
+                redirect_uri : "http://localhost:3000/",
             }
         });
         res.send(result.data);
@@ -132,7 +132,7 @@ app.get('/login-access', async(req,res) => {
                 client_id : configs.c_id,
                 client_secret : configs.c_s_id,
                 code : req.query.code,
-                redirect_uri : "http://localhost:3000",
+                redirect_uri : "http://localhost:3000/",
             }
         });
         await axios.put("http://localhost:5000/user/update",{
@@ -192,51 +192,43 @@ app.get('/updateHistorys', async(req,res) => {
 })
 // 갱신 버튼 누를 시 즉시 상태 업데이트 시도
 app.get('/updatState', async(req,res) => {
-    let text = "";
+    let result = [];
     try {
-        await calendarStateUpdatFunc();
-        text = "업데이트 성공"
+        result = await calendarStateUpdatFunc();
     } catch (err) {
-        text = "업데이트 에러"
+        console.log("updat state err : " + err);
     }
-    res.send(text)
+    res.send(result)
 });
 
 // calendar 내용 토대로 오늘 날짜의 일정이 있는 사람의 상태를 체크 및 업뎃 -> 휴가, 병가, 미팅, 회의 등..
 async function calendarStateUpdatFunc() {
     const todays = moment(new Date()).format('YYYY-MM-')
     const today = moment(new Date()).format('YYYY-MM-DD')
+    let resultArray = [];
     try {
-        const result = await axios.get(`http://localhost:5000/calendar/allTime?textTime=${todays}`);
-        let resultSet = result.data
-        
-        resultSet.forEach((data) => {
-            let getDays = /(\d{4}-\d{2}-)(\d{2}?([,~]?\d{2}?)*)/.exec(data.textTime);
+        const resultCal = await axios.get(`http://localhost:5000/calendar/allTime?textTime=${todays}`);
+        const resultGnr = await axios.get(`http://localhost:5000/generals/allTime?textTime=${todays}`);
+        resultCal.data.forEach((data) => {
+            let getDay = [];
             let update = false;
-            // 0 : default
-            // 1 : 년-월-
-            // 2 : 일 수 배열 혹은 단일
-            // 3 : 단일 인지 복수 인지 여부를 나타낼 값
-            if(getDays[3]){
-                if(/\,{1,}/.exec(getDays[2])){
-                    getDays[2] = getDays[2].split(/[,~]/)
-                    // , 기준 일 시 배열로 나눠서 각각 오늘 날짜와 검증
-                    for (let index = 0; index < getDays[2].length; index++) {
-                        getDays[2][index] = todays + getDays[2][index]
-                        if(getDays[2][index] === today){
-                            update = true;
-                            break;
-                        }
+            if(/\d{4}-\d{2}-(\d{2}(,?\d{2}?)+)/.test(data.textTime)) {
+                getDay = (data.textTime).split(",")
+                // , 기준 일 시 배열로 나눠서 각각 오늘 날짜와 검증
+                for (let index = 0; index < getDay.length; index++) {
+                    if(index !== 0) {
+                        getDay[index] = todays + getDay[index]
                     }
-                } else {
-                    // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
-                    getDays[2] = getDays[2].split(/[,~]/)
-                    for (let index = 0; index < getDays[2].length; index++) {
-                        getDays[2][index] = todays + getDays[2][index]
-                    }
-                    if(moment(getDays[2][0]).diff(today) <= 0 && moment(getDays[2][getDays[2].length -1]).diff(today) >= 0){
+                    if(getDay[index] === today){
                         update = true;
+                        break;
                     }
+                }
+            // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
+            } else if(/~/.test(data.textTime)) {
+                getDay = (data.textTime).split("~")
+                if(moment(getDay[0]).diff(today) <= 0 && moment(getDay[1]).diff(today) >= 0){
+                    update = true;
                 }
             } else {
                 // 단일 날짜가 오늘 날짜인지 검증
@@ -254,8 +246,33 @@ async function calendarStateUpdatFunc() {
                         id : data.userId,
                     }
                 })
+                resultArray.push({
+                    state : data.state,
+                    time : data.textTime,
+                    cate : data.cate,
+                    userid : data.userId,
+                    user : data.user,
+                })
             }
         });
+        resultGnr.data.forEach((data) => {
+            // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
+            let getDay = (data.textTime).split("~")
+            getDay[0] =  moment(getDay[0], "YYYY-MM-DD")
+            getDay[1] =  moment(getDay[1], "YYYY-MM-DD")
+            if(moment(getDay[0]).diff(today) <= 0 && moment(getDay[1]).diff(today) >= 0){
+                resultArray.push({
+                    state : data.tag,
+                    time : data.textTime,
+                    partner : data.partner,
+                    userid : data.userId,
+                    user : data.user,
+                    title : data.title,
+                    content : data.content,
+                })
+            }
+        });
+        return resultArray;
     } catch (err){
         console.log("scheduler err code calendars selt : " + err);
     }

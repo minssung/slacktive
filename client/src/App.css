@@ -66,9 +66,9 @@ html, body, #root {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    width: 90%;
+    width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow-y: scroll;
 }
 
 /* ---------- userInfo css ---------- */
@@ -171,32 +171,6 @@ html, body, #root {
     top: 0px;
     left: 0px;
     opacity: 0.1;
-}
-
-.slack-mainDiv {
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-    margin-right: -2.5%;
-    width: 186px;
-    height: 110px;
-}
-
-.slack-dash {
-    background-color: white;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    padding-left: 20px;
-    padding-right: 20px;
-    font-size: 15px;
-    align-items: flex-start;
-    /* justify-content: center;
-    flex-wrap: wrap; */
 }
 
 /* 메뉴 그림 css */
@@ -388,7 +362,61 @@ html, body, #root {
 .card_color {
     width: 10px;
     height: 110px;
-    background-color: yellowgreen;
+}
+
+.slack-mainDiv {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 186px;
+    height: 110px;
+    border-top-right-radius: 19px;
+    border-bottom-right-radius: 19px;
+    background-color: white;
+}
+
+.slack-dash {
+    width: 87%;
+    margin-top: 13px;
+    margin-left: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.slack-title {
+    font-size: 16px;
+    color: #000000;
+}
+
+.slack-userImg {
+    width: 30px;
+    height: 30px;
+}
+
+.slack-partnerDiv {
+    width: 87%;
+    margin-left: 14px;
+    margin-right: 14px;
+}
+
+.slack-partner {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.slack-timeDiv {
+    width: 87%;
+    margin-left: 14px;
+    margin-right: 14px;
+    padding-bottom: 10px;
+}
+
+.slack-textTime {
+    font-size: 12px;
+    color: #777777;
 }
 
 /* 오늘의 카드 디자인 */

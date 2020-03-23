@@ -32,7 +32,7 @@ router.get("/allTime", async(req, res) => {
         const result = await Calendar.findAll({
             include : [{
                 model : models.user,
-                attributes : ['username']
+                attributes : ['username','usertag']
             }],
             order : [[
                 'id' , 'ASC'
