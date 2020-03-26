@@ -4,9 +4,9 @@ var configs = {
     password : "tlejroqkfwk",
     host : "192.168.0.40",
     dialect : "mysql",
-    b_token : "xoxb-891877255443-926835312512-wuYJCTnKPJLhzU4DJ5C9P8AB",    // app 토큰
-    p_token : "xoxp-891877255443-891877703267-1007212747350-29c645cef196f730740191e290fc31be",
-    bearer_p_token : "Bearer xoxp-891877255443-891877703267-1007212747350-29c645cef196f730740191e290fc31be",
+    b_token : "xoxb-891877255443-926835312512-UemKqFHgbkD7cI6WOKoJ41lF",    // app 토큰
+    p_token : "xoxp-891877255443-891877703267-1014681147938-e327be26fafd4c069e39183191f33368",
+    bearer_p_token : "Bearer xoxp-891877255443-891877703267-1014681147938-e327be26fafd4c069e39183191f33368",
     c_id : "891877255443.906922103267",             // app client 아이디
     c_s_id : "75d6c672024db024e2f4c481ba3a56e2",    // app secret 아이디
     channel_time : "CSZTZ7TCL",     // 출퇴근

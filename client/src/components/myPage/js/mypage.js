@@ -7,11 +7,6 @@ import MyDashboard from './My_Dashboard/MyDashboard';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('../../../client_config');
-// } else if (process.env.NODE_ENV === 'development') {
-//     var configs = require('../../../devClient_config');
-// }
 
 class mypage extends Component {
     constructor(props){
@@ -155,6 +150,9 @@ class mypage extends Component {
         } catch(err) {
             console.log("Holiday Usage History err : " + err);
         }
+    }
+    myDash() {
+        console.log("a")
     }
     // ------------------------------ rendering ------------------------------
     render() {

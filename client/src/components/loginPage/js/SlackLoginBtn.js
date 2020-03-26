@@ -20,7 +20,6 @@ class SlackLoginBtn extends React.Component {
         if(!localStorage.getItem("usertoken")){
             const url = new URL(window.location.href);
             const code = url.searchParams.get("code");
-            console.log(code);
             if(code){
                 try {
                     await this.setState({

@@ -14,13 +14,12 @@ module.exports = (sequelize, DataTypes) => {
         },
         content: {
             type: DataTypes.STRING,
-            allowNull: false
         },
         tag: {
             type: DataTypes.STRING,
         },
         partner: {
-            type: DataTypes.STRING,
+            type: DataTypes.JSON,
         },
         textTime: {
             type: DataTypes.STRING,
