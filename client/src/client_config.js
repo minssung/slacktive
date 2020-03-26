@@ -6,5 +6,8 @@ var client_c = {
     channel_calendar : "CS7RWKTT5",
     channel_times : "CSZTZ7TCL",
     colorArray : ['#FFB1B1','#FFE0B1','#FFF8B1','#E6FFB1','#B1FFB1','#B1FFDE','#B1FEFF','#B1D8FF','#B1BAFF','#D1B1FF','#FFB1F8'],
+
+    // API 호출 도메인
+    domain : "http://dev.cedar.kr:3333",
 }
 module.exports = client_c;

@@ -3,9 +3,17 @@ import axios from 'axios';
 import moment from "moment";
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
-import configs from '../../../client_config'; // config 파일
+//import configs from '../../../client_config'; // config 파일
 import '../css/popupCrt.css'    // 팝업 생성
 import '../css/popupConfirm.css'    // 팝업 확인
+
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../../../client_config');
+// } else if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../../../devClient_config');
+// }
 
 class TestCal extends React.Component {
     constructor(props) {
@@ -53,7 +61,7 @@ class TestCal extends React.Component {
         const { usertoken } = this.state;
         // user Db setting
         await this.setState({
-            user : await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`)
+            user : await axios.get(`${configs.domain}/user/one?userid=${usertoken}`)
         })
         // calendar init moubt
         await this.scheduleInitMount()
@@ -118,12 +126,12 @@ class TestCal extends React.Component {
                 timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일] ") + data.radio
             }
             try {
-                await axios.post("http://localhost:5000/slackapi/messagePost",{
+                await axios.post(configs.domain+"/slackapi/messagePost",{
                     channel : configs.channel_calendar,
                     p_token : user.data.p_token,
                     text : timeText
                 })
-                const result = await axios.post("http://localhost:5000/slackapi/channelHistoryCal")
+                const result = await axios.post(configs.domain+"/slackapi/channelHistoryCal")
                 calendar.createSchedules([{
                     id: result.data[0].id,
                     calendarId: '0',
@@ -140,12 +148,12 @@ class TestCal extends React.Component {
             }
         } else {
             try {
-                await axios.post("http://localhost:5000/slackapi/messagePost",{
+                await axios.post(configs.domain+"/slackapi/messagePost",{
                     channel : user.data.userchannel,
                     p_token : user.data.p_token,
                     text : `[${data.title}] ${data.content} / ${data.startDate}~${data.endDate} / 참여자 : ${data.partner}`
                 })
-                const result = await axios.post("http://localhost:5000/generals/create",{
+                const result = await axios.post(configs.domain+"/generals/create",{
                     title : data.title,
                     content : data.content,
                     partner : data.partner,
@@ -199,8 +207,8 @@ class TestCal extends React.Component {
         }
         try {
             const { user } = this.state;
-            let result = await axios.get(`http://localhost:5000/calendar/one?id=${data.schedule.id}`);
-            await axios.put("http://localhost:5000/calendar/update",{
+            let result = await axios.get(`${configs.domain}/calendar/one?id=${data.schedule.id}`);
+            await axios.put(configs.domain+"/calendar/update",{
                 id : data.schedule.id,
                 userId : user.data.id,
                 text : timeText,
@@ -208,7 +216,7 @@ class TestCal extends React.Component {
                 textTime : dbTimeText,
                 textTitle : data.changes.title
             });
-            await axios.post("http://localhost:5000/slackapi/messageUpdate",{
+            await axios.post(configs.domain+"/slackapi/messageUpdate",{
                 p_token : user.data.p_token,
                 channel : configs.channel_calendar,
                 text : timeText,
@@ -235,22 +243,22 @@ class TestCal extends React.Component {
         try {
             let scheduleResult = [];
             if(c_id !== "99") {
-                scheduleResult = await axios.get(`http://localhost:5000/calendar/one?id=${id}`);
-                await axios.delete(`http://localhost:5000/calendar/delete?id=${id}`);
-                await axios.post("http://localhost:5000/slackapi/messageDelete",{
+                scheduleResult = await axios.get(`${configs.domain}/calendar/one?id=${id}`);
+                await axios.delete(`${configs.domain}/calendar/delete?id=${id}`);
+                await axios.post(configs.domain+"/slackapi/messageDelete",{
                 p_token : user.data.p_token,
                 channel : configs.channel_calendar,
                 time : scheduleResult.data.ts,
             })
             } else {
-                const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${id}`);
+                const generalResult = await axios.get(`${configs.domain}/generals/one?id=${id}`);
                 console.log(generalResult)
-                await axios.post("http://localhost:5000/slackapi/messagePost",{
+                await axios.post(configs.domain+"/slackapi/messagePost",{
                     channel : user.data.userchannel,
                     p_token : user.data.p_token,
                     text : `이전에 등록한 일정 -> 제목 : [${generalResult.data.title}] / 날짜 : ${generalResult.data.textTime}이 캘린더에서 삭제되었습니다.`
                 });
-                await axios.delete(`http://localhost:5000/generals/delete?id=${id}`);
+                await axios.delete(`${configs.domain}/generals/delete?id=${id}`);
             }
             calendar.deleteSchedule(id, c_id);
             this.setState({
@@ -263,8 +271,8 @@ class TestCal extends React.Component {
     // 캘린더 스케줄 초기 마운트 시 생성 설정
     async scheduleInitMount() {
         // calendar db select all -> init
-        let schedulesDB = await axios.get("http://localhost:5000/calendar/all");
-        let generalsDB = await axios.get("http://localhost:5000/generals/all");
+        let schedulesDB = await axios.get(configs.domain+"/calendar/all");
+        let generalsDB = await axios.get(configs.domain+"/generals/all");
         await this.setState({
             scheduleArray : schedulesDB.data,
             generalsArray : generalsDB.data,
@@ -530,7 +538,7 @@ class TestCal extends React.Component {
             })
         } else {
             try {
-                const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${e.schedule.id}`);
+                const generalResult = await axios.get(`${configs.domain}/generals/one?id=${e.schedule.id}`);
                 await this.setState({
                     in_data : {
                         id : generalResult.data.id,
@@ -565,7 +573,7 @@ class TestCal extends React.Component {
             else {
                 select = "calendar"
             }
-            const result = await axios.get(`http://localhost:5000/slackapi/userGetVerify?id=${in_data.id}&select=${select}`)
+            const result = await axios.get(`${configs.domain}/slackapi/userGetVerify?id=${in_data.id}&select=${select}`)
             if(result.data.userId === usertoken){
                 await this.setState({
                     userGet : true,

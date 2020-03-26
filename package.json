@@ -10,8 +10,12 @@
     "debug-windows": "nodemon --legacy-watch --watch ./server --inspect=0.0.0.0:9229 --nolazy ./server/index.js",
     "client": "npm run start --prefix client",
     "server": "nodemon server/index.js",
-    "start-pm2": "pm2 start ./server/ecosystem.config.js --watch --env development",
-    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\" "
+    "pm2-dev": "pm2 start ./ecosystem.config.js",
+    "pm2-product": "pm2 start ./ecosystem.config.js --env production",
+    "nodemon": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\" ",
+    "dev": "concurrently --kill-others-on-fail  \"npm run pm2-dev\" \"npm run client\" ",
+    "product": "concurrently --kill-others-on-fail \"npm run pm2-product\" \"npm run client\" ",
+    "root": "npm run client"
   },
   "keywords": [],
   "author": "",

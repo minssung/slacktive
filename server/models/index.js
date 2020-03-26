@@ -2,7 +2,12 @@ const fs = require("fs");
 const path = require("path");
 const basename  = path.basename(__filename);
 const Sequelize = require("sequelize");
-const config = require("../server_config");
+
+// 로컬에서 배포 실행용
+// const config = require("../server_config");
+
+let config = {};
+process.env.NODE_ENV === 'development' ? config = require('../devServer_config') : config = require('../server_config');
  
 const db = {};
  

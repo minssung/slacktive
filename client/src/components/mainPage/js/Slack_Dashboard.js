@@ -4,6 +4,14 @@ import Dashboard from './Dashboard/Dashboard';
 import moment from 'moment';
 import loadMask from '../../../resource/loadmaskTest.gif'
 
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+// if (process.env.NODE_ENV === 'production') {
+//     var configs = require('../../../client_config');
+// } else if (process.env.NODE_ENV === 'development') {
+//     var configs = require('../../../devClient_config');
+// }
+
 class Slack_Dashboard extends React.Component {
     constructor(props){
         super(props);
@@ -36,8 +44,8 @@ class Slack_Dashboard extends React.Component {
     // ---------- user List Api & Render----------
     async userListApi(){
         try {
-            const result = await axios.get(`http://localhost:5000/user/all`);
-            const stateText = await axios.get("http://localhost:5000/user/state");
+            const result = await axios.get(configs.domain+"/user/all");
+            const stateText = await axios.get(configs.domain+"/user/state");
             await this.setState({
                 usersalldb : result.data,
                 spanText : stateText.data
@@ -70,11 +78,11 @@ class Slack_Dashboard extends React.Component {
     // ---------- clock Api & Render ----------
     async clockBtnApi(reroad) {
         try {
-            const result = await axios.get("http://localhost:5000/updateHistorys");
+            const result = await axios.get(configs.domain+"/updateHistorys");
             await this.setState({
                 todayTimes : result.data
             })
-            await axios.get("http://localhost:5000/updatState");
+            await axios.get(configs.domain+"/updatState");
         } catch(err) {
             console.log("click btn clock updat err : " + err)
         }
