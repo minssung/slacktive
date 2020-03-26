@@ -45,6 +45,15 @@ const agenda = new Agenda({ db: { address: mongoConnectionString, options: { use
 try {
     agenda.on('ready', () => {
         console.log('Success agenda connecting');
+        // 2분
+        agenda.define('Busy', {lockLifetime: 10000}, async job => {
+            console.log('2분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
+            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
+            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
+            await History;
+            await HistoryCal;
+            await calendarStateUpdatFunc();
+        });
         // 10분
         agenda.define('First', {lockLifetime: 10000}, async job => {
             console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
@@ -75,7 +84,8 @@ try {
           
         (async () => { // IIFE to give access to async/await
         await agenda.start();
-        await agenda.every('*/10 9-18 * * *', 'First');
+        await agenda.every('*/2 9-11 * * *', 'Busy');
+        await agenda.every('*/10 12-18 * * *', 'First');
         await agenda.every('*/60 19-23/2 * * *', 'Second');
         await agenda.every('*/60 0-8/2 * * *', 'Third');
         })();
@@ -97,7 +107,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
                 // await axios.get("http://localhost:5000/slackapi/teamUsers");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
                 // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
-                await axios.get("http://localhost:5000/")
+                // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
