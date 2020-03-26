@@ -1,0 +1,16 @@
+version: '3.7'
+ 
+services:
+  dockerman:
+    image: dockerman
+    build: .
+    volumes:
+      - ./server:/usr/src/app/server
+      - ./client:/usr/src/app/client
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+      - 5000:5000
+      - 9229:9229
+    command: sh -c "npm install && npm run dev"
