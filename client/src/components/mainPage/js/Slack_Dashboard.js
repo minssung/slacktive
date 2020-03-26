@@ -6,26 +6,22 @@ import loadMask from '../../../resource/loadmaskTest.gif'
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('../../../client_config');
-// } else if (process.env.NODE_ENV === 'development') {
-//     var configs = require('../../../devClient_config');
-// }
 
-class Slack_Dashboard extends React.Component {
+class SlackDashboard extends React.Component {
     constructor(props){
         super(props);
         this.state = {
             // users list - state
             usersalldb : [],
             usertoken : [],
-            spanText : [],
             // time contents
-            todayTimes : "",
+            //todayTimes : "",
             // load mask
             loading : "",
-            // general db
-
+            // caeldnar  % general db
+            dashDb : [],
+            // today date
+            toDate : new Date(),
         }
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -35,74 +31,71 @@ class Slack_Dashboard extends React.Component {
             usertoken : await this.props.Token
         })
         await this.userListApi();   // user List Api
-        await this.setState({
+        await this.dashDbApi();     // cal & gnr Api
+        this.setState({
             loading : "Loading",
         })
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
-    // ---------- user List Api & Render----------
+    // ---------- user List Api ----------
     async userListApi(){
         try {
-            const result = await axios.get(configs.domain+"/user/all");
-            const stateText = await axios.get(configs.domain+"/user/state");
-            await this.setState({
+            const result = await axios.get(`${configs.domain}/user/all`);
+            this.setState({
                 usersalldb : result.data,
-                spanText : stateText.data
             });
             
         } catch(err){
             console.log("user List Api err : " + err);
         }
     }
-    usersListBoard(spanText){
-        const { usersalldb } = this.state;
-        // console.log(spanText);
-        
-        return <div className="slack-dash">
-            <span className="schedule_Title">{spanText}</span>
-            <div className="schedule_User_row">
-            {   
-                usersalldb.map((data,i)=>{
-                    return <span key={i} className="schedule_User">
-                        {
-                            data.state === spanText && data.username
-                        }
-                    </span>
-                })
-            }
-            </div>
-            <span className="schedule_Time">시간</span>
-        </div>
-    }
-    // ---------- clock Api & Render ----------
-    async clockBtnApi(reroad) {
+    // ---------- calendar / general Api & Render----------
+    async dashDbApi() {
         try {
-            const result = await axios.get(configs.domain+"/updateHistorys");
-            await this.setState({
-                todayTimes : result.data
-            })
-            await axios.get(configs.domain+"/updatState");
+            const result = await axios.get(configs.domain+"/updatState");
+            await this.setState({ dashDb : result.data })
         } catch(err) {
-            console.log("click btn clock updat err : " + err)
-        }
-        if(reroad){
-            window.location.href = "/"
+            console.log("calendar api err : " + err);
         }
     }
-    clockContents() {
-        const { todayTimes } = this.state;
-        return <div className="slack-dash">
-            <span>마지막 업데이트 날짜</span><br></br>
-            <span>{moment(todayTimes).format("YYYY-MM-DD HH:mm:ss")}</span>
-            <button type="button" onClick={this.clockBtnApi.bind(this, "reroad")}>갱신</button>
-        </div>
+    dataTextTime(time) {
+        let userTime
+        let dayArr = [];
+        if(/~/.test(time)) {
+            dayArr = time.split("~")
+            if(moment(dayArr[1]).diff(dayArr[0], "days") === 0) {
+                dayArr[0] = moment(moment(dayArr[0], "YYYY-MM-DD")).format("M. D(ddd)")
+                userTime = dayArr[0]
+            } else {
+                dayArr[0] = moment(moment(dayArr[0], "YYYY-MM-DD")).format("M. D(ddd)~")
+                dayArr[1] = moment(moment(dayArr[1], "YYYY-MM-DD")).format("M. D(ddd)")
+                userTime = dayArr[0] + dayArr[1]
+            }
+        } else if(/,/.test(time)) {
+            dayArr = /\d{4}-\d{2}-(\d{2}(,?\d{2}?)+)/.exec(time);
+            userTime = dayArr[1];
+        } else {
+            userTime = moment(time).format("M. D(ddd)")
+        }
+        return userTime;
+    }
+    dataStateSwich(state) {
+        let userState = "";
+        switch(state) {
+            case "휴가관련" : userState = "gold"; break;
+            case "출장 / 미팅" : userState = "greenyellow"; break;
+            case "회의" : userState = "turquoise"; break;
+            case "생일" : userState = "violet"; break;
+            case "기타" : userState = "thistle"; break;
+        }
+        return userState;
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- rendering ---------- 
     render () {
-        const { spanText, loading } = this.state;
+        const { loading,dashDb } = this.state;
         return (
             <div className="dash-boardDiv">
                 {
@@ -110,10 +103,14 @@ class Slack_Dashboard extends React.Component {
                         <img alt="Logind~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
-                <Dashboard contents={this.clockContents.bind(this)} />
                 {
-                    spanText.map((data,i)=>{
-                        return <Dashboard key={i} contents={this.usersListBoard.bind(this, data.state)}/>
+                    dashDb.map((data,i)=>{
+                        return <Dashboard key={i}
+                            title={data.title ? data.title : data.user.username + " " + data.cate}
+                            partner={data.partner[0] ? data.user.username + "," + data.partner.map((data,i)=>{ return data.username }) : data.user.username}
+                            textTime={this.dataTextTime.bind(this,data.time)}
+                            color={this.dataStateSwich.bind(this,data.state)}
+                        />
                     })
                 }
             </div>
@@ -121,4 +118,4 @@ class Slack_Dashboard extends React.Component {
     }
 }
 
-export default Slack_Dashboard;
+export default SlackDashboard;

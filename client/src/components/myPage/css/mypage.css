@@ -6,14 +6,14 @@
 }
 
 .mypage-upDiv {
-    height: 90%;
+    height: 70%;
 }
 
 .mypage-progDiv {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 30%;
+    height: 20%;
 }
 
 .mypage-progressBarDiv {

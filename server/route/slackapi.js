@@ -14,12 +14,6 @@ const General = models.general;
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devServer_config') : configs = require('../server_config');
 
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('../server_config');
-// } else if (process.env.NODE_ENV === 'development') {
-//     var configs = require('../devServer_config');
-// }
-
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
     try {
@@ -505,7 +499,7 @@ function regFunc(channel ,resultSet,init, ...args){
             }
         });
         return resultArray;
-    } else if(channel === "calendar") {
+    } else {
         // 일정용 처리
         // args : 0 => real time
         // args : 1 => cal Reg
@@ -525,7 +519,6 @@ function regFunc(channel ,resultSet,init, ...args){
                         // 불필요한 요소 제거
                         if(index === 0 || index === 5)
                             continue;
-                            // args[2][0] : 이름
                             // 1 : 년
                             // 2 : 월
                             // 3 : 일 수에 대한 다차원 배열
@@ -534,7 +527,7 @@ function regFunc(channel ,resultSet,init, ...args){
                     }
                     // 일 수를 배열로 받아서 변환
                     // 일, 공백 한칸, ,기준으로 스플릿
-                    args[2][3] = args[1][4].split(/\s{1,}|\,|일/)
+                    args[2][3] = args[1][4].split(/\,/)
                     for (index = 0; index < args[2][3].length; index++) {
                         args[4] = args[2][3].indexOf("")
                         if(args[4]!= -1)
@@ -558,18 +551,36 @@ function regFunc(channel ,resultSet,init, ...args){
                         args[2][2] = args[2][2].replace(/\월$/, "-");
                         args[3] = args[3] + args[2][2];
                     } else {
-                        if(/^\d{4}-(\d{2})/.exec(args[0])[1] < 10) {
+                        if(/^\d{4}-(\d{2})/.test(args[0])[1] < 10) {
                             args[3] = args[3] + /^\d{4}-(\d{2}-)/.exec(args[0])[1]
                         } else {
                             args[3] = args[3] + /^\d{4}-(\d{2}-)/.exec(args[0])[1]
                         }
                     }
                     // 뒤에 남은 일 수들 입력 및 중간에 , 넣기
+                    let dateFormat = "";
+                    let splitDate = [];
                     for (index = 0; index < args[2][3].length; index++) {
-                        if(!/\d{2}?/.exec(args[2][3][index])){
+                        args[2][3][index] = args[2][3][index].replace(/\년/, "-");
+                        args[2][3][index] = args[2][3][index].replace(/\월/, "-");
+                        args[2][3][index] = args[2][3][index].replace(/\일/g, "");
+                        args[2][3][index] = args[2][3][index].replace(/\s*/g, "");
+                        if(!/\d{2}?/.test(args[2][3][index])){
                             args[2][3][index] = "0" + args[2][3][index]
                         }
-                        args[3] = args[3] + args[2][3][index] + (index === args[2][3].length -1 ? "" : ",");
+                        if(/~/.test(args[2][3][index])) {
+                            splitDate = args[2][3][index].split("~")
+                            if(/\d{1,}-\d{1,}-\d{1,}/.test(splitDate[1])) {
+                                dateFormat = moment(splitDate[1], "YYYY-M-D").format("YYYY-MM-DD")
+                            } else if(/\d{1,}-\d{1,}$/.test(splitDate[1])) {
+                                dateFormat = moment(splitDate[1], "M-D").format("YYYY-MM-DD")
+                            } else {
+                                dateFormat = moment(splitDate[1], "D").format("YYYY-MM-DD")
+                            }
+                            args[3] = args[3] + splitDate[0] + "~" + dateFormat;
+                        } else {
+                            args[3] = args[3] + args[2][3][index] + (index === args[2][3].length -1 ? "" : ",");
+                        }
                     }
                     // 반환
                     return data.user && {
@@ -579,6 +590,7 @@ function regFunc(channel ,resultSet,init, ...args){
                         text : data.text,
                         cate : args[2][4],
                         textTime : args[3],
+                        state : "휴가관련",
                     }
                 } catch(err){
                     console.log("Calendar init Reg err : " + err)

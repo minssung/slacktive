@@ -32,7 +32,7 @@ router.get("/allTime", async(req, res) => {
         const result = await Calendar.findAll({
             include : [{
                 model : models.user,
-                attributes : ['username']
+                attributes : ['username','usertag']
             }],
             order : [[
                 'id' , 'ASC'
@@ -144,7 +144,6 @@ router.put("/update", async(req, res) => {
             text: req.body.text,
             cate : req.body.cate,
             textTime : req.body.textTime,
-            textTitle : req.body.textTitle,
             }, {
             where: {
                 id : req.body.id,

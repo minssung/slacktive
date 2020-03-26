@@ -1,12 +1,12 @@
 var configs = {
-    database : "cedar_slack",
-    user : "root",
-    password : "multi1004",
-    host : "docker.for.mac.host.internal",
+    database : "slack",
+    user : "cedar",
+    password : "tlejroqkfwk",
+    host : "192.168.0.40",
     dialect : "mysql",
-    b_token : "xoxb-891877255443-926835312512-wuYJCTnKPJLhzU4DJ5C9P8AB",    // app 토큰
-    p_token : "xoxp-891877255443-891877703267-1007212747350-29c645cef196f730740191e290fc31be",
-    bearer_p_token : "Bearer xoxp-891877255443-891877703267-1007212747350-29c645cef196f730740191e290fc31be",
+    b_token : "xoxb-891877255443-926835312512-qiLY87UZ8t4MIeN1uKGH9UW0",    // app 토큰
+    p_token : "xoxp-891877255443-891877703267-1015819710531-fcddcc3be2ed8ec999d53630dcf1cddd",
+    bearer_p_token : "Bearer xoxp-891877255443-891877703267-1015819710531-fcddcc3be2ed8ec999d53630dcf1cddd",
     c_id : "891877255443.906922103267",             // app client 아이디
     c_s_id : "75d6c672024db024e2f4c481ba3a56e2",    // app secret 아이디
     channel_time : "CSZTZ7TCL",     // 출퇴근
@@ -21,6 +21,12 @@ var configs = {
     Am0 : "08:30",
     Am1 : "11:00",
     Pm0 : "16:50",
+
+    // API 호출 도메인
+    domain : "http://dev.cedar.kr:3333",
+    redirectDomain : "http://dev.cedar.kr:2222",
+    port : 3333
+
 }
 
 module.exports = configs;

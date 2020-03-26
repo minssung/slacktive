@@ -14,6 +14,6 @@ var client_c = {
     ],
 
     // API 호출 도메인
-    domain : "http://localhost:5000",
+    domain : "http://dev.cedar.kr:3333",
 }
 module.exports = client_c;

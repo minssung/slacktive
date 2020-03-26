@@ -1,32 +1,28 @@
 import React from "react";
 import axios from 'axios';
 import moment from "moment";
+import 'moment/locale/ko'       // 한글로 불러오기
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
 //import configs from '../../../client_config'; // config 파일
 import '../css/popupCrt.css'    // 팝업 생성
 import '../css/popupConfirm.css'    // 팝업 확인
+import arrow from '../css/arrow.png';   // 카테고리의 화살표
+import loadMask from '../../../resource/loadmaskTest.gif'   // loadmask
+import Timekeeper from 'react-timekeeper';
+import 'react-daypicker/lib/DayPicker.css';
+import DayPicker from 'react-daypicker';
+import charImg from '../css/char.png';
+
+moment.locale('en');    // ko -> 한글 버전. => moment.js에서 한글로 변환하는게 잘 안되고 오류가 있음 ( invalid err )
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
-// if (process.env.NODE_ENV === 'production') {
-//     var configs = require('../../../client_config');
-// } else if (process.env.NODE_ENV === 'development') {
-//     var configs = require('../../../devClient_config');
-// }
 
 class TestCal extends React.Component {
     constructor(props) {
         super(props);
         this.calendarRef = React.createRef();   // 캘린더 인스턴스용 Ref
-        // calendar popup refs
-        this.title = React.createRef();
-        this.location = React.createRef();
-        this.content = React.createRef();
-        this.partner = React.createRef();
-        this.radioBtn = React.createRef();
-        this.time = React.createRef();
-        this.etcText = React.createRef();
         //  userinfo popup refs
         this.state = {
             scheduleArray : [], // 캘린터 아이템에 넣기 전 푸시용
@@ -36,24 +32,47 @@ class TestCal extends React.Component {
             user : [],  // 유저 데이터 정보 디비
             calendarDate : 'default', // 달력 월 표시
             // popup create state
-            startDate : "",
-            endDate : "",
-            saveData : {},
-            popupInv : "none",
-            selectCal : true,
+            startDate : "", // 시작 날짜
+            endDate : "",   // 끝 날짜
+            startTime : "", // 상세 시간 시작
+            endTime : "",   // 상세 시간 끝
+            saveData : {},  // 등록 및 수정으로 저장 시
+            popupInv : "none",  // 팝업 창 제어용
+            title : "", // 제목
+            partnerInput : "",  // 파트너 검색 인풋
+            partnerDrop : "none",   // 파트너 리스트 창 제어용
+            partnerData : [],   // db에서 가져와 담을 값
+            partnerSelt : [],   // 선택한 파트너 값
+            memoArea : "",  // 메모
+            cateClick : false,  // 카테고리 리스트 창 제어용
+            showTimeStart : false,
+            showTimeEnd : false,
+            showDateStart : false,
+            showDateEnd : false,
+            // 드롭다운의 리스트들
+            cateTag : [
+                {name : "출장 / 미팅", color : configs.colors[0], num : 0},
+                {name : "회의", color : configs.colors[1], num : 1},
+                {name : "휴가관련", color : configs.colors[2], num : 2},
+                {name : "생일", color : configs.colors[3], num : 3},
+                {name : "기타", color : configs.colors[4], num : 4},
+            ],
+            // 드롭다운의 현재 보여질 리스트 항목
+            currentTag : { name : "출장 / 미팅", color : configs.colors[0], num : 0 },
             // popup schedule state
-            start_date : "",
-            end_date : "",
-            in_data : {},
+            in_data : {},   // 데이터를 넘겨주거나 보여줄 때
             popupInvSchedule : "none",
-            userGet : true,
+            userGet : true, // 해당 유저의 데이터인지 확인용
             // popup update state
-            updateData : {},
-            updateTF : false,
+            updateTF : false,   // 수정 버튼을 누를 경우
+            updateID : "",  // 업뎃 시 아이디
+            updateCID : "", // 업뎃 시 캘린더 아이디
+            // load mask
+            loading : "",
         }
     }
     // 초기 마운트
-    async componentDidMount(){
+    async componentDidMount() {
         // token verify
         await this.setState({
             usertoken : await this.props.Token
@@ -67,219 +86,22 @@ class TestCal extends React.Component {
         await this.scheduleInitMount()
         const { scheduleArray,generalsArray } = this.state;
         // calendar create mount
-        await this.scheduleCreateMount(scheduleArray,generalsArray);
+        this.scheduleCreateMount(scheduleArray,generalsArray);
         // 현재 달력 월
-        await this.nowDate();
-    }
-    // ------------------------------ Instance method ------------------------------ //
-    // 이전 달로 이동하는 버튼
-    handleClickPrevButton = async() => {
-        const calendar = this.calendarRef.current.getInstance();
-        calendar.prev();
-        this.nowDate();
-    };
-    // 다음 달로 이동하는 버튼
-    handleClickNextButton = async() => {
-        const calendar = this.calendarRef.current.getInstance();
-        calendar.next();
-        this.nowDate();
-    };
-    // 오늘 날짜로 돌아오기
-    todayButton = async() => {
-        const calendar = this.calendarRef.current.getInstance();
-        calendar.today();
         this.nowDate();
     }
-    // 달력 현재 날짜 표시
-    nowDate = () => {
-        const calendar = this.calendarRef.current.getInstance();
-        const date = calendar.getDate();
-        const momentdate = moment(date._date).format('YYYY.MM');
-        this.setState({
-            calendarDate : momentdate
-        });
-    }
-    // ------------------------------ Event ------------------------------ //
-    // 캘린더 영역을 클릭 시에 이벤트 호출
-    beforeCreateSchedule = async(e) => {
-        await this.setState({
-            startDate : moment(e.start._date).format("YYYY-MM-DD HH:mm"),
-            endDate : moment(e.end._date).format("YYYY-MM-DD HH:mm")
-        });
-        this.setState({
-            popupInv : this.state.popupInv === "none" ? "flex" : "none",
-            popupInvSchedule : "none",
-            in_data : {},
-        });
-    }
-    // 새로운 일정 생성 시 동작
-    // 생성 시 슬랙에도 메시지 출력
-    // 캘린더 상에서 일정 등록 시 필요 양식 => 예) oo 휴가/반차
-    createScheduleItems = async(data) => {
-        const calendar = this.calendarRef.current.getInstance();
-        const { user,selectCal } = this.state;
-        if(selectCal){
-            let timeText = "";
-            if(moment(data.endDate).diff(data.startDate, "days") >= 1){
-                timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD") + "~" + moment(data.endDate).format("DD") + " " + data.radio
-            } else {
-                timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일] ") + data.radio
-            }
-            try {
-                await axios.post(configs.domain+"/slackapi/messagePost",{
-                    channel : configs.channel_calendar,
-                    p_token : user.data.p_token,
-                    text : timeText
-                })
-                const result = await axios.post(configs.domain+"/slackapi/channelHistoryCal")
-                calendar.createSchedules([{
-                    id: result.data[0].id,
-                    calendarId: '0',
-                    title: user.data.username + " " + data.radio,
-                    category: 'time',
-                    isAllDay: configs.dataCateReg.test(data.radio) ? true : false,
-                    start : data.startDate,
-                    end : data.endDate,
-                    bgColor : "#ffffff",
-                    color : "#ffffff",
-                }])
-            } catch(err) {
-                console.log("before create scd err : " + err);
-            }
-        } else {
-            try {
-                await axios.post(configs.domain+"/slackapi/messagePost",{
-                    channel : user.data.userchannel,
-                    p_token : user.data.p_token,
-                    text : `[${data.title}] ${data.content} / ${data.startDate}~${data.endDate} / 참여자 : ${data.partner}`
-                })
-                const result = await axios.post(configs.domain+"/generals/create",{
-                    title : data.title,
-                    content : data.content,
-                    partner : data.partner,
-                    textTime : data.startDate + "~" + data.endDate,
-                    userId : user.data.id,
-                    location : data.location,
-                });
-                calendar.createSchedules([{
-                    id : result.data.id,
-                    calendarId: '99',
-                    title: data.title,
-                    category: "general",
-                    start : data.startDate,
-                    end : data.endDate,
-                    bgColor : "#ffffff",
-                    color : "#ffffff",
-                }]);
-                console.log("create generals success");
-            } catch(err) {
-                console.log("before create gnr err : " + err);
-            }
-        }
-        // calendar init mount
-        await this.scheduleInitMount()
-        // calendar create mount
-        await this.scheduleCreateMount(this.state.scheduleArray,this.state.generalsArray);
-    }
-    // 일정 수정 시
-    // 수정 시 슬랙의 메시지도 수정
-    // 수정 시에도 생성 시와 같은 양식 준수 필요
-    beforeUpdateSchedule = async(data) => {
-        const calendar = this.calendarRef.current.getInstance();
-        let dataText = "";
-        let dbTimeText = "";
-        let timeText = "";
-        console.log(data);
-        console.log(moment(data.end._date).diff(data.start._date, "days"));
-        
-        
-        if(data.changes && data.changes.title){
-            dataText = configs.dataTitleReg.exec(data.changes.title)
-        } else {
-            dataText = configs.dataTitleReg.exec(data.schedule.title)
-        }
-        if(moment(data.end._date).diff(data.start._date, "days") >= 1){
-            timeText = "["+dataText[1]+"] "+ moment(data.start._date).format("YYYY[년] MM[월] DD") + "~" + moment(data.end._date).format("DD") + " " + dataText[2]
-            dbTimeText = moment(data.start._date).format("YYYY-MM-DD") + "~" + moment(data.end._date).format("DD")
-        } else {
-            timeText = "["+dataText[1]+"] "+ moment(data.start._date).format("YYYY[년] MM[월] DD[일] ") + dataText[2]
-            dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
-        }
-        try {
-            const { user } = this.state;
-            let result = await axios.get(`${configs.domain}/calendar/one?id=${data.schedule.id}`);
-            await axios.put(configs.domain+"/calendar/update",{
-                id : data.schedule.id,
-                userId : user.data.id,
-                text : timeText,
-                cate : dataText[2],
-                textTime : dbTimeText,
-                textTitle : data.changes.title
-            });
-            await axios.post(configs.domain+"/slackapi/messageUpdate",{
-                p_token : user.data.p_token,
-                channel : configs.channel_calendar,
-                text : timeText,
-                time : result.data.ts
-            })
-            calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
-                title : data.changes.title  && data.changes.title,
-                start : data.changes.start && data.changes.start._date,
-                end : data.changes.end && data.changes.end._date,
-            });
-            this.setState({
-                popupInv : "none",
-                popupInvSchedule : "none",
-            })
-        } catch(err){
-            console.log("before scd update err : " + err);
-        }
-    }
-    // 일정 삭제 시
-    // 삭제 시 메시지 또한 삭제 됨
-    beforeDeleteSchedule = async(id, c_id) => {
-        const calendar = this.calendarRef.current.getInstance();
-        const { user } = this.state;
-        try {
-            let scheduleResult = [];
-            if(c_id !== "99") {
-                scheduleResult = await axios.get(`${configs.domain}/calendar/one?id=${id}`);
-                await axios.delete(`${configs.domain}/calendar/delete?id=${id}`);
-                await axios.post(configs.domain+"/slackapi/messageDelete",{
-                p_token : user.data.p_token,
-                channel : configs.channel_calendar,
-                time : scheduleResult.data.ts,
-            })
-            } else {
-                const generalResult = await axios.get(`${configs.domain}/generals/one?id=${id}`);
-                console.log(generalResult)
-                await axios.post(configs.domain+"/slackapi/messagePost",{
-                    channel : user.data.userchannel,
-                    p_token : user.data.p_token,
-                    text : `이전에 등록한 일정 -> 제목 : [${generalResult.data.title}] / 날짜 : ${generalResult.data.textTime}이 캘린더에서 삭제되었습니다.`
-                });
-                await axios.delete(`${configs.domain}/generals/delete?id=${id}`);
-            }
-            calendar.deleteSchedule(id, c_id);
-            this.setState({
-                popupInvSchedule : "none",
-            })
-        } catch(err) {
-            console.log("before scd delete err : " + err)
-        }
-    }
-    // 캘린더 스케줄 초기 마운트 시 생성 설정
+    // 캘린더 스케줄 초기 마운트 시 생성 설정 -> 불러오기
     async scheduleInitMount() {
         // calendar db select all -> init
         let schedulesDB = await axios.get(configs.domain+"/calendar/all");
         let generalsDB = await axios.get(configs.domain+"/generals/all");
-        await this.setState({
+        this.setState({
             scheduleArray : schedulesDB.data,
             generalsArray : generalsDB.data,
         })
     }
-    // 캘린더 스케줄 마운트 및 정규식 표현 처리
-    async scheduleCreateMount(datasS,datasG) {
+    // 캘린더 스케줄 마운트 및 정규식 표현 처리 -> 보여주기
+    scheduleCreateMount(datasS,datasG) {
         let scheduleItem = [];
         let startDate = "";
         let endDate = "";
@@ -287,29 +109,21 @@ class TestCal extends React.Component {
         let color = "";
         try {
             datasS.forEach(data => {
-                color = data.user.usercolor ? data.user.usercolor : "#ffffff";
-                regDays = configs.dataTimeReg.exec(data.textTime)
-                let days = [];
-                let scheduleObj = {};
+                color = data.user.usercolor ? data.user.usercolor : "#ffffff";  // 컬러별 지정 없다면 ffffff                                                   
+                regDays = configs.dataTimeReg.exec(data.textTime)   // 디비의 타임 텍스트를 가져와서 정규식 거침
+                let days = [];  // 일 수를 복수로 담을 배열
+                let scheduleObj = {};   // 스케줄 아이템을 담을 변수
                 let isAll = configs.dataCateReg.test(data.cate) ? true : false
                 let timeAm = isAll ? " 00:00" : " 09:00"
                 let timePm = isAll ? " 23:59" : " 19:00"
-                timeAm = configs.dataCateTimeReg.test(data.cate) ? " 11:59" : timeAm
+                timeAm = configs.dataCateTimeRegPm.test(data.cate) ? " 14:00" : timeAm
+                timePm = configs.dataCateTimeReg.test(data.cate) ? " 14:00" : timePm
                 // regDays : 2020-02-02-
                 // 물결을 사용한 다수 일정 등록 시
-                if(/~/.test(data.textTime)){
+                if(/~/.test(data.textTime)) {
                     days = data.textTime.split(/~/)
-                    if(days.length > 1){
-                        for (let index = 0; index < days.length; index++) {
-                            if(days[index].length < 3)
-                                days[index] = regDays[0] + days[index]
-                        }
-                    }
-                    if(!/\d{2}/.test(days[days.length -1])){
-                        days[days.length -1] = "0" + days[days.length -1]
-                    }
                     startDate = moment(days[0] + timeAm).format()
-                    endDate = moment(days[days.length -1] + timePm).format()
+                    endDate = moment(days[1] + timePm).format()
                     scheduleObj = {
                         id: data.id,
                         calendarId: '0',
@@ -322,7 +136,7 @@ class TestCal extends React.Component {
                     };
                     scheduleItem.push(scheduleObj)
                 // 컴마를 사용한 다수 일정 등록 시
-                } else if(/,/.test(data.textTime)){
+                } else if(/,/.test(data.textTime)) {
                     days = data.textTime.split(/,/)
                     for (let index = 0; index < days.length; index++) {
                         if(days[index].length < 3)
@@ -332,12 +146,12 @@ class TestCal extends React.Component {
                     let num = 0;
                     let count = -1;
                     for (let index = 0; index < days.length; index++) {
-                        if(days[index+1] && moment(days[index+1]).diff(days[index], 'days') === 1){
+                        if(days[index+1] && moment(days[index+1]).diff(days[index], 'days') === 1) {
                             if(count === -1)
                             count = index;
                             continue;
                         } else {
-                            if(count === -1){
+                            if(count === -1) {
                                 startDate = moment(days[index] + timeAm).format()
                                 endDate = moment(days[index] + timePm).format()
                             } else {
@@ -375,6 +189,7 @@ class TestCal extends React.Component {
                     scheduleItem.push(scheduleObj)
                 }
             })
+            // 일정용 스케줄
             datasG.forEach(data=>{
                 color = data.user.usercolor ? data.user.usercolor : "#ffffff";
                 let textTimes = data.textTime.split("~");
@@ -394,122 +209,593 @@ class TestCal extends React.Component {
         } catch(err) {
             console.log("TUI Mount init err : " + err)
         }
-        await this.setState({
-            scheduleItem
+        this.setState({
+            scheduleItem,
+            loading : "load",
         })
     }
-    selectCalendars(e) {
+    // ------------------------------ Instance method ------------------------------ //
+    // 이전 / 다음 / 오늘 달로 이동하는 버튼
+    handleClickPrevNextButton = async(data) => {
+        const calendar = this.calendarRef.current.getInstance();
+        if(data === "pre")
+            calendar.prev();
+        else if(data === "nex")
+            calendar.next();
+        else
+            calendar.today();
+        this.nowDate();
+    };
+    // 달력 현재 날짜 표시
+    nowDate = () => {
+        const calendar = this.calendarRef.current.getInstance();
+        const date = calendar.getDate();
+        const momentdate = moment(date._date).format('YYYY.MM');
         this.setState({
-            selectCal : e.target.value === "holiday" ? true : false,
+            calendarDate : momentdate
+        });
+    }
+    // ------------------------------ Event ------------------------------ //
+    // 캘린더 영역을 클릭 시에 이벤트 호출
+    beforeCreateSchedule = (e) => {
+        this.setState({
+            startDate : moment(e.start._date).format("YYYY-MM-DD HH:mm"),
+            startTime : moment(e.start._date).format("LT"),
+            endDate : moment(e.end._date).format("YYYY-MM-DD HH:mm"),
+            endTime : moment(e.end._date).format("LT"),
+            title : "",
+            currentTag : { name : "출장 / 미팅", color : configs.colors[0], num : 0 },
+            partnerInput : "",
+            memoArea : "",
+            partnerData : [],
+            partnerSelt : [],
+            partnerDrop : "none",
+            in_data : {},
+         });
+        this.setState({
+            popupInv : this.state.popupInv === "none" ? "flex" : "none",
+            popupInvSchedule : "none",
+        });
+    }
+    // 새로운 일정 생성 시 동작
+    // 생성 시 슬랙에도 메시지 출력
+    // 캘린더 상에서 일정 등록 시 필요 양식 => 예) oo 휴가/반차
+    createScheduleItems = async(data) => {
+        const calendar = this.calendarRef.current.getInstance();
+        const { user,currentTag } = this.state;
+        this.setState({
+            loading : "",
         })
+        // 휴가 관련 = 2
+        if(currentTag.num === 2) {
+            let timeText = "";
+            // 날짜 차이가 1인 경우
+            if(moment(data.endDate).diff(data.startDate, "days") >= 1) {
+                timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일]") + "~" + moment(data.endDate).format("YYYY[년] MM[월] DD[일]") + " " + data.title
+            // 날짜 차이가 없는 경우 = 종료일과 같음
+            } else {
+                timeText = "["+user.data.username+"] "+ moment(data.startDate).format("YYYY[년] MM[월] DD[일] ") + data.title
+            }
+            // 슬랙에 메시지 전송
+            try {
+                await axios.post(configs.domain+"/slackapi/messagePost",{
+                    channel : configs.channel_calendar,
+                    p_token : user.data.p_token,
+                    text : timeText
+                })
+                // 채널 내역 갱신
+                await axios.post(configs.domain+"/slackapi/channelHistoryCal")
+                // 새로 마운트
+                // calendar init mount
+                await this.scheduleInitMount()
+                // 새로 재생성
+                // calendar create mount
+                this.scheduleCreateMount(this.state.scheduleArray,this.state.generalsArray);
+            } catch(err) {
+                console.log("before create scd err : " + err);
+            }
+        // 휴가관련 외의 경우 -> 일정용 디비에 저장
+        } else {
+            try {
+                let partners = "";
+                data.partner.forEach((data,i)=>{
+                    if(i === 0) {
+                        partners = "" + data.username;
+                    } else {
+                        partners = partners + "," + data.username;
+                    }
+                });
+                const PartnersData = data.partner.map((data)=>{
+                    return {
+                        id : data.id,
+                        username : data.username,
+                    }
+                })
+                // 슬랙에 메시지 전송
+                const post = axios.post(configs.domain+"/slackapi/messagePost",{
+                    channel : user.data.userchannel,
+                    p_token : user.data.p_token,
+                    text : `제목 : [${data.title}] / 메모사항 : [${data.content}] / ${data.startDate}~${data.endDate} / 참여자 : [${partners}]`
+                })
+                // 일정 디비에 생성
+                const result = await axios.post(configs.domain+"/generals/create",{
+                    title : data.title,
+                    content : data.content,
+                    partner : PartnersData,
+                    textTime : `${data.startDate}~${data.endDate}`,
+                    tag : data.state,
+                    userId : user.data.id,
+                });
+                // 스케줄 아이템 생성
+                calendar.createSchedules([{
+                    id : result.data.id,
+                    calendarId: '99',   // 일정용임을 구분짓는 수 99
+                    title: data.title,
+                    category: "time",
+                    start : data.startDate,
+                    end : data.endDate,
+                    bgColor : user.data.usercolor,
+                }]);
+                await post;
+            } catch(err) {
+                console.log("before create gnr err : " + err);
+            }
+            this.setState({
+                loading : "load",
+            })
+        }
+    }
+    // 일정 수정 시
+    // 수정 시 슬랙의 메시지도 수정
+    // 수정 시에도 생성 시와 같은 양식 준수 필요
+    beforeUpdateSchedule = async(data) => {
+        const calendar = this.calendarRef.current.getInstance();
+        const { user,updateCID,updateID } = this.state
+        let dataText = "";
+        let dbTimeText = "";
+        let timeText = "";
+        // 직접 입력 업데이트인 경우
+        if(data.dir) {
+            if(data.state === "휴가관련") {
+                if(moment(data.endDate).diff(data.startDate, "days") >= 1){
+                    timeText = `[${user.data.username}] ${moment(data.startDate).format("YYYY[년] MM[월] DD[일]")}~${moment(data.endDate).format("YYYY[년] MM[월] DD[일]")} ${data.title}`
+                    dbTimeText = moment(data.startDate).format("YYYY-MM-DD") + "~" + moment(data.endDate).format("YYYY-MM-DD")
+                } else {
+                    timeText = `[${user.data.username}] ${moment(data.startDate).format("YYYY[년] MM[월] DD[일]")} ${data.title}`
+                    dbTimeText = moment(data.startDate).format("YYYY-MM-DD");
+                }
+                try {
+                    let result = await axios.get(`${configs.domain}/calendar/one?id=${updateID}`);
+                    const updat = axios.put(configs.domain+"/calendar/update",{
+                        id : updateID,
+                        userId : user.data.id,
+                        text : timeText,
+                        cate : data.title,
+                        textTime : dbTimeText,
+                    });
+                    const posting = axios.post(configs.domain+"/slackapi/messageUpdate",{
+                        p_token : user.data.p_token,
+                        channel : configs.channel_calendar,
+                        text : timeText,
+                        time : result.data.ts
+                    })
+                    calendar.updateSchedule(updateID, updateCID, {
+                        title : user.data.username + " " + data.title,
+                        start : data.startDate,
+                        end : data.endDate,
+                    });
+                    await updat; await posting;
+                } catch(err) {
+                    console.log("before updat scd err : " + err); 
+                }
+            } else {
+                dbTimeText = data.startDate + "~" + data.endDate;
+                try {
+                    let result = await axios.get(`${configs.domain}/generals/one?id=${updateID}`);
+                    const updat = axios.put(configs.domain+"/generals/update",{
+                        id : updateID,
+                        title : data.title,
+                        textTime : dbTimeText,
+                        content : data.content,
+                        partner : data.partner,
+                        tag : data.state,
+                    });
+                    const posting = axios.post(configs.domain+"/slackapi/messagePost",{
+                        channel : user.data.userchannel,
+                        p_token : user.data.p_token,
+                        text : `이전에 등록한 일정 -> 제목 : [(수정전)${result.data.title} (수정후)${data.title}] / 날짜 : (수정전)${result.data.textTime} (수정후)${dbTimeText}이 캘린더에서 수정되었습니다.`
+                    });
+                    calendar.updateSchedule(updateID, updateCID, {
+                        title : data.title,
+                        start : data.startDate,
+                        end : data.endDate,
+                    });
+                    await updat; await posting;
+                } catch(err) {
+                    console.log("before updat gnr err : " + err);
+                }
+            }
+        // 드래그를 통한 날짜 업데이트인 경우
+        } else {
+            // 휴가 관련 업데이트 일 경우
+            if(data.schedule.calendarId !== "99") {
+                dataText = (/\S*\s*(.*)/.exec(data.schedule.title))[1];
+                if(moment(data.end._date).diff(data.start._date, "days") >= 1){
+                    timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")}~${moment(data.end._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
+                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD") + "~" + moment(data.end._date).format("YYYY-MM-DD")
+                } else {
+                    timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
+                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
+                }
+                try {
+                    let result = await axios.get(`${configs.domain}/calendar/one?id=${data.schedule.id}`);
+                    const updat = axios.put(configs.domain+"/calendar/update",{
+                        id : data.schedule.id,
+                        userId : user.data.id,
+                        text : timeText,
+                        cate : dataText,
+                        textTime : dbTimeText,
+                    });
+                    const posting = axios.post(configs.domain+"/slackapi/messageUpdate",{
+                        p_token : user.data.p_token,
+                        channel : configs.channel_calendar,
+                        text : timeText,
+                        time : result.data.ts
+                    })
+                    calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
+                        start : data.changes.start && data.changes.start._date,
+                        end : data.changes.end && data.changes.end._date,
+                    });
+                    await updat; await posting;
+                } catch(err){
+                    console.log("before scd update err : " + err);
+                }
+            // 일정 관련 업데이트 일 경우
+            } else {
+                dbTimeText = moment(data.start._date).format("YYYY-MM-DD LT") + "~" + moment(data.end._date).format("YYYY-MM-DD LT")
+                try {
+                    let result = await axios.get(`${configs.domain}/generals/one?id=${data.schedule.id}`);
+                    const updat = axios.put(configs.domain+"/generals/update",{
+                        id : data.schedule.id,
+                        textTime : dbTimeText,
+                    });
+                    const posting = axios.post(configs.domain+"/slackapi/messagePost",{
+                        channel : user.data.userchannel,
+                        p_token : user.data.p_token,
+                        text : `이전에 등록한 일정 -> 제목 : [${result.data.title}] / 날짜 : (수정전)${result.data.textTime} (수정후)${dbTimeText}이 캘린더에서 수정되었습니다.`
+                    });
+                    calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
+                        start : data.changes.start && data.changes.start._date,
+                        end : data.changes.end && data.changes.end._date,
+                    });
+                    await updat; await posting;
+                } catch(err){
+                    console.log("before scd update err : " + err);
+                }
+            }
+        }
+        this.setState({
+            popupInv : "none",
+            popupInvSchedule : "none",
+        })
+    }
+    // 일정 삭제 시
+    // 삭제 시 메시지 또한 삭제 됨
+    beforeDeleteSchedule = async(id, c_id) => {
+        const calendar = this.calendarRef.current.getInstance();
+        const { user } = this.state;
+        try {
+            let scheduleResult = [];
+            // 캘린더 아이디가 99가 아닌 값 -> 휴가용
+            if(c_id !== "99") {
+                // 조회
+                scheduleResult = await axios.get(`${configs.domain}/calendar/one?id=${id}`);
+                // 디비에서 삭제
+                const delt = axios.delete(`${configs.domain}/calendar/delete?id=${id}`);
+                // 캘린더상에서 삭제
+                calendar.deleteSchedule(id, c_id);
+                // 팝업 창 내리기
+                this.setState({ popupInvSchedule : "none", })
+                // 슬랙에서 삭제
+                axios.post(configs.domain+"/slackapi/messageDelete",{
+                    p_token : user.data.p_token,
+                    channel : configs.channel_calendar,
+                    time : scheduleResult.data.ts,
+                })
+                await delt;
+            // 캘린더 아이디가 99인 값 -> 일정용
+            } else {
+                // 해당 아이디 조회
+                const generalResult = await axios.get(`${configs.domain}/generals/one?id=${id}`);
+                // 디비에서 삭제
+                const delt = axios.delete(`${configs.domain}/generals/delete?id=${id}`);
+                // 캘린더상에서 삭제
+                calendar.deleteSchedule(id, c_id);
+                // 팝업 창 내리기
+                this.setState({ popupInvSchedule : "none", })
+                // 삭제 되었다는 메시지 보내기
+                axios.post(configs.domain+"/slackapi/messagePost",{
+                    channel : user.data.userchannel,
+                    p_token : user.data.p_token,
+                    text : `이전에 등록한 일정 -> 제목 : [${generalResult.data.title}] / 날짜 : ${generalResult.data.textTime}이 캘린더에서 삭제되었습니다.`
+                });
+                await delt;
+            }
+        } catch(err) {
+            console.log("before scd delete err : " + err)
+        }
+    }
+    // 카테고리 선택 값
+    cateClick(cate, num) {
+        const { cateClick } = this.state;
+        this.setState({
+            cateClick : cateClick ? false : true,
+        })
+        if(cate){
+            this.setState({
+                currentTag : {
+                    name : cate.name,
+                    color : cate.color,
+                    num : num,
+                }
+            })
+        }
+    }
+    // 메모 사항 인풋 값
+    memoArea(e) {
+        this.setState({ memoArea : e.target.value })
+    }
+    // 타이틀 인풋 값
+    titleInput(e) {
+        this.setState({ title : e.target.value, })
+    }
+    // 시계 모달로 입력받은 값 
+    dateTime(e) {
+        const { showTimeEnd, showTimeStart} = this.state;
+        if(showTimeStart) {
+            this.setState({ startTime : e.formattedSimple + " " + e.meridiem.toUpperCase() })
+        }
+        if(showTimeEnd) {
+            this.setState({ endTime : e.formattedSimple + " " + e.meridiem.toUpperCase() })
+        }
+    }
+    // 시계 팝업 제어용
+    setShowTime(bool) {
+        if(bool === "end") {
+            this.setState({ showTimeEnd : true })
+        } else if(bool === "start"){
+            this.setState({ showTimeStart : true})
+        } else {
+            this.setState({ showTimeStart : bool, showTimeEnd : bool })
+        }
+    }
+    // 달력 팝업 제어용
+    setShowDate(bool) {
+        if(bool === "end") {
+            this.setState({ showDateEnd : true })
+        } else if(bool === "start"){
+            this.setState({ showDateStart : true})
+        } else {
+            this.setState({ showDateStart : bool, showDateEnd : bool })
+        }
+    }
+    // 파트너 인풋 값
+    async partnerInput(e) {
+        await this.setState({ partnerInput : e.target.value })
+        const { partnerInput } = this.state;
+        if(partnerInput) {
+            try {
+                const result = await axios.get(`${configs.domain}/user/search?username=${partnerInput}`);
+                if(result.data) {
+                    this.setState({ partnerData : result.data });
+                }
+            } catch(err) {
+                console.log("search Partner api err : " + err);
+            }
+            this.setState({ partnerDrop : "flex" });
+        } else {
+            this.setState({ partnerDrop : "none" });
+        }
+    }
+    // 파트너 삭제 버튼
+    partnerCancel(id) {
+        this.setState({ partnerSelt : this.state.partnerSelt.filter(val => val.id !== id) })
+    }
+    // 해당 파트너 클릭 시
+    partnerClick(data) {
+        this.setState({ 
+            partnerDrop : "none",
+            partnerInput : "",
+            partnerSelt : this.state.partnerSelt.concat(data)   // state 값에 추가
+        });
     }
     // 일정 등록을 위한 팝업 창
     popupCreate() {
-        const { startDate,endDate,popupInv,updateData,updateTF,selectCal } = this.state;
-        return <div className="popup-border" style={{
+        const { 
+            startDate,endDate,startTime,endTime,    // 시간 관련
+            popupInv,   // 팝업 창 제어
+            cateClick,cateTag,currentTag,   // 태그 관련    
+            memoArea,title,     // 메모와 타이틀
+            partnerInput,partnerDrop,partnerData,partnerSelt,   // 파트너 등록 관련
+            updateTF,    // 수정 시
+            showTimeStart,showDateStart,
+            showTimeEnd,showDateEnd,
+        } = this.state;
+        return <div className="popup-crt-main" style={{
             display : popupInv
         }}>
-            <div className="popup-selectBox">
-                <div>
-                    휴가관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="holiday"></input>
-                    일정관련<input type="radio" name="selectCal" onChange={this.selectCalendars.bind(this)} value="calendar"></input>
+            <div className="popup-crt-header">
+                <span className="popup-crt-headerTitle">일정 등록하기</span>
+                <span className="popup-crt-headerCancel" onClick={this.clickCancel.bind(this)}>x</span>
+            </div>
+            <div className="popup-crt-hAndBLine"></div>
+            <div className="popup-crt-body">
+                <span className="popup-crt-bodyText">제목</span>
+                <input type="text" className="popup-crt-bodyTitleInput" placeholder="제목에 들어갈 내용" value={title} onChange={this.titleInput.bind(this)}></input>
+                <div className="popup-crt-bodyTime">
+                    <span className="popup-crt-bodyText popup-crt-bodyDateText">시작일</span>
+                    <span className="popup-crt-bodyText">시작시간</span>
                 </div>
-                {
-                    selectCal ? 
-                    <form className="popup-radioGroup" ref={this.radioBtn}>
-                        휴가<input type="radio" name="cal" value="휴가" className="popup-radioBtn"></input>
-                        오전반차<input type="radio" name="cal" value="오전 반차" className="popup-radioBtn"></input>
-                        오후반차<input type="radio" name="cal" value="오후 반차" className="popup-radioBtn"></input>
-                        병가<input type="radio" name="cal" value="병가" className="popup-radioBtn"></input>
-                        대휴<input type="radio" name="cal" value="대휴" className="popup-radioBtn"></input>
-                        기타<input type="radio" name="cal" value="기타" className="popup-radioETC"></input>
-                        <input type="text" name="cal" ref={this.etcText} className="popup-radioETC"></input>
-                    </form> 
-                    :
-                    <div>
-                        <div>
-                            <span>제목</span>
-                            <input type="text" ref={this.title}></input>
+                <div className="popup-crt-bodyTimeDate">
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText" onClick={this.setShowDate.bind(this,"start")}>{moment(startDate).format("YYYY. MM. DD (ddd)")}</span>
+                    {
+                        showDateStart && 
+                        <div className="popup-crt-datePicker">
+                            <DayPicker onDayClick={(day) => this.setState({ startDate : day })} />
+                            <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}><span>close</span></div>
                         </div>
-                        <div>
-                            <span>장소</span>
-                            <input type="text" ref={this.location}></input>
+                    }
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.setShowTime.bind(this,"start")}>{startTime}</span>
+                    {
+                        showTimeStart &&
+                        <div className="popup-crt-timePicker">
+                            <Timekeeper
+                                onChange={this.dateTime.bind(this)}
+                                switchToMinuteOnHourSelect
+                                closeOnMinuteSelect={true}
+                                hour24Mode
+                            />
+                            <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}><span>close</span></div>
                         </div>
-                        <div>
-                            <span>내용</span>
-                            <input type="text" ref={this.content}></input>
+                    }
+                </div>
+                <div className="popup-crt-bodyTime">
+                    <span className="popup-crt-bodyText popup-crt-bodyDateText">종료일</span>
+                    <span className="popup-crt-bodyText">종료시간</span>
+                </div>
+                <div className="popup-crt-bodyTimeDate">
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText" onClick={this.setShowDate.bind(this,"end")}>{moment(endDate).format("YYYY. MM. DD (ddd)")}</span>
+                    {
+                        showDateEnd && 
+                        <div className="popup-crt-datePicker">
+                            <DayPicker onDayClick={(day) => this.setState({ endDate : day })} />
+                            <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}>close</div>
                         </div>
-                        <div>
-                            <span>참여자</span>
-                            <input type="text" ref={this.partner}></input>
+                    }
+                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.setShowTime.bind(this,"end")}>{endTime}</span>
+                    {
+                        showTimeEnd &&
+                        <div className="popup-crt-timePicker">
+                            <Timekeeper
+                                onChange={this.dateTime.bind(this)}
+                                switchToMinuteOnHourSelect
+                                closeOnMinuteSelect={true}
+                                hour24Mode
+                            />
+                            <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}>close</div>
                         </div>
+                    }
+                </div>
+                <span className="popup-crt-bodyText">카테고리</span>
+                <div className="popup-crt-bodyCateContent">
+                    <button className="popup-crt-bodyCateBtns" onClick={this.cateClick.bind(this)}>
+                        <div className="popup-crt-bodyCateBtnDiv">
+                            <div className="popup-crt-bodyCateBtnDivDetail">
+                                <div className="popup-crt-bodyCateMark" style={{ backgroundColor : currentTag.color }}></div>
+                                <span className="popup-crt-bodyTextContent">{currentTag.name}</span>
+                            </div>
+                            <img src={arrow} className="popup-crt-bodyCateArrow"></img>
+                        </div>
+                    </button>
+                    <div className="popup-crt-bodyCateList" style={{ display : cateClick ? "flex" : "none" }}>
+                        {
+                            cateTag.map((data,i)=>{
+                                return <button key={i} className="popup-crt-bodyCateBtn" onClick={this.cateClick.bind(this,data,i)}>
+                                    <div className="popup-crt-bodyCateBtnDiv">
+                                        <div className="popup-crt-bodyCateMark" style={{ backgroundColor : data.color }}></div>
+                                        <span className="popup-crt-bodyTextContent">{data.name}</span>{i === 0 && <img src={arrow} className="popup-crt-bodyCateArrow"></img>}
+                                    </div>
+                                </button>
+                            })
+                        } 
                     </div>
-                }
-                <div className="popup-times" ref={this.time}>
-                    <span className="popup-startTime">{updateTF ? updateData.start : startDate}</span>~
-                    <span className="popup-endTime">{updateTF ? updateData.end : endDate}</span>
                 </div>
-                <div className="popup-save">
-                    <button className="popup-saveBtn" onClick={this.clickSave.bind(this)}>
-                        <span className="popup-saveText">저장</span>
-                    </button>
-                    <button className="popup-saveBtn" onClick={this.clickCancel.bind(this)}>
-                        <span className="popup-saveText">취소</span>
-                    </button>
+                <span className="popup-crt-bodyText">참여인원</span>
+                <div className="popup-crt-bodyPartnerDiv">
+                    <img alt="char" src={charImg} className="popup-crt-bodyPartnerInputImg"></img>
+                    <input type="text" className="popup-crt-bodyPartnerInput" onChange={this.partnerInput.bind(this)} value={partnerInput}></input>
                 </div>
+                <div className="popup-crt-bodyPartnerDroplist" style={{ display : partnerDrop }}>
+                    {
+                        partnerData && 
+                        partnerData.map((data,i)=> {
+                            return <div key={i} className="popup-crt-bodyPartnerBoxRow" onClick={this.partnerClick.bind(this,data)}>
+                                <div className="popup-crt-bodyPartnerSpaceDiv">
+                                    <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
+                                    <span className="popup-crt-bodyTextContent">{data.username}</span>
+                                </div>
+                            </div>
+                        }) 
+                    }
+                </div>
+                <div className="popup-crt-bodyPartnerContent">
+                    {
+                        partnerSelt &&
+                        partnerSelt.map((data,i)=> {
+                            return <div key={i} className="popup-crt-bodyPartnerBox">
+                                <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
+                                <span className="popup-crt-bodyTextContent">{data.username}</span>
+                                <button className="popup-crt-bodyPartnerDelt" onClick={this.partnerCancel.bind(this,data.id)}><span className="popup-crt-bpdt">x</span></button>
+                            </div>
+                        })
+                    }
+                </div>
+                <span className="popup-crt-bodyText">메모 사항</span>
+                <textarea className="popup-crt-bodyMemoContent" value={memoArea} onChange={this.memoArea.bind(this)}></textarea>
+            </div>
+            <div className="popup-crt-btns">
+                <button className="popup-crt-btnCreate" onClick={this.clickSave.bind(this,updateTF)}>
+                    <span className="popup-confirm-bodyMemoContent">{updateTF ? "수정" : "등록"}</span>
+                </button>
             </div>
         </div>
     }
     // 팝업 창의 저장 버튼 누를 시
-    async clickSave() {
-        const { updateTF,selectCal } = this.state
-        let times = (this.time.current.innerText).split("~");
+    async clickSave(updateTF) {
+        const { currentTag,startDate,endDate,memoArea,title,startTime,endTime,partnerSelt } = this.state
+        if(moment(endDate).diff(startDate, "days") < 0) {
+            alert("날짜 입력이 잘못되었습니다. 다시 시도해주세요.");
+            return;
+        }
+        if(!title) {
+            alert("제목을 입력해주세요.");
+            return;
+        }
         await this.setState({
             saveData : {},
         })
-        if(selectCal){
-            let radioValue = "";
-            for (let index = 0; index < this.radioBtn.current.elements.length; index++) {
-                if(this.radioBtn.current.elements[index].checked){
-                    if(index === 5) {
-                        radioValue = this.etcText.current.value;
-                    } else {
-                        radioValue = this.radioBtn.current.elements[index].value;
-                    }
-                    await this.setState({
-                        saveData : {
-                            radio : radioValue,
-                            startDate : moment(times[0]).format("YYYY-MM-DD"),
-                            endDate : moment(times[1]).format("YYYY-MM-DD"),
-                        }
-                    })
-                    break;
+        if(currentTag.num === 2){
+            await this.setState({
+                saveData : {
+                    title : title,
+                    startDate : moment(startDate).format("YYYY-MM-DD"),
+                    endDate : moment(endDate).format("YYYY-MM-DD"),
+                    state : "휴가관련",
+                    dir : true,
                 }
-            }
+            })
         } else {
             await this.setState({
                 saveData : {
-                    title : this.title.current.value,
-                    location : this.location.current.value,
-                    content : this.content.current.value,
-                    partner : this.partner.current.value,
-                    startDate : times[0],
-                    endDate : times[1],
+                    title : title,
+                    content : memoArea,
+                    partner : partnerSelt,
+                    startDate : moment(startDate).format("YYYY-MM-DD") + " " + startTime,
+                    endDate : moment(endDate).format("YYYY-MM-DD") + " " + endTime,
+                    state : currentTag.name,
+                    dir : true,
                 }
             })
         }
         this.setState({
             popupInv : "none",
+            updateTF : false,
         })
         if(updateTF){
-            this.beforeUpdateSchedule(this.state.updateData);
+            this.beforeUpdateSchedule(this.state.saveData);
         } else {
             this.createScheduleItems(this.state.saveData);
         }
-        this.setState({
-            updateTF : false,
-            updateData : {},
-        })
     }
     // 팝업 창의 취소 버튼 누를 시
     clickCancel() {
@@ -517,38 +803,57 @@ class TestCal extends React.Component {
             popupInv : "none",
             popupInvSchedule : "none",
             updateTF : false,
-            updateData : {},
             in_data : {},
         })
     }
     // 스케줄 클릭 시
     clickSchedule = async(e) =>{ 
+        const { cateTag } = this.state;
+        let color = "";
+        let num = 0;
         await this.setState({
             in_data : {},
         })
         if(e.schedule.calendarId !== "99") {
+            const calendarResult = await axios.get(`${configs.domain}/calendar/one?id=${e.schedule.id}`);
             await this.setState({
                 in_data : {
                     id : e.schedule.id,
                     c_id : e.schedule.calendarId,
-                    title : e.schedule.title,
+                    title : calendarResult.data.cate,
+                    tag : calendarResult.data.state,
+                    color : configs.colors[2],
+                    num : 0,
                     start : moment(e.schedule.start._date).format("YYYY-MM-DD HH:mm"),
                     end : moment(e.schedule.end._date).format("YYYY-MM-DD HH:mm"),
+                    startTime : moment(e.schedule.start._date).format("LT"),
+                    endTime : moment(e.schedule.end._date).format("LT"),
                 }
             })
         } else {
             try {
                 const generalResult = await axios.get(`${configs.domain}/generals/one?id=${e.schedule.id}`);
+                cateTag.forEach(data=>{
+                    if(data.name === generalResult.data.tag) {
+                        color = data.color;
+                        num = data.num
+                    }
+                });
                 await this.setState({
                     in_data : {
                         id : generalResult.data.id,
                         c_id : e.schedule.calendarId,
                         title : generalResult.data.title,
-                        location : generalResult.data.location,
                         content : generalResult.data.content,
                         partner : generalResult.data.partner,
+                        color : color,
+                        num : num,
+                        tag : generalResult.data.tag,
+                        memo : generalResult.data.content,
                         start : moment(e.schedule.start._date).format("YYYY-MM-DD HH:mm"),
                         end : moment(e.schedule.end._date).format("YYYY-MM-DD HH:mm"),
+                        startTime : moment(e.schedule.start._date).format("LT"),
+                        endTime : moment(e.schedule.end._date).format("LT"),
                     }
                 })
             } catch (err) {
@@ -560,7 +865,6 @@ class TestCal extends React.Component {
             popupInvSchedule : this.state.popupInvSchedule === "none" ? "flex" : "none",
             popupInv : "none",
             updateTF : false,
-            updateData : {},
         });
     }
     // 스케줄 클릭 시 해당 유저의 스케줄인지 체크
@@ -570,19 +874,13 @@ class TestCal extends React.Component {
             let select = "";
             if(in_data.c_id === "99")
                 select = "general"
-            else {
+            else
                 select = "calendar"
-            }
             const result = await axios.get(`${configs.domain}/slackapi/userGetVerify?id=${in_data.id}&select=${select}`)
-            if(result.data.userId === usertoken){
-                await this.setState({
-                    userGet : true,
-                })
-            } else {
-                await this.setState({
-                    userGet : false,
-                })
-            }
+            if(result.data.userId === usertoken)
+                this.setState({ userGet : true })
+            else
+                this.setState({ userGet : false })
         } catch(err) {
             console.log("popup user get err : " + err);
         }
@@ -590,52 +888,72 @@ class TestCal extends React.Component {
     // 스케줄용 팝업 창
     popupSchedule() {
         const { in_data,userGet } = this.state;
-        return <div className="schedulePopup-mainDIv" style={{
+        return <div className="popup-confirm-main" style={{
             display : this.state.popupInvSchedule,
         }}>
-            <div className="schedulePopup-titleDiv">
-                제목 : <span className="schedulePopup-titleText">{in_data.title}</span>
+            <div className="popup-confirm-header">
+                <span className="popup-confirm-headerTitle">일정 확인</span>
+                <span className="popup-confirm-headerCancel" onClick={this.clickCancel.bind(this)}>x</span>
             </div>
-            {
-                in_data.c_id === "99" && <>
-                    <div className="schedulePopup-titleDiv">
-                        장소 : <span className="schedulePopup-titleText">{in_data.location}</span>
-                    </div>
-                    <div className="schedulePopup-titleDiv">
-                        내용 : <span className="schedulePopup-titleText">{in_data.content}</span>
-                    </div>
-                    <div className="schedulePopup-titleDiv">
-                        참여자 : <span className="schedulePopup-titleText">{in_data.partner}</span>
-                    </div>
-                </>
-            }
-            <div className="schedulePopup-timeDiv">
-                <span className="schedulePopup-time">{in_data.start}</span><br></br>
-                <span className="schedulePopup-time">{in_data.end}</span>
+            <div className="popup-confirm-hAndBLine"></div>
+            <div className="popup-confirm-body">
+                <span className="popup-confirm-bodyText">제목</span>
+                <span className="popup-confirm-bodyTextContent">{in_data.title}</span>
+                <span className="popup-confirm-bodyText">시간</span>
+                <span className="popup-confirm-bodyTextContent">{moment(in_data.start).format("YYYY. MM. DD. (ddd) LT")} ~  {moment(in_data.end).format("YYYY. MM. DD. (ddd) LT")}</span>
+                <span className="popup-confirm-bodyText">카테고리</span>
+                <div className="popup-confirm-bodyCateContent">
+                    <div className="popup-confirm-bodyCateMark" style={{ backgroundColor : in_data.color }}></div>
+                    <span className="popup-confirm-bodyTextContent">{in_data.tag}</span>
+                </div>
+                <span className="popup-confirm-bodyText">참여인원</span>
+                <div className="popup-confirm-bodyPartnerContent">
+                    {
+                        in_data.partner &&
+                        in_data.partner.map((data,i)=>{
+                            return <div key={i} className="popup-confirm-bodyPartnerBox">
+                                <img src={charImg} alt="char" className="popup-confirm-bodyPartnerImg"></img>
+                                <span className="popup-confirm-bodyTextContent">{data.username}</span>
+                            </div>
+                        })
+                    }
+                </div>
+                <span className="popup-confirm-bodyText">메모 사항</span>
+                <span className="popup-confirm-bodyTextContent">{in_data.memo ? in_data.memo : ""}</span>
             </div>
-            <div className="schedulePopup-btnsDiv">
+            <div className="popup-confirm-btns">
                 {
-                userGet && <>
-                    <button type="button" className="schedulePopup-btn" onClick={this.popupUpdate.bind(this, in_data)}>
-                        <span>수정</span>
-                    </button>
-                    <button type="button" className="schedulePopup-btn" onClick={this.beforeDeleteSchedule.bind(this, in_data.id, in_data.c_id)}>
-                        <span>삭제</span>
-                    </button>
-                </>
+                    userGet && <>
+                        <button className="popup-confirm-btnUpdat" onClick={this.popupUpdate.bind(this,in_data)}>
+                            <span className="popup-confirm-btnUpdatText">수정</span>
+                        </button>
+                        <button className="popup-confirm-btnDelet" onClick={this.beforeDeleteSchedule.bind(this,in_data.id,in_data.c_id)}>
+                            <span className="popup-confirm-btnDeletText">삭제</span>
+                        </button>
+                    </>
                 }
-                <button type="button" className="schedulePopup-btn" onClick={this.clickCancel.bind(this)}><span>취소</span></button>
             </div>
         </div>
     }
     // 수정 버튼을 눌렀을 시 수정용 스태이트 값 변환
-    async popupUpdate(data) {
-        console.log(data)
-        await this.setState({
-            updateData : data,
+    popupUpdate(data) {
+        this.setState({
+            // 현재 수정 버튼을 누른 상태인지 체크하기 위한 불 값
             updateTF : true,
+            // 넘어온 데이터를 토대로 재구성하여 보여줌
+            title : data.title,
+            startDate : data.start,
+            endDate : data.end,
+            startTime : data.startTime,
+            endTime : data.endTime,
+            currentTag : { name : data.tag, color : data.color, num : data.num },
+            partnerInput : "",
+            partnerSelt : data.partner,
+            memoArea : data.memo ? data.memo : "",
+            updateID : data.id,
+            updateCID : data.c_id,
         })
-        await this.setState({
+        this.setState({
             popupInv : "flex",
             popupInvSchedule : "none",
         })
@@ -645,13 +963,18 @@ class TestCal extends React.Component {
         // 팝업 창 처음부터 렌더
         const popupmini = this.popupCreate();
         const popupschedule = this.popupSchedule();
-        const { calendarDate } = this.state;
+        const { calendarDate,loading } = this.state;
         return (
             <div className="tui-div">
+                {
+                    !loading && <div className="loadMaskDiv">
+                        <img alt="Loging~" src={loadMask} className="loadMask"></img>
+                    </div>
+                }
                 <div>
-                    <button onClick={this.handleClickPrevButton}>이전 달</button>
-                    <button onClick={this.handleClickNextButton}>다음 달</button>
-                    <button onClick={this.todayButton}>오늘</button>
+                    <button onClick={this.handleClickPrevNextButton.bind(this,"pre")}>이전 달</button>
+                    <button onClick={this.handleClickPrevNextButton.bind(this,"nex")}>다음 달</button>
+                    <button onClick={this.handleClickPrevNextButton.bind(this)}>오늘</button>
                     <span>{calendarDate}</span> {/** 달력 현재 월 표시 */}
                 </div>
                 { popupmini /*popup components create */ }

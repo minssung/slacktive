@@ -5,6 +5,7 @@ const models = require("../models");
 
 // DB Setting --------------------
 const User = models.user;
+const Op = models.Sequelize.Op;
 
 const stateQuery = "select max(id), state from users group by state";
 // ------------------------------------- DB CRUD -------------------------------------
@@ -12,6 +13,22 @@ const stateQuery = "select max(id), state from users group by state";
 router.get("/all", async(req, res) => {
     try {
         const result = await User.findAll();
+        res.send(result);
+    } catch(err) {
+        console.log("select users all err : " + err)
+    }
+});
+
+// DB SelectAll 지각자 체크 --------------------
+router.get("/search", async(req, res) => {
+    try {
+        const result = await User.findAll({
+            where : {
+                username : {
+                    [Op.like] : "%" + req.query.username + "%"
+                }
+            }
+        });
         res.send(result);
     } catch(err) {
         console.log("select users all err : " + err)
