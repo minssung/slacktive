@@ -3,5 +3,7 @@
 /docker-compose.yml
 /package-lock.json
 
-# /server/server_config.js
+
+/server/server_config.js
+/server/devServer_config.js
 # /server/reg_config.js

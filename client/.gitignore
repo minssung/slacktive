@@ -24,4 +24,5 @@ yarn-debug.log*
 yarn-error.log*
 
 #etc
-# /src/client_config.js
+/src/client_config.js
+/src/devClient_config.js
