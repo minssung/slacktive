@@ -19,11 +19,11 @@ class mypage extends Component {
             today : moment(new Date()).format("YYYY-MM-"),  // 오늘 년,월
             toYear : moment(new Date()).format("YYYY"),     // 이번년도
             // api datas
-            tardys : [],
-            atten : [],
-            avgAtten : [],
-            nightShift : [],
-            holidayHistorys : [],
+            tardys : [],    // 지각
+            atten : [],     // 출근
+            avgAtten : [],  // 평균 출근
+            nightShift : [],// 야근
+            holidayHistorys : [],   // 휴가 내역
             // load mask
             loading : "",
         }

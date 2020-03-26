@@ -107,7 +107,7 @@ class SlackDashboard extends React.Component {
                     dashDb.map((data,i)=>{
                         return <Dashboard key={i}
                             title={data.title ? data.title : data.user.username + " " + data.cate}
-                            partner={data.partner ? data.partner.map((data,i)=>{ return i !== 0 ? "," + data.username : "" + data.username }) : data.user.username}
+                            partner={data.partner[0] ? data.user.username + "," + data.partner.map((data,i)=>{ return data.username }) : data.user.username}
                             textTime={this.dataTextTime.bind(this,data.time)}
                             color={this.dataStateSwich.bind(this,data.state)}
                         />
