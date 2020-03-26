@@ -4,18 +4,20 @@ import moment from "moment";
 import 'moment/locale/ko'       // 한글로 불러오기
 import Calendar from '@toast-ui/react-calendar';
 import 'tui-calendar/dist/tui-calendar.css';    // 캘린더 css 적용
-import configs from '../../../client_config'; // config 파일
+//import configs from '../../../client_config'; // config 파일
 import '../css/popupCrt.css'    // 팝업 생성
 import '../css/popupConfirm.css'    // 팝업 확인
 import arrow from '../css/arrow.png';   // 카테고리의 화살표
 import loadMask from '../../../resource/loadmaskTest.gif'   // loadmask
-
 import Timekeeper from 'react-timekeeper';
 import 'react-daypicker/lib/DayPicker.css';
 import DayPicker from 'react-daypicker';
 import charImg from '../css/char.png';
 
 moment.locale('en');    // ko -> 한글 버전. => moment.js에서 한글로 변환하는게 잘 안되고 오류가 있음 ( invalid err )
+
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
 
 class TestCal extends React.Component {
     constructor(props) {
@@ -78,7 +80,7 @@ class TestCal extends React.Component {
         const { usertoken } = this.state;
         // user Db setting
         await this.setState({
-            user : await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`)
+            user : await axios.get(`${configs.domain}/user/one?userid=${usertoken}`)
         })
         // calendar init moubt
         await this.scheduleInitMount()
@@ -91,8 +93,8 @@ class TestCal extends React.Component {
     // 캘린더 스케줄 초기 마운트 시 생성 설정 -> 불러오기
     async scheduleInitMount() {
         // calendar db select all -> init
-        let schedulesDB = await axios.get("http://localhost:5000/calendar/all");
-        let generalsDB = await axios.get("http://localhost:5000/generals/all");
+        let schedulesDB = await axios.get(configs.domain+"/calendar/all");
+        let generalsDB = await axios.get(configs.domain+"/generals/all");
         this.setState({
             scheduleArray : schedulesDB.data,
             generalsArray : generalsDB.data,
@@ -276,13 +278,13 @@ class TestCal extends React.Component {
             }
             // 슬랙에 메시지 전송
             try {
-                await axios.post("http://localhost:5000/slackapi/messagePost",{
+                await axios.post(configs.domain+"/slackapi/messagePost",{
                     channel : configs.channel_calendar,
                     p_token : user.data.p_token,
                     text : timeText
                 })
                 // 채널 내역 갱신
-                await axios.post("http://localhost:5000/slackapi/channelHistoryCal")
+                await axios.post(configs.domain+"/slackapi/channelHistoryCal")
                 // 새로 마운트
                 // calendar init mount
                 await this.scheduleInitMount()
@@ -310,13 +312,13 @@ class TestCal extends React.Component {
                     }
                 })
                 // 슬랙에 메시지 전송
-                const post = axios.post("http://localhost:5000/slackapi/messagePost",{
+                const post = axios.post(configs.domain+"/slackapi/messagePost",{
                     channel : user.data.userchannel,
                     p_token : user.data.p_token,
                     text : `제목 : [${data.title}] / 메모사항 : [${data.content}] / ${data.startDate}~${data.endDate} / 참여자 : [${partners}]`
                 })
                 // 일정 디비에 생성
-                const result = await axios.post("http://localhost:5000/generals/create",{
+                const result = await axios.post(configs.domain+"/generals/create",{
                     title : data.title,
                     content : data.content,
                     partner : PartnersData,
@@ -363,15 +365,15 @@ class TestCal extends React.Component {
                     dbTimeText = moment(data.startDate).format("YYYY-MM-DD");
                 }
                 try {
-                    let result = await axios.get(`http://localhost:5000/calendar/one?id=${updateID}`);
-                    const updat = axios.put("http://localhost:5000/calendar/update",{
+                    let result = await axios.get(`${configs.domain}/calendar/one?id=${updateID}`);
+                    const updat = axios.put(configs.domain+"/calendar/update",{
                         id : updateID,
                         userId : user.data.id,
                         text : timeText,
                         cate : data.title,
                         textTime : dbTimeText,
                     });
-                    const posting = axios.post("http://localhost:5000/slackapi/messageUpdate",{
+                    const posting = axios.post(configs.domain+"/slackapi/messageUpdate",{
                         p_token : user.data.p_token,
                         channel : configs.channel_calendar,
                         text : timeText,
@@ -389,8 +391,8 @@ class TestCal extends React.Component {
             } else {
                 dbTimeText = data.startDate + "~" + data.endDate;
                 try {
-                    let result = await axios.get(`http://localhost:5000/generals/one?id=${updateID}`);
-                    const updat = axios.put("http://localhost:5000/generals/update",{
+                    let result = await axios.get(`${configs.domain}/generals/one?id=${updateID}`);
+                    const updat = axios.put(configs.domain+"/generals/update",{
                         id : updateID,
                         title : data.title,
                         textTime : dbTimeText,
@@ -398,7 +400,7 @@ class TestCal extends React.Component {
                         partner : data.partner,
                         tag : data.state,
                     });
-                    const posting = axios.post("http://localhost:5000/slackapi/messagePost",{
+                    const posting = axios.post(configs.domain+"/slackapi/messagePost",{
                         channel : user.data.userchannel,
                         p_token : user.data.p_token,
                         text : `이전에 등록한 일정 -> 제목 : [(수정전)${result.data.title} (수정후)${data.title}] / 날짜 : (수정전)${result.data.textTime} (수정후)${dbTimeText}이 캘린더에서 수정되었습니다.`
@@ -426,15 +428,15 @@ class TestCal extends React.Component {
                     dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
                 }
                 try {
-                    let result = await axios.get(`http://localhost:5000/calendar/one?id=${data.schedule.id}`);
-                    const updat = axios.put("http://localhost:5000/calendar/update",{
+                    let result = await axios.get(`${configs.domain}/calendar/one?id=${data.schedule.id}`);
+                    const updat = axios.put(configs.domain+"/calendar/update",{
                         id : data.schedule.id,
                         userId : user.data.id,
                         text : timeText,
                         cate : dataText,
                         textTime : dbTimeText,
                     });
-                    const posting = axios.post("http://localhost:5000/slackapi/messageUpdate",{
+                    const posting = axios.post(configs.domain+"/slackapi/messageUpdate",{
                         p_token : user.data.p_token,
                         channel : configs.channel_calendar,
                         text : timeText,
@@ -452,12 +454,12 @@ class TestCal extends React.Component {
             } else {
                 dbTimeText = moment(data.start._date).format("YYYY-MM-DD LT") + "~" + moment(data.end._date).format("YYYY-MM-DD LT")
                 try {
-                    let result = await axios.get(`http://localhost:5000/generals/one?id=${data.schedule.id}`);
-                    const updat = axios.put("http://localhost:5000/generals/update",{
+                    let result = await axios.get(`${configs.domain}/generals/one?id=${data.schedule.id}`);
+                    const updat = axios.put(configs.domain+"/generals/update",{
                         id : data.schedule.id,
                         textTime : dbTimeText,
                     });
-                    const posting = axios.post("http://localhost:5000/slackapi/messagePost",{
+                    const posting = axios.post(configs.domain+"/slackapi/messagePost",{
                         channel : user.data.userchannel,
                         p_token : user.data.p_token,
                         text : `이전에 등록한 일정 -> 제목 : [${result.data.title}] / 날짜 : (수정전)${result.data.textTime} (수정후)${dbTimeText}이 캘린더에서 수정되었습니다.`
@@ -487,15 +489,15 @@ class TestCal extends React.Component {
             // 캘린더 아이디가 99가 아닌 값 -> 휴가용
             if(c_id !== "99") {
                 // 조회
-                scheduleResult = await axios.get(`http://localhost:5000/calendar/one?id=${id}`);
+                scheduleResult = await axios.get(`${configs.domain}/calendar/one?id=${id}`);
                 // 디비에서 삭제
-                const delt = axios.delete(`http://localhost:5000/calendar/delete?id=${id}`);
+                const delt = axios.delete(`${configs.domain}/calendar/delete?id=${id}`);
                 // 캘린더상에서 삭제
                 calendar.deleteSchedule(id, c_id);
                 // 팝업 창 내리기
                 this.setState({ popupInvSchedule : "none", })
                 // 슬랙에서 삭제
-                axios.post("http://localhost:5000/slackapi/messageDelete",{
+                axios.post(configs.domain+"/slackapi/messageDelete",{
                     p_token : user.data.p_token,
                     channel : configs.channel_calendar,
                     time : scheduleResult.data.ts,
@@ -504,15 +506,15 @@ class TestCal extends React.Component {
             // 캘린더 아이디가 99인 값 -> 일정용
             } else {
                 // 해당 아이디 조회
-                const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${id}`);
+                const generalResult = await axios.get(`${configs.domain}/generals/one?id=${id}`);
                 // 디비에서 삭제
-                const delt = axios.delete(`http://localhost:5000/generals/delete?id=${id}`);
+                const delt = axios.delete(`${configs.domain}/generals/delete?id=${id}`);
                 // 캘린더상에서 삭제
                 calendar.deleteSchedule(id, c_id);
                 // 팝업 창 내리기
                 this.setState({ popupInvSchedule : "none", })
                 // 삭제 되었다는 메시지 보내기
-                axios.post("http://localhost:5000/slackapi/messagePost",{
+                axios.post(configs.domain+"/slackapi/messagePost",{
                     channel : user.data.userchannel,
                     p_token : user.data.p_token,
                     text : `이전에 등록한 일정 -> 제목 : [${generalResult.data.title}] / 날짜 : ${generalResult.data.textTime}이 캘린더에서 삭제되었습니다.`
@@ -583,7 +585,7 @@ class TestCal extends React.Component {
         const { partnerInput } = this.state;
         if(partnerInput) {
             try {
-                const result = await axios.get(`http://localhost:5000/user/search?username=${partnerInput}`);
+                const result = await axios.get(`${configs.domain}/user/search?username=${partnerInput}`);
                 if(result.data) {
                     this.setState({ partnerData : result.data });
                 }
@@ -813,7 +815,7 @@ class TestCal extends React.Component {
             in_data : {},
         })
         if(e.schedule.calendarId !== "99") {
-            const calendarResult = await axios.get(`http://localhost:5000/calendar/one?id=${e.schedule.id}`);
+            const calendarResult = await axios.get(`${configs.domain}/calendar/one?id=${e.schedule.id}`);
             await this.setState({
                 in_data : {
                     id : e.schedule.id,
@@ -830,7 +832,7 @@ class TestCal extends React.Component {
             })
         } else {
             try {
-                const generalResult = await axios.get(`http://localhost:5000/generals/one?id=${e.schedule.id}`);
+                const generalResult = await axios.get(`${configs.domain}/generals/one?id=${e.schedule.id}`);
                 cateTag.forEach(data=>{
                     if(data.name === generalResult.data.tag) {
                         color = data.color;
@@ -874,7 +876,7 @@ class TestCal extends React.Component {
                 select = "general"
             else
                 select = "calendar"
-            const result = await axios.get(`http://localhost:5000/slackapi/userGetVerify?id=${in_data.id}&select=${select}`)
+            const result = await axios.get(`${configs.domain}/slackapi/userGetVerify?id=${in_data.id}&select=${select}`)
             if(result.data.userId === usertoken)
                 this.setState({ userGet : true })
             else

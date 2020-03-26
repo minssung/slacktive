@@ -4,6 +4,9 @@ import Dashboard from './Dashboard/Dashboard';
 import moment from 'moment';
 import loadMask from '../../../resource/loadmaskTest.gif'
 
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+
 class SlackDashboard extends React.Component {
     constructor(props){
         super(props);
@@ -38,7 +41,7 @@ class SlackDashboard extends React.Component {
     // ---------- user List Api ----------
     async userListApi(){
         try {
-            const result = await axios.get(`http://localhost:5000/user/all`);
+            const result = await axios.get(`${configs.domain}/user/all`);
             this.setState({
                 usersalldb : result.data,
             });
@@ -50,7 +53,7 @@ class SlackDashboard extends React.Component {
     // ---------- calendar / general Api & Render----------
     async dashDbApi() {
         try {
-            const result = await axios.get("http://localhost:5000/updatState");
+            const result = await axios.get(configs.domain+"/updatState");
             await this.setState({ dashDb : result.data })
         } catch(err) {
             console.log("calendar api err : " + err);

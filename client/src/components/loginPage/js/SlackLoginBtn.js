@@ -2,6 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import loadMask from '../../../resource/loadmaskTest.gif'
 
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+
 class SlackLoginBtn extends React.Component {
     constructor(props){
         super(props);
@@ -22,18 +25,17 @@ class SlackLoginBtn extends React.Component {
                     await this.setState({
                         loading : "Loding"
                     })
-                    const result = await axios.get("http://localhost:5000/login-access",{
+                    const result = await axios.get(configs.domain+"/login-access",{
                         params : {
                             code
                         }
                     });
                     console.log("jwt user token : "+result.data);
                     localStorage.setItem("usertoken", result.data);
-    
                     window.location.href = "/";
                 } catch(err) {
                     console.log("code already use err : " + err);
-                    window.location.href = "/";
+                    process.exit(1);
                 }
             }
         }
@@ -42,7 +44,7 @@ class SlackLoginBtn extends React.Component {
         await this.setState({
             loading : "Loding"
         })
-        window.location.href = "http://localhost:5000/login"
+        window.location.href = configs.domain+"/login"
     }
     render() {
         const { loading } = this.state;

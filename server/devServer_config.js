@@ -1,8 +1,8 @@
 var configs = {
-    database : "slack",
-    user : "cedar",
-    password : "tlejroqkfwk",
-    host : "192.168.0.40",
+    database : "cedar_slack",
+    user : "root",
+    password : "multi1004",
+    host : "localhost",
     dialect : "mysql",
 
     b_token : "xoxb-891877255443-1018466406144-gHCF2Ry4bKcCxaHDBBm4NP9E",    // app 토큰
@@ -28,10 +28,10 @@ var configs = {
     Pm0 : "16:50",
 
     // API 호출 도메인
-    domain : "http://dev.cedar.kr:3333",
-    redirectDomain : "http://dev.cedar.kr:2222",
-    port : 3333
-
+    domain : 'http://localhost:5000',
+    redirectDomain : "http://localhost:3000",
+    port : 5000
+    
 }
 
 module.exports = configs;

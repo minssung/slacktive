@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const configs = require("../server_config");
+//const configs = require("../server_config");
 const axios = require('axios');
 const models = require("../models");
 const moment = require('moment');
@@ -10,6 +10,9 @@ const User = models.user;
 const Slackchat = models.slackchat;
 const Calendar = models.calendar;
 const General = models.general;
+
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../devServer_config') : configs = require('../server_config');
 
 // 팀의 모든 유저 보기 ( 앱 포함 ) --------------------------------------------------
 router.get("/teamUsers", async(req,res)=>{
@@ -24,6 +27,11 @@ router.get("/teamUsers", async(req,res)=>{
                 token : configs.b_token,
             }
         });
+        try {
+            result.data.ok === true
+        } catch (err) {
+            console.log('어딘가 문제가 있군 그래', err);
+        }
         const resultSet = result.data.members;
         const array = resultSet.map((data)=>{
             return {
@@ -56,6 +64,7 @@ router.get("/teamUsers", async(req,res)=>{
         res.send(array);
     } catch(err){
         console.log("db created err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -86,7 +95,7 @@ router.post("/messagePost", async(req,res)=>{
 router.post("/channelHistory", async(req,res) =>{
     try {
         // 가장 최근 데이터 추출
-        let historyOne = await axios.get("http://localhost:5000/slack/oneRow");
+        let historyOne = await axios.get(configs.domain+"/slack/oneRow");
         console.log("History Update");
         
         const result = await axios({
@@ -124,7 +133,7 @@ router.post("/channelHistory", async(req,res) =>{
 // 채널의 메시지 내역 가져오기 ( 일정용 ) --------------------------------------------------
 router.post("/channelHistoryCal", async(req,res) =>{
     try {
-        let historyOne = await axios.get("http://localhost:5000/calendar/oneRow");
+        let historyOne = await axios.get(configs.domain+"/calendar/oneRow");
         console.log("calendar History Update");
         const result = await axios({
             method : "get",
@@ -150,7 +159,7 @@ router.post("/channelHistoryCal", async(req,res) =>{
                 individualHooks : true,
             })
         } catch(err) {
-            console.error("bulkcreate init err : " + err);
+            console.error("bulkcreate cal err : " + err);
         }
         await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
@@ -185,7 +194,7 @@ router.post("/channelHistoryInit", async(req,res) =>{
                 individualHooks : true,
             });
         } catch(err) {
-            console.error("bulkcreate atten arr : " + err);
+            console.error("bulkcreate Init atten arr : " + err);
         }
         res.send(resultArray);
     } catch(error) {
@@ -219,7 +228,7 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
                 individualHooks : true,
             })
         } catch(err) {
-            console.error("bulkcreate init err : " + err);
+            console.error("bulkcreate Init Cal err : " + err);
         }
         await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
@@ -419,13 +428,14 @@ router.get("/userGetVerify", async(req,res)=>{
 
 // 정규식을 거쳐 처리하는 함수 --------------------------------------------------
 function regFunc(channel ,resultSet,init, ...args){
-    if(channel === "times"){
+    let resultArray = [];
+    if(channel === "times") {
         // 출퇴근의 처리
         // args : 0 => real time
         // args : 1 => check time
         // args : 2 => time Reg result
         // args : 3 => state var
-        let resultArray = resultSet.map(data=> {
+        resultSet.forEach(data=> {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
             // data.text 조건문 처리
@@ -474,13 +484,13 @@ function regFunc(channel ,resultSet,init, ...args){
                 }
                 // 추가해야 될 예외 처리
                 // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
-                return data.user && {
+                resultArray.push({
                     userId : data.user,
                     time : args[0],
                     ts : data.ts,
                     text : data.text,
                     state : args[3]
-                }
+                });
             } else {
                 if(!init){
                     errMessageMe(data,channel);
@@ -489,7 +499,6 @@ function regFunc(channel ,resultSet,init, ...args){
                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss")  + " , err Msg : " + data.text)
             }
         });
-        return resultArray;
     } else {
         // 일정용 처리
         // args : 0 => real time
@@ -498,7 +507,7 @@ function regFunc(channel ,resultSet,init, ...args){
         // args : 3 => text time
         // args : 4 => search
         let index = 0;
-        let resultArray = resultSet.map(data => {
+        resultSet.map(data => {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = configs.calendarReg.exec(data.text);
             args[2] = [];
@@ -574,7 +583,7 @@ function regFunc(channel ,resultSet,init, ...args){
                         }
                     }
                     // 반환
-                    return data.user && {
+                    resultArray.push({
                         userId : data.user,
                         time : args[0],
                         ts : data.ts,
@@ -582,7 +591,7 @@ function regFunc(channel ,resultSet,init, ...args){
                         cate : args[2][4],
                         textTime : args[3],
                         state : "휴가관련",
-                    }
+                    })
                 } catch(err){
                     console.log("Calendar init Reg err : " + err)
                 }
@@ -594,8 +603,8 @@ function regFunc(channel ,resultSet,init, ...args){
                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss") + " , err Msg : " + data.text)
             }
         });
-        return resultArray;
     }
+    return resultArray;
 }
 
 // 정규식에 어긋난 내용은 개인 슬랙 채널에 메시지를 보냄

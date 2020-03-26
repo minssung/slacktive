@@ -9,17 +9,18 @@ const calendar_router = require("./route/calendar");
 const generals_router = require("./route/generals");
 const axios = require("axios");
 let jwt = require("jsonwebtoken");
-let configs = require('./server_config');
 const moment = require('moment');
 const Agenda = require('agenda');
 
-// const redis = require("redis");
-// let client = redis.createClient(6379, "docker.for.mac.host.internal");
+const redis = require("redis");
+let client = redis.createClient(6379, "localhost");
 
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Origin", configs.redirectDomain);
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
     next();
@@ -37,6 +38,11 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
+    
+    client.get("a", (err,re)=>{
+        console.log(re);
+    })
+    
     res.send("Hello SlackApi World!");
 });
 
@@ -104,16 +110,18 @@ try {
 }};
 
 // -------------------- 초기 포트 및 서버 실행 --------------------
-const PORT = process.env.PORT || 5000;
-models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
-.then(() => {
+const PORT = process.env.PORT || configs.port;
+models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
     models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                // await axios.get("http://localhost:5000/slackapi/teamUsers");
-                // await axios.post("http://localhost:5000/slackapi/channelHistoryInitCal");
-                // await axios.post("http://localhost:5000/slackapi/channelHistoryInit");
+                // await axios.get(configs.domain+"/slackapi/teamUsers");
+                // const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
+                // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                // await Promise.all([Cal,Gnr]).then((data)=>{
+                //     console.log("Initialize Success");
+                // });
                 await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
@@ -132,7 +140,7 @@ app.get('/login', async(req, res) => {
             params : {
                 scope : 'chat:write:user,users:read',
                 client_id : configs.c_id,
-                redirect_uri : "http://localhost:3000/",
+                redirect_uri : configs.redirectDomain,
             }
         });
         res.send(result.data);
@@ -149,10 +157,10 @@ app.get('/login-access', async(req,res) => {
                 client_id : configs.c_id,
                 client_secret : configs.c_s_id,
                 code : req.query.code,
-                redirect_uri : "http://localhost:3000/",
+                redirect_uri : configs.redirectDomain,
             }
         });
-        await axios.put("http://localhost:5000/user/update",{
+        await axios.put(configs.domain+"/user/update",{
             userid : result.data.user_id,
             p_token : result.data.access_token,
         });
@@ -197,11 +205,8 @@ app.get('/verify', (req,res)=>{
 // -------------------- index Api --------------------
 app.get('/updateHistorys', async(req,res) => {
     try {
-        let resultC = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-        let resultH = axios.post("http://localhost:5000/slackapi/channelHistory");
-        await Promise.all([resultC,resultH]).then((val)=>{
-            console.log("update History Promise All Suce");
-        })
+        const resultC = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+        const resultH = axios.post(configs.domain+"/slackapi/channelHistory");
         const updatDate = new Date();
         res.send(updatDate);
     } catch(err) {
@@ -225,8 +230,8 @@ async function calendarStateUpdatFunc() {
     const today = moment(new Date()).format('YYYY-MM-DD')
     let resultArray = [];
     try {
-        let resultCal = axios.get(`http://localhost:5000/calendar/allTime?textTime=${todays}`);
-        let resultGnr = axios.get(`http://localhost:5000/generals/allTime?textTime=${todays}`);
+        let resultCal = axios.get(`${configs.domain}/calendar/allTime?textTime=${todays}`);
+        let resultGnr = axios.get(`${configs.domain}/generals/allTime?textTime=${todays}`);
         await Promise.all([resultCal,resultGnr]).then((val)=>{
             resultCal = val[0].data;
             resultGnr = val[1].data;

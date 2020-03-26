@@ -5,6 +5,9 @@ import axios from 'axios';
 import loadMask from '../../../resource/loadmaskTest.gif'
 import MyDashboard from './My_Dashboard/MyDashboard';
 
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+
 class mypage extends Component {
     constructor(props){
         super(props);
@@ -33,7 +36,7 @@ class mypage extends Component {
         const { usertoken } = this.state;
         // user Db setting
         await this.setState({
-            user : await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`)
+            user : await axios.get(`${configs.domain}/user/one?userid=${usertoken}`)
         })
         // 동시에 처리
         const tardy = this.tardyApi();   // 지각
@@ -55,7 +58,7 @@ class mypage extends Component {
         let text = "지각";
         try {
             const result = await axios.get(
-                `http://localhost:5000/slack/state?state=${text}&userid=${user.data.id}&time=${today}
+                `${configs.domain}/slack/state?state=${text}&userid=${user.data.id}&time=${today}
             `)
             await this.setState({
                 tardys : result.data,
@@ -77,7 +80,7 @@ class mypage extends Component {
         let times = [];
         try {
             let result = await axios.get(
-                `http://localhost:5000/slack/time?state=${text}&userid=${user.data.id}&time=${today}`)
+                `${configs.domain}/slack/time?state=${text}&userid=${user.data.id}&time=${today}`)
             times = /(\d{2}):(\d{2})/.exec(result.data)
             await this.setState({
                 avgAtten : times,
@@ -100,7 +103,7 @@ class mypage extends Component {
         let text = "출근";
         try {
             const result = await axios.get(
-                `http://localhost:5000/slack/state?state=${text}&userid=${user.data.id}&time=${today}
+                `${configs.domain}/slack/state?state=${text}&userid=${user.data.id}&time=${today}
             `)
             await this.setState({
                 atten : result.data,
@@ -121,7 +124,7 @@ class mypage extends Component {
         let text = "야근";
         try {
             const result = await axios.get(
-                `http://localhost:5000/slack/state?state=${text}&userid=${user.data.id}&time=${today}
+                `${configs.domain}/slack/state?state=${text}&userid=${user.data.id}&time=${today}
             `)
             await this.setState({
                 nightShift : result.data,
@@ -140,7 +143,7 @@ class mypage extends Component {
     async holidayUsageHistoryApi() {
         const { toYear,user } = this.state;
         try {
-            const result = await axios.get(`http://localhost:5000/calendar/getTime?textTime=${toYear}&userId=${user.data.id}`)
+            const result = await axios.get(`${configs.domain}/calendar/getTime?textTime=${toYear}&userId=${user.data.id}`)
             await this.setState({
                 holidayHistorys : result.data,
             });

@@ -6,6 +6,10 @@ import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
 
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
+console.log(configs);
+
 class IndexRoot extends React.Component {
     constructor(props){
         super(props);
@@ -23,6 +27,7 @@ class IndexRoot extends React.Component {
             },
             preColor : "#ff0000",
             task : '',
+            vertical : 'vertical_checked_1',
         }
         this.tag = React.createRef();
         this.color = React.createRef();
@@ -48,7 +53,7 @@ class IndexRoot extends React.Component {
                 }, (err) => {
                     console.log("promise all err : " + err);
                 })
-                const userOne = await axios.get(`http://localhost:5000/user/one?userid=${this.state.usertoken}`);
+                const userOne = await axios.get(`${configs.domain}/user/one?userid=${this.state.usertoken}`);
                 if(!userOne.data.usertag){
                     await this.setState({
                         userinfoSet : false
@@ -66,7 +71,7 @@ class IndexRoot extends React.Component {
 
     // 지각자 체크
     async tardyUser() {
-        const result = await axios.get('http://localhost:5000/user/tardyall');
+        const result = await axios.get(configs.domain+"/user/tardyall");
         const userCheck = result.data;
         const tardyArray = userCheck.map((data) => {
             return data.username
@@ -77,7 +82,7 @@ class IndexRoot extends React.Component {
 
     // 휴가자 체크
     async vacationUser() {
-        const result = await axios.get('http://localhost:5000/user/vacationall');
+        const result = await axios.get(configs.domain+"/user/vacationall");
         const userCheck = result.data;
         const vacationArray = userCheck.map((data) => {
             return data.username
@@ -89,7 +94,7 @@ class IndexRoot extends React.Component {
     // 유저 이름 확인
     async usernameCheck() {
         const usertoken = this.state.usertoken;
-        const userCheck = await axios.get(`http://localhost:5000/user/one?userid=${usertoken}`);
+        const userCheck = await axios.get(`${configs.domain}/user/one?userid=${usertoken}`);
         this.setState({
             task : userCheck.data.usertag
         });
@@ -99,7 +104,7 @@ class IndexRoot extends React.Component {
     // 유저 마지막 출근 시간 확인
     async onWorkTimeCheck() {
         const usertoken = this.state.usertoken;
-        const TimeCheck = await axios.get(`http://localhost:5000/slack/onworktime?userid=${usertoken}`);
+        const TimeCheck = await axios.get(`${configs.domain}/slack/onworktime?userid=${usertoken}`);
         const time = (TimeCheck.data.time).substring(11, 16);
         const timeArray = time.split(':');
         const editTime = timeArray[0]+'시 '+timeArray[1]+'분';
@@ -139,7 +144,7 @@ class IndexRoot extends React.Component {
     async usersTokenChecked(){
         if(localStorage.getItem("usertoken")){
             try {
-                const result = await axios("http://localhost:5000/verify",{
+                const result = await axios(configs.domain+"/verify",{
                     method : "get",
                     headers : {
                         'content-type' : 'text/json',
@@ -162,19 +167,19 @@ class IndexRoot extends React.Component {
     }
 
     bgBtn_1() {
-        this.setState({ bgcolor : 'bg_1' })
+        this.setState({ bgcolor : 'bg_1', vertical : 'vertical_checked_1'})
     };
 
     bgBtn_2() {
-        this.setState({ bgcolor : 'bg_2' })
+        this.setState({ bgcolor : 'bg_2', vertical : 'vertical_checked_2' })
     };
 
     bgBtn_3() {
-        this.setState({ bgcolor : 'bg_3' })
+        this.setState({ bgcolor : 'bg_3', vertical : 'vertical_checked_3' })
     };
 
     bgBtn_4() {
-        this.setState({ bgcolor : 'bg_4' })
+        this.setState({ bgcolor : 'bg_4', vertical : 'vertical_checked_4' })
     };
 
     // 유저 정보 등록
@@ -192,7 +197,7 @@ class IndexRoot extends React.Component {
             return;
         }
         try {
-            await axios.put("http://localhost:5000/user/update",{
+            await axios.put(configs.domain+"/user/update",{
                 userid : this.state.usertoken,
                 usertag : this.tag.current.value,
                 usercolor : this.color.current.value,
@@ -220,7 +225,7 @@ class IndexRoot extends React.Component {
         }
     }
     render() {
-        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task } = this.state;
+        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task, vertical } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -245,6 +250,7 @@ class IndexRoot extends React.Component {
                                             <img src="img/Menu4.png" className="main-menu-4" alt="Etc"/>
                                         </Link>
                                     </div>
+                                    <div className={vertical}></div>
                                     <div className="vertical"></div>
                                     <div className="app-rightDiv">
                                         <Route exact path="/">
