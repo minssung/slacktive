@@ -68,7 +68,7 @@ class TestCal extends React.Component {
             updateID : "",  // 업뎃 시 아이디
             updateCID : "", // 업뎃 시 캘린더 아이디
             // load mask
-            loading : "",
+            loading : ""
         }
     }
     // 초기 마운트

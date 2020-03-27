@@ -279,7 +279,7 @@ async function calendarStateUpdatFunc() {
                     models.user.update({
                         id : data.userId,
                         state : data.cate,
-                    }, {
+                    },{
                         where : {
                             id : data.userId,
                         }
