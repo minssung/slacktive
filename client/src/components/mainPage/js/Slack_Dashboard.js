@@ -28,10 +28,9 @@ class SlackDashboard extends React.Component {
     // ---------- user Token verify & Mount & axios ---------- 
     async componentDidMount(){
         await this.setState({
-            usertoken : await this.props.Token
+            usertoken : await this.props.Token,
         })
         await this.userListApi();   // user List Api
-        await this.dashDbApi();     // cal & gnr Api
         this.setState({
             loading : "Loading",
         })
@@ -51,14 +50,6 @@ class SlackDashboard extends React.Component {
         }
     }
     // ---------- calendar / general Api & Render----------
-    async dashDbApi() {
-        try {
-            const result = await axios.get(configs.domain+"/updatState");
-            await this.setState({ dashDb : result.data })
-        } catch(err) {
-            console.log("calendar api err : " + err);
-        }
-    }
     dataTextTime(time) {
         let userTime
         let dayArr = [];
@@ -88,6 +79,7 @@ class SlackDashboard extends React.Component {
             case "회의" : userState = "turquoise"; break;
             case "생일" : userState = "violet"; break;
             case "기타" : userState = "thistle"; break;
+            default : break;
         }
         return userState;
     }
@@ -95,19 +87,20 @@ class SlackDashboard extends React.Component {
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- rendering ---------- 
     render () {
-        const { loading,dashDb } = this.state;
+        const { loading } = this.state;
+        const { dashData } = this.props;
         return (
             <div className="dash-boardDiv">
                 {
                     !loading && <div className="loadMaskDiv">
-                        <img alt="Logind~" src={loadMask} className="loadMask"></img>
+                        <img alt="Loding~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
                 {
-                    dashDb.map((data,i)=>{
+                    dashData.map((data,i)=>{
                         return <Dashboard key={i}
                             title={data.title ? data.title : data.user.username + " " + data.cate}
-                            partner={data.partner[0] ? data.user.username + "," + data.partner.map((data,i)=>{ return data.username }) : data.user.username}
+                            partner={data.partner ? data.user.username + data.partner.map((data,i)=>{ return i !== 0 ? data.username : "," + data.username}) : data.user.username}
                             textTime={this.dataTextTime.bind(this,data.time)}
                             color={this.dataStateSwich.bind(this,data.state)}
                         />

@@ -8,7 +8,6 @@ import Mypage from './myPage/js/mypage';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
-console.log(configs);
 
 class IndexRoot extends React.Component {
     constructor(props){
@@ -28,6 +27,7 @@ class IndexRoot extends React.Component {
             preColor : "#ff0000",
             task : '',
             vertical : 'vertical_checked_1',
+            dashDb : [],
         }
         this.tag = React.createRef();
         this.color = React.createRef();
@@ -35,15 +35,15 @@ class IndexRoot extends React.Component {
     }
 
     async componentDidMount(){
-        if(localStorage.getItem("usertoken")){
+        console.log("mount did ")
+        if(localStorage.getItem("usertoken")) {
             try {
                 await this.setState({
                     usertoken : await this.usersTokenChecked()
                 });
-
                 // API 동시 호출을 위한 Promiss.all 패턴
                 const promiseArray = [this.usernameCheck(), this.onWorkTimeCheck(), this.tardyUser(), this.vacationUser()];
-                Promise.all(promiseArray).then((values) => {
+                await Promise.all(promiseArray).then((values) => {
                     this.setState({
                         username: values[0],
                         onWorkTime: values[1],
@@ -55,11 +55,11 @@ class IndexRoot extends React.Component {
                 })
                 const userOne = await axios.get(`${configs.domain}/user/one?userid=${this.state.usertoken}`);
                 if(!userOne.data.usertag){
-                    await this.setState({
+                    this.setState({
                         userinfoSet : false
                     })
                 } else {
-                    await this.setState({
+                    this.setState({
                         userinfoSet : true
                     })
                 }
@@ -105,9 +105,9 @@ class IndexRoot extends React.Component {
     async onWorkTimeCheck() {
         const usertoken = this.state.usertoken;
         const TimeCheck = await axios.get(`${configs.domain}/slack/onworktime?userid=${usertoken}`);
-        const time = (TimeCheck.data.time).substring(11, 16);
-        const timeArray = time.split(':');
-        const editTime = timeArray[0]+'시 '+timeArray[1]+'분';
+        let time = (TimeCheck.data.time).substring(11, 16);
+        let timeArray = time.split(':');
+        let editTime = timeArray[0]+'시 '+timeArray[1]+'분';
         
         // 마지막 출근 기록에 지각이 아닌 출근으로 저장되어 있을 경우
         // 슬랙에 출근을 늦게 입력했을 때를 위해
@@ -116,22 +116,20 @@ class IndexRoot extends React.Component {
         if (TimeCheck.data.state === '출근') {
             // 시 만 입력 되었을 때
             try {
-                if (TimeCheck.data.text === (/(\d*시)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.exec(TimeCheck.data.text))[0]) {
-                    const time = (TimeCheck.data.text)
-                    const timeArray = time.split(' ');
-                    const editTime = timeArray[0];
-                    return editTime
+                if (TimeCheck.data.text === (/(\d*시)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.test(TimeCheck.data.text))) {
+                    time = (TimeCheck.data.text)
+                    timeArray = time.split(' ');
+                    editTime = timeArray[0];
                 }
             } catch (err) {
                 console.log(err);
             }
             // 시, 분 모두 입력되었을 때
             try {
-                if (TimeCheck.data.text === (/(\d*시)\s*(\d*분)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.exec(TimeCheck.data.text))[0]) {
-                    const time = (TimeCheck.data.text)
-                    const timeArray = time.split(' ');
-                    const editTime = timeArray[0] + ' ' + timeArray[1];
-                    return editTime
+                if (TimeCheck.data.text === (/(\d*시)\s*(\d*분)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.test(TimeCheck.data.text))) {
+                    time = (TimeCheck.data.text)
+                    timeArray = time.split(' ');
+                    editTime = timeArray[0] + ' ' + timeArray[1];
                 }
             } catch (err) {
                 console.log(err);
@@ -165,23 +163,10 @@ class IndexRoot extends React.Component {
         }
         return null;
     }
-
-    bgBtn_1() {
-        this.setState({ bgcolor : 'bg_1', vertical : 'vertical_checked_1'})
+    // 배경 변경
+    bgBtn(num) {
+        this.setState({ bgcolor : 'bg_'+num, vertical : 'vertical_checked_'+num})
     };
-
-    bgBtn_2() {
-        this.setState({ bgcolor : 'bg_2', vertical : 'vertical_checked_2' })
-    };
-
-    bgBtn_3() {
-        this.setState({ bgcolor : 'bg_3', vertical : 'vertical_checked_3' })
-    };
-
-    bgBtn_4() {
-        this.setState({ bgcolor : 'bg_4', vertical : 'vertical_checked_4' })
-    };
-
     // 유저 정보 등록
     async clickUserInfoSave() {
         if(!this.tag.current.value) {
@@ -203,8 +188,7 @@ class IndexRoot extends React.Component {
                 usercolor : this.color.current.value,
                 userchannel : this.prvCh.current.value,
             });
-            console.log("user info set success : " + this.color.current.value, this.tag.current.value, this.state.usertoken, this.prvCh.current.value)
-            await this.setState({
+            this.setState({
                 userinfoSet : true,
             })
             window.location.href = "/"
@@ -224,8 +208,14 @@ class IndexRoot extends React.Component {
             })
         }
     }
+    // 대시보드에 들어갈 데이터
+    changeDashDb(data){
+        this.setState({
+            dashDb: data
+        })
+    }
     render() {
-        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task, vertical } = this.state;
+        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task, vertical, dashDb } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -237,16 +227,16 @@ class IndexRoot extends React.Component {
                             <div className={bgcolor}>
                                 <div className="app-contentDiv">
                                     <div className="app-leftDiv">
-                                        <Link to="/" onClick={this.bgBtn_1.bind(this)}>
+                                        <Link to="/" onClick={this.bgBtn.bind(this,1)}>
                                             <img src="img/Menu1.png" className="main-menu-1" alt="Calendar"/>
                                         </Link>
-                                        <Link to="/my" onClick={this.bgBtn_2.bind(this)}>
+                                        <Link to="/my" onClick={this.bgBtn.bind(this,2)}>
                                             <img src="img/Menu2.png" className="main-menu-2" alt="My"/>
                                         </Link>
-                                        <Link to="/cedar" onClick={this.bgBtn_3.bind(this)}>
+                                        <Link to="/cedar" onClick={this.bgBtn.bind(this,3)}>
                                             <img src="img/Menu3.png" className="main-menu-3" alt="Cedar"/>
                                         </Link>
-                                        <Link to="/etc" onClick={this.bgBtn_4.bind(this)}>
+                                        <Link to="/etc" onClick={this.bgBtn.bind(this,4)}>
                                             <img src="img/Menu4.png" className="main-menu-4" alt="Etc"/>
                                         </Link>
                                     </div>
@@ -254,32 +244,32 @@ class IndexRoot extends React.Component {
                                     <div className="vertical"></div>
                                     <div className="app-rightDiv">
                                         <Route exact path="/">
-                                        {
-                                            !userinfoSet &&
-                                            <div className="app-userInfoDiv">
-                                                <div className="app-userInfo">
-                                                    <div className="userInfo-colorDiv">
-                                                        <span className="userInfo-colorText">당신의 일정에 표시할 색을 선택하세요.</span>
-                                                        <input type="color" name="color" ref={this.color} onChange={this.inputChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
+                                            {
+                                                !userinfoSet &&
+                                                <div className="app-userInfoDiv">
+                                                    <div className="app-userInfo">
+                                                        <div className="userInfo-colorDiv">
+                                                            <span className="userInfo-colorText">당신의 일정에 표시할 색을 선택하세요.</span>
+                                                            <input type="color" name="color" ref={this.color} onChange={this.inputChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
+                                                        </div>
+                                                        <div className="userInfo-colorDiv">
+                                                            <span className="userInfo-colorText">당신만의 메시지를 받을 슬랙 본인 채널ID를 입력하세요.</span>
+                                                            <input type="text" name="prvCh" ref={this.prvCh} onChange={this.inputChange.bind(this)} value={prvCh} className="userInfo-colorInput"></input>
+                                                        </div>
+                                                        <div className="userInfo-TagDiv">
+                                                            <span className="userInfo-TagText">당신의 부서를 선택하세요.</span>
+                                                            <select ref={this.tag}>
+                                                                <option>개발팀</option>
+                                                                <option>디자인팀</option>
+                                                                <option>전략기획팀</option>
+                                                            </select>
+                                                        </div>
+                                                        <button className="userInfo-button" type="button" onClick={this.clickUserInfoSave.bind(this)}>
+                                                            <span className="userInfo-buttonText">등록</span>
+                                                        </button>
                                                     </div>
-                                                    <div className="userInfo-colorDiv">
-                                                        <span className="userInfo-colorText">당신만의 메시지를 받을 슬랙 본인 채널ID를 입력하세요.</span>
-                                                        <input type="text" name="prvCh" ref={this.prvCh} onChange={this.inputChange.bind(this)} value={prvCh} className="userInfo-colorInput"></input>
-                                                    </div>
-                                                    <div className="userInfo-TagDiv">
-                                                        <span className="userInfo-TagText">당신의 부서를 선택하세요.</span>
-                                                        <select ref={this.tag}>
-                                                            <option>개발팀</option>
-                                                            <option>디자인팀</option>
-                                                            <option>전략기획팀</option>
-                                                        </select>
-                                                    </div>
-                                                    <button className="userInfo-button" type="button" onClick={this.clickUserInfoSave.bind(this)}>
-                                                        <span className="userInfo-buttonText">등록</span>
-                                                    </button>
                                                 </div>
-                                            </div>
-                                        }
+                                            }
                                             <div className="intro">
                                                 {username}님, &nbsp;좋은아침!{<br></br>}
                                                 {onWorkTime}에 출근하셨네요
@@ -297,7 +287,7 @@ class IndexRoot extends React.Component {
                                                 <span className="tardy">지각자&nbsp;&nbsp;&nbsp;{tardyUser}</span>
                                                 <span className="vacation">휴가자&nbsp;&nbsp;&nbsp;{vacationUser}</span>
                                             </div>
-                                            <TuiCalendar Token={usertoken}/>
+                                            <TuiCalendar Token={usertoken} changeDashDb={this.changeDashDb.bind(this)} />
                                             <div className="design_2">
                                                 <img className="zandi" src="img/zandi.png" alt="zandi" />
                                                 <img className="tree" src="img/tree.png" alt="tree" />
@@ -305,7 +295,7 @@ class IndexRoot extends React.Component {
                                                 <img className="Todaycard" src="img/Todaycard.png" alt="Todaycard" />
                                             </div>
                                             <div className="app-dash">
-                                                <SlackDash Token={usertoken}></SlackDash>
+                                                <SlackDash Token={usertoken} dashData={dashDb}></SlackDash>
                                             </div>
                                         </Route>
                                         <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>

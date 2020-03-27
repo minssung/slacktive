@@ -38,11 +38,7 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    
-    client.get("a", (err,re)=>{
-        console.log(re);
-    })
-    
+
     res.send("Hello SlackApi World!");
 });
 
@@ -263,16 +259,8 @@ async function calendarStateUpdatFunc() {
                     update = true;
                 }
             }
-            // 검증에서 true 일 시 업데이트
-            if(update){
-                models.user.update({
-                    id : data.userId,
-                    state : data.cate,
-                }, {
-                    where : {
-                        id : data.userId,
-                    }
-                })
+            // 해당하는 결과 푸시
+            if(update) {
                 resultArray.push({
                     state : data.state,
                     time : data.textTime,
@@ -281,6 +269,23 @@ async function calendarStateUpdatFunc() {
                     user : data.user,
                 })
             }
+            // 레디스 조회 후 데이터 변화가 없으면 유저 업댓 x
+            client.get(data.userId, (err,val)=>{
+                if(err) {
+                    console.log("redis user updat err : " + err);
+                }
+                if(val !== data.cate) {
+                    client.set(data.userId, data.cate, redis.print);
+                    models.user.update({
+                        id : data.userId,
+                        state : data.cate,
+                    }, {
+                        where : {
+                            id : data.userId,
+                        }
+                    })
+                }
+            })
         });
         resultGnr.forEach((data) => {
             // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증

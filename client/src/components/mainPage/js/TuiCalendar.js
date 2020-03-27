@@ -93,15 +93,19 @@ class TestCal extends React.Component {
     // 캘린더 스케줄 초기 마운트 시 생성 설정 -> 불러오기
     async scheduleInitMount() {
         // calendar db select all -> init
-        let schedulesDB = await axios.get(configs.domain+"/calendar/all");
-        let generalsDB = await axios.get(configs.domain+"/generals/all");
+        let schedulesDB = axios.get(configs.domain+"/calendar/all");
+        let generalsDB = axios.get(configs.domain+"/generals/all");
+        await Promise.all([schedulesDB,generalsDB]).then((val)=>{
+            schedulesDB = val[0].data;
+            generalsDB = val[1].data;
+        })
         this.setState({
-            scheduleArray : schedulesDB.data,
-            generalsArray : generalsDB.data,
+            scheduleArray : schedulesDB,
+            generalsArray : generalsDB
         })
     }
     // 캘린더 스케줄 마운트 및 정규식 표현 처리 -> 보여주기
-    scheduleCreateMount(datasS,datasG) {
+    async scheduleCreateMount(datasS,datasG) {
         let scheduleItem = [];
         let startDate = "";
         let endDate = "";
@@ -209,10 +213,16 @@ class TestCal extends React.Component {
         } catch(err) {
             console.log("TUI Mount init err : " + err)
         }
+        await this.dashDataProps();
         this.setState({
             scheduleItem,
             loading : "load",
         })
+    }
+    // 대시보드에 프롭스 넘겨주기
+    async dashDataProps() {
+        const result = await axios.get(configs.domain+"/updatState");
+        this.props.changeDashDb(result.data)
     }
     // ------------------------------ Instance method ------------------------------ //
     // 이전 / 다음 / 오늘 달로 이동하는 버튼
@@ -344,6 +354,7 @@ class TestCal extends React.Component {
                 loading : "load",
             })
         }
+        await this.dashDataProps();
     }
     // 일정 수정 시
     // 수정 시 슬랙의 메시지도 수정
@@ -384,7 +395,7 @@ class TestCal extends React.Component {
                         start : data.startDate,
                         end : data.endDate,
                     });
-                    await updat; await posting;
+                    await Promise.all([updat,posting]);
                 } catch(err) {
                     console.log("before updat scd err : " + err); 
                 }
@@ -410,7 +421,7 @@ class TestCal extends React.Component {
                         start : data.startDate,
                         end : data.endDate,
                     });
-                    await updat; await posting;
+                    await Promise.all([updat,posting]);
                 } catch(err) {
                     console.log("before updat gnr err : " + err);
                 }
@@ -419,58 +430,62 @@ class TestCal extends React.Component {
         } else {
             // 휴가 관련 업데이트 일 경우
             if(data.schedule.calendarId !== "99") {
-                dataText = (/\S*\s*(.*)/.exec(data.schedule.title))[1];
-                if(moment(data.end._date).diff(data.start._date, "days") >= 1){
-                    timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")}~${moment(data.end._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
-                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD") + "~" + moment(data.end._date).format("YYYY-MM-DD")
-                } else {
-                    timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
-                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
-                }
-                try {
-                    let result = await axios.get(`${configs.domain}/calendar/one?id=${data.schedule.id}`);
-                    const updat = axios.put(configs.domain+"/calendar/update",{
-                        id : data.schedule.id,
-                        userId : user.data.id,
-                        text : timeText,
-                        cate : dataText,
-                        textTime : dbTimeText,
-                    });
-                    const posting = axios.post(configs.domain+"/slackapi/messageUpdate",{
-                        p_token : user.data.p_token,
-                        channel : configs.channel_calendar,
-                        text : timeText,
-                        time : result.data.ts
-                    })
-                    calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
-                        start : data.changes.start && data.changes.start._date,
-                        end : data.changes.end && data.changes.end._date,
-                    });
-                    await updat; await posting;
-                } catch(err){
-                    console.log("before scd update err : " + err);
+                let result = await axios.get(`${configs.domain}/calendar/one?id=${data.schedule.id}`);
+                if(result.data.userId === user.data.id) {
+                    dataText = (/\S*\s*(.*)/.exec(data.schedule.title))[1];
+                    if(moment(data.end._date).diff(data.start._date, "days") >= 1){
+                        timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")}~${moment(data.end._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
+                        dbTimeText = moment(data.start._date).format("YYYY-MM-DD") + "~" + moment(data.end._date).format("YYYY-MM-DD")
+                    } else {
+                        timeText = `[${user.data.username}] ${moment(data.start._date).format("YYYY[년] MM[월] DD[일]")} ${dataText}`
+                        dbTimeText = moment(data.start._date).format("YYYY-MM-DD");
+                    }
+                    try {
+                        const updat = axios.put(configs.domain+"/calendar/update",{
+                            id : data.schedule.id,
+                            userId : user.data.id,
+                            text : timeText,
+                            cate : dataText,
+                            textTime : dbTimeText,
+                        });
+                        const posting = axios.post(configs.domain+"/slackapi/messageUpdate",{
+                            p_token : user.data.p_token,
+                            channel : configs.channel_calendar,
+                            text : timeText,
+                            time : result.data.ts
+                        })
+                        calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
+                            start : data.changes.start && data.changes.start._date,
+                            end : data.changes.end && data.changes.end._date,
+                        });
+                        await Promise.all([updat,posting]);
+                    } catch(err){
+                        console.log("before scd update err : " + err);
+                    }
                 }
             // 일정 관련 업데이트 일 경우
             } else {
-                dbTimeText = moment(data.start._date).format("YYYY-MM-DD LT") + "~" + moment(data.end._date).format("YYYY-MM-DD LT")
-                try {
-                    let result = await axios.get(`${configs.domain}/generals/one?id=${data.schedule.id}`);
-                    const updat = axios.put(configs.domain+"/generals/update",{
-                        id : data.schedule.id,
-                        textTime : dbTimeText,
-                    });
-                    const posting = axios.post(configs.domain+"/slackapi/messagePost",{
-                        channel : user.data.userchannel,
-                        p_token : user.data.p_token,
-                        text : `이전에 등록한 일정 -> 제목 : [${result.data.title}] / 날짜 : (수정전)${result.data.textTime} (수정후)${dbTimeText}이 캘린더에서 수정되었습니다.`
-                    });
-                    calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
-                        start : data.changes.start && data.changes.start._date,
-                        end : data.changes.end && data.changes.end._date,
-                    });
-                    await updat; await posting;
-                } catch(err){
-                    console.log("before scd update err : " + err);
+                let result = await axios.get(`${configs.domain}/generals/one?id=${data.schedule.id}`);
+                if(result.data.userId === user.data.id) {
+                    dbTimeText = moment(data.start._date).format("YYYY-MM-DD LT") + "~" + moment(data.end._date).format("YYYY-MM-DD LT")
+                    try {
+                        const updat = axios.put(configs.domain+"/generals/update",{
+                            id : data.schedule.id,
+                            textTime : dbTimeText,
+                        });
+                        const posting = axios.post(configs.domain+"/slackapi/messagePost",{
+                            channel : user.data.userchannel,
+                            p_token : user.data.p_token,
+                            text : `이전에 등록한 일정 -> 제목 : [${result.data.title}] / 날짜 : (수정전)${result.data.textTime} (수정후)${dbTimeText}이 캘린더에서 수정되었습니다.`
+                        });
+                        calendar.updateSchedule(data.schedule.id, data.schedule.calendarId, {
+                            start : data.changes.start && data.changes.start._date,
+                            end : data.changes.end && data.changes.end._date,
+                        });
+                        await Promise.all([updat,posting]);
+                    } catch(err){
+                        console.log("before scd update err : " + err);
+                    }
                 }
             }
         }
@@ -478,6 +493,7 @@ class TestCal extends React.Component {
             popupInv : "none",
             popupInvSchedule : "none",
         })
+        await this.dashDataProps();
     }
     // 일정 삭제 시
     // 삭제 시 메시지 또한 삭제 됨
@@ -524,6 +540,7 @@ class TestCal extends React.Component {
         } catch(err) {
             console.log("before scd delete err : " + err)
         }
+        await this.dashDataProps();
     }
     // 카테고리 선택 값
     cateClick(cate, num) {
@@ -694,7 +711,7 @@ class TestCal extends React.Component {
                                 <div className="popup-crt-bodyCateMark" style={{ backgroundColor : currentTag.color }}></div>
                                 <span className="popup-crt-bodyTextContent">{currentTag.name}</span>
                             </div>
-                            <img src={arrow} className="popup-crt-bodyCateArrow"></img>
+                            <img alt="arrow" src={arrow} className="popup-crt-bodyCateArrow"></img>
                         </div>
                     </button>
                     <div className="popup-crt-bodyCateList" style={{ display : cateClick ? "flex" : "none" }}>
@@ -703,7 +720,7 @@ class TestCal extends React.Component {
                                 return <button key={i} className="popup-crt-bodyCateBtn" onClick={this.cateClick.bind(this,data,i)}>
                                     <div className="popup-crt-bodyCateBtnDiv">
                                         <div className="popup-crt-bodyCateMark" style={{ backgroundColor : data.color }}></div>
-                                        <span className="popup-crt-bodyTextContent">{data.name}</span>{i === 0 && <img src={arrow} className="popup-crt-bodyCateArrow"></img>}
+                                        <span className="popup-crt-bodyTextContent">{data.name}</span>{i === 0 && <img alt="arrow" src={arrow} className="popup-crt-bodyCateArrow"></img>}
                                     </div>
                                 </button>
                             })

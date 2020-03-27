@@ -4,6 +4,8 @@ module.exports = {
       name: 'Server',
       script: './server/index.js',
       instances : 2,
+      watch: ["server", "client"],
+      ignore_watch : ["node_modules"],
       env: {
         "NODE_ENV": "development"
       },
