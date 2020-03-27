@@ -4,7 +4,7 @@
 /node_modules
 /package-lock.json
 /src/client_config.js
-/src/devClient.config.js
+/src/devClient_config.js
 /ecosystem.config.js
 /.pnp
 .pnp.js
