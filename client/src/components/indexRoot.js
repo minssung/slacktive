@@ -5,6 +5,7 @@ import SlackLoginBtn from './loginPage/js/SlackLoginBtn';
 import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
+import Employee from './cedarPage/Employee';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
@@ -309,7 +310,7 @@ class IndexRoot extends React.Component {
                                             </div>
                                         </Route>
                                         <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
-                                        <Route path="/cedar"></Route>
+                                        <Route path="/cedar"><Employee Token={usertoken}></Employee></Route>
                                         <Route path="/etc"></Route>
                                     </div>
                                     

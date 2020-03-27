@@ -4,9 +4,9 @@ var configs = {
     password : "tlejroqkfwk",
     host : "192.168.0.40",
     dialect : "mysql",
-    b_token : "xoxb-891877255443-926835312512-qiLY87UZ8t4MIeN1uKGH9UW0",    // app 토큰
-    p_token : "xoxp-891877255443-891877703267-1015819710531-fcddcc3be2ed8ec999d53630dcf1cddd",
-    bearer_p_token : "Bearer xoxp-891877255443-891877703267-1015819710531-fcddcc3be2ed8ec999d53630dcf1cddd",
+    b_token : "xoxb-891877255443-926835312512-7mlVs6S0dCj1Ux6bi6GQmOfF",    // app 토큰
+    p_token : "xoxp-891877255443-891877703267-1014824700898-e755d4aa5943b17f58edfde254e98e41",
+    bearer_p_token : "Bearer xoxp-891877255443-891877703267-1014824700898-e755d4aa5943b17f58edfde254e98e41",
     c_id : "891877255443.906922103267",             // app client 아이디
     c_s_id : "75d6c672024db024e2f4c481ba3a56e2",    // app secret 아이디
     channel_time : "CSZTZ7TCL",     // 출퇴근
@@ -23,7 +23,7 @@ var configs = {
     Pm0 : "16:50",
 
     // API 호출 도메인
-    domain : "http://dev.cedar.kr:3333",
+    domain : "http://192.168.0.40:3333",
     redirectDomain : "http://dev.cedar.kr:2222",
     port : 3333
 

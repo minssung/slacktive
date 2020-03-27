@@ -104,14 +104,13 @@ try {
 const PORT = process.env.PORT || configs.port;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
 .then(() => {
-    models.sequelize.sync({ force:true }).then(()=>{
+    models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
-            console.log(configs);
             try {
-                await axios.get(configs.domain+"/slackapi/teamUsers");
-                await axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
-                await axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                // await axios.get(configs.domain+"/slackapi/teamUsers");
+                // await axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
+                // await axios.post(configs.domain+"/slackapi/channelHistoryInit");
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
