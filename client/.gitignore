@@ -2,7 +2,10 @@
 
 # dependencies
 /node_modules
-# /package-lock.json
+/package-lock.json
+/client-client_config.js
+/devClient.config.js
+/ecosystem.config.js
 /.pnp
 .pnp.js
 
