@@ -38,8 +38,28 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
+    
+    // let a = moment("2020-03-30");
+    // let b = moment("2020-03-31");
+    // console.log(a.diff(b,"days"))
+    // let h = moment(new Date()).format("YYYY-MM-DD");
+    // let n = /-(\d{2}-\d{2})/.exec(h)
+    // if(n[1] === "01-01") {
+    //     client.get("newYear", (err, val)=>{
+    //         if(err) {
+    //             console.log("new Holiday Set Err : " + err);
+    //         }
+    //         if(val) {
+    //             console.log("new Holiday aleardy Set");
+    //         } else {
+    //             client.set("newYear", "holidayCountSet", redis.print);
+    //         }
+    //     })
+    // }
 
-    res.send("Hello SlackApi World!");
+    // let a = "2020-02-03 10:43"
+    // let b = "2020-02-03 09:20"
+    // console.log(moment.duration(moment(a).diff(b)).asMinutes());
 });
 
 // ---------- MongoDB 연동 ---------- //
@@ -142,6 +162,7 @@ app.get('/login', async(req, res) => {
         res.send(result.data);
     } catch(err) {
         console.log("login trying err : " + err);
+        res.end();
     }
 });
 app.get('/login-access', async(req,res) => {
@@ -165,6 +186,7 @@ app.get('/login-access', async(req,res) => {
         res.send(usertoken);
     } catch(err) {
         console.log("login access err : " + err);
+        res.end();
     }
 });
 // -------------------- ********** --------------------
@@ -203,10 +225,12 @@ app.get('/updateHistorys', async(req,res) => {
     try {
         const resultC = axios.post(configs.domain+"/slackapi/channelHistoryCal");
         const resultH = axios.post(configs.domain+"/slackapi/channelHistory");
+        await Promise.all([resultC,resultH]);
         const updatDate = new Date();
         res.send(updatDate);
     } catch(err) {
-        console.log("index api & history updat err : " + err)
+        console.log("index api & history updat err : " + err);
+        res.end();
     }
 })
 // 갱신 버튼 누를 시 즉시 상태 업데이트 시도
@@ -216,6 +240,7 @@ app.get('/updatState', async(req,res) => {
         result = await calendarStateUpdatFunc();
     } catch (err) {
         console.log("updat state err : " + err);
+        res.end();
     }
     res.send(result)
 });
@@ -274,10 +299,10 @@ async function calendarStateUpdatFunc() {
                 if(err) {
                     console.log("redis user updat err : " + err);
                 }
-                if(val !== data.cate) {
+                if(val !== data.cate && update) {
+                    console.log(data.cate)
                     client.set(data.userId, data.cate, redis.print);
                     models.user.update({
-                        id : data.userId,
                         state : data.cate,
                     },{
                         where : {

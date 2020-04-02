@@ -15,11 +15,12 @@ router.get("/all", async(req, res) => {
         const result = await User.findAll();
         res.send(result);
     } catch(err) {
-        console.log("select users all err : " + err)
+        console.log("select users all err : " + err);
+        res.end();
     }
 });
 
-// DB SelectAll 지각자 체크 --------------------
+// DB 유저 찾기 --------------------
 router.get("/search", async(req, res) => {
     try {
         const result = await User.findAll({
@@ -31,7 +32,8 @@ router.get("/search", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select users all err : " + err)
+        console.log("select users all err : " + err);
+        res.end();
     }
 });
 
@@ -45,7 +47,8 @@ router.get("/tardyall", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select users all err : " + err)
+        console.log("select users all err : " + err);
+        res.end();
     }
 });
 
@@ -74,6 +77,7 @@ router.get("/one", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select user one err : " + err);
+        res.end();
     }
 });
 
@@ -84,6 +88,7 @@ router.get("/state", async(req, res) => {
         res.send(result);
     } catch (err){
         console.log("select chat one err : " + err);
+        res.end();
     }
 });
 
@@ -106,6 +111,7 @@ router.post("/create", async(req, res) => {
         });
     }catch(err) {
         console.error("created user err : " + err);
+        res.end();
     }
     res.send(result);
 });
@@ -150,6 +156,7 @@ router.delete("/delete", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("delete user err : " + err);
+        res.end();
     }
 });
 

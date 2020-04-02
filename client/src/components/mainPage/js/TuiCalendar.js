@@ -30,7 +30,6 @@ class TestCal extends React.Component {
             scheduleItem : null,    // 캘린더에 표시되는 아이템들
             usertoken : "", // 유저 토큰 값
             user : [],  // 유저 데이터 정보 디비
-            calendarDate : 'default', // 달력 월 표시
             // popup create state
             startDate : "", // 시작 날짜
             endDate : "",   // 끝 날짜
@@ -87,8 +86,6 @@ class TestCal extends React.Component {
         const { scheduleArray,generalsArray } = this.state;
         // calendar create mount
         this.scheduleCreateMount(scheduleArray,generalsArray);
-        // 현재 달력 월
-        this.nowDate();
     }
     // 캘린더 스케줄 초기 마운트 시 생성 설정 -> 불러오기
     async scheduleInitMount() {
@@ -113,7 +110,7 @@ class TestCal extends React.Component {
         let color = "";
         try {
             datasS.forEach(data => {
-                color = data.user.usercolor ? data.user.usercolor : "#ffffff";  // 컬러별 지정 없다면 ffffff                                                   
+                color = configs.colors[2];                                                
                 regDays = configs.dataTimeReg.exec(data.textTime)   // 디비의 타임 텍스트를 가져와서 정규식 거침
                 let days = [];  // 일 수를 복수로 담을 배열
                 let scheduleObj = {};   // 스케줄 아이템을 담을 변수
@@ -195,7 +192,14 @@ class TestCal extends React.Component {
             })
             // 일정용 스케줄
             datasG.forEach(data=>{
-                color = data.user.usercolor ? data.user.usercolor : "#ffffff";
+                switch(data.tag) {
+                    case "휴가관련" : color = configs.colors[2]; break;
+                    case "출장 / 미팅" : color = configs.colors[0]; break;
+                    case "회의" : color = configs.colors[1]; break;
+                    case "생일" : color = configs.colors[3]; break;
+                    case "기타" : color = configs.colors[4]; break;
+                    default : break;
+                }
                 let textTimes = data.textTime.split("~");
                 let scheduleObj = {};
                 scheduleObj = {
@@ -230,21 +234,9 @@ class TestCal extends React.Component {
         const calendar = this.calendarRef.current.getInstance();
         if(data === "pre")
             calendar.prev();
-        else if(data === "nex")
+        else 
             calendar.next();
-        else
-            calendar.today();
-        this.nowDate();
     };
-    // 달력 현재 날짜 표시
-    nowDate = () => {
-        const calendar = this.calendarRef.current.getInstance();
-        const date = calendar.getDate();
-        const momentdate = moment(date._date).format('YYYY.MM');
-        this.setState({
-            calendarDate : momentdate
-        });
-    }
     // ------------------------------ Event ------------------------------ //
     // 캘린더 영역을 클릭 시에 이벤트 호출
     beforeCreateSchedule = (e) => {
@@ -336,6 +328,15 @@ class TestCal extends React.Component {
                     tag : data.state,
                     userId : user.data.id,
                 });
+                let bgColor = "";
+                switch(currentTag.num) {
+                    case 2 : bgColor = configs.colors[2]; break;
+                    case 0 : bgColor = configs.colors[0]; break;
+                    case 1 : bgColor = configs.colors[1]; break;
+                    case 3 : bgColor = configs.colors[3]; break;
+                    case 4 : bgColor = configs.colors[4]; break;
+                    default : break;
+                }
                 // 스케줄 아이템 생성
                 calendar.createSchedules([{
                     id : result.data.id,
@@ -344,7 +345,7 @@ class TestCal extends React.Component {
                     category: "time",
                     start : data.startDate,
                     end : data.endDate,
-                    bgColor : user.data.usercolor,
+                    bgColor
                 }]);
                 await post;
             } catch(err) {
@@ -638,132 +639,136 @@ class TestCal extends React.Component {
             showTimeStart,showDateStart,
             showTimeEnd,showDateEnd,
         } = this.state;
-        return <div className="popup-crt-main" style={{
-            display : popupInv
-        }}>
-            <div className="popup-crt-header">
-                <span className="popup-crt-headerTitle">일정 등록하기</span>
-                <span className="popup-crt-headerCancel" onClick={this.clickCancel.bind(this)}>x</span>
-            </div>
-            <div className="popup-crt-hAndBLine"></div>
-            <div className="popup-crt-body">
-                <span className="popup-crt-bodyText">제목</span>
-                <input type="text" className="popup-crt-bodyTitleInput" placeholder="제목에 들어갈 내용" value={title} onChange={this.titleInput.bind(this)}></input>
-                <div className="popup-crt-bodyTime">
-                    <span className="popup-crt-bodyText popup-crt-bodyDateText">시작일</span>
-                    <span className="popup-crt-bodyText">시작시간</span>
+        return <div className="popup-crt">
+            <div className="popup-crt-main" style={{
+                display : popupInv
+            }}>
+                <div className="popup-crt-header">
+                    <span className="popup-crt-headerTitle">일정 등록하기</span>
+                    <span className="popup-crt-headerCancel" onClick={this.clickCancel.bind(this)}>x</span>
                 </div>
-                <div className="popup-crt-bodyTimeDate">
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText" onClick={this.setShowDate.bind(this,"start")}>{moment(startDate).format("YYYY. MM. DD (ddd)")}</span>
-                    {
-                        showDateStart && 
-                        <div className="popup-crt-datePicker">
-                            <DayPicker onDayClick={(day) => this.setState({ startDate : day })} />
-                            <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}><span>close</span></div>
-                        </div>
-                    }
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.setShowTime.bind(this,"start")}>{startTime}</span>
-                    {
-                        showTimeStart &&
-                        <div className="popup-crt-timePicker">
-                            <Timekeeper
-                                onChange={this.dateTime.bind(this)}
-                                switchToMinuteOnHourSelect
-                                closeOnMinuteSelect={true}
-                                hour24Mode
-                            />
-                            <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}><span>close</span></div>
-                        </div>
-                    }
-                </div>
-                <div className="popup-crt-bodyTime">
-                    <span className="popup-crt-bodyText popup-crt-bodyDateText">종료일</span>
-                    <span className="popup-crt-bodyText">종료시간</span>
-                </div>
-                <div className="popup-crt-bodyTimeDate">
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateText" onClick={this.setShowDate.bind(this,"end")}>{moment(endDate).format("YYYY. MM. DD (ddd)")}</span>
-                    {
-                        showDateEnd && 
-                        <div className="popup-crt-datePicker">
-                            <DayPicker onDayClick={(day) => this.setState({ endDate : day })} />
-                            <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}>close</div>
-                        </div>
-                    }
-                    <span className="popup-crt-bodyTextContent-time popup-crt-bodyDateTextTime" onClick={this.setShowTime.bind(this,"end")}>{endTime}</span>
-                    {
-                        showTimeEnd &&
-                        <div className="popup-crt-timePicker">
-                            <Timekeeper
-                                onChange={this.dateTime.bind(this)}
-                                switchToMinuteOnHourSelect
-                                closeOnMinuteSelect={true}
-                                hour24Mode
-                            />
-                            <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}>close</div>
-                        </div>
-                    }
-                </div>
-                <span className="popup-crt-bodyText">카테고리</span>
-                <div className="popup-crt-bodyCateContent">
-                    <button className="popup-crt-bodyCateBtns" onClick={this.cateClick.bind(this)}>
-                        <div className="popup-crt-bodyCateBtnDiv">
-                            <div className="popup-crt-bodyCateBtnDivDetail">
-                                <div className="popup-crt-bodyCateMark" style={{ backgroundColor : currentTag.color }}></div>
-                                <span className="popup-crt-bodyTextContent">{currentTag.name}</span>
-                            </div>
-                            <img alt="arrow" src={arrow} className="popup-crt-bodyCateArrow"></img>
-                        </div>
-                    </button>
-                    <div className="popup-crt-bodyCateList" style={{ display : cateClick ? "flex" : "none" }}>
-                        {
-                            cateTag.map((data,i)=>{
-                                return <button key={i} className="popup-crt-bodyCateBtn" onClick={this.cateClick.bind(this,data,i)}>
-                                    <div className="popup-crt-bodyCateBtnDiv">
-                                        <div className="popup-crt-bodyCateMark" style={{ backgroundColor : data.color }}></div>
-                                        <span className="popup-crt-bodyTextContent">{data.name}</span>{i === 0 && <img alt="arrow" src={arrow} className="popup-crt-bodyCateArrow"></img>}
-                                    </div>
-                                </button>
-                            })
-                        } 
+                <div className="popup-crt-hAndBLine"></div>
+                <div className="popup-crt-body">
+                    <span className="popup-crt-bodyText">제목</span>
+                    <input type="text" className="popup-crt-bodyTitleInput" placeholder="제목에 들어갈 내용" value={title} onChange={this.titleInput.bind(this)}></input>
+                    <div className="popup-crt-bodyTime">
+                        <span className="popup-crt-bodyText popup-crt-bodyDateText">시작일</span>
+                        <span className="popup-crt-bodyText">시작시간</span>
                     </div>
-                </div>
-                <span className="popup-crt-bodyText">참여인원</span>
-                <div className="popup-crt-bodyPartnerDiv">
-                    <img alt="char" src={charImg} className="popup-crt-bodyPartnerInputImg"></img>
-                    <input type="text" className="popup-crt-bodyPartnerInput" onChange={this.partnerInput.bind(this)} value={partnerInput}></input>
-                </div>
-                <div className="popup-crt-bodyPartnerDroplist" style={{ display : partnerDrop }}>
-                    {
-                        partnerData && 
-                        partnerData.map((data,i)=> {
-                            return <div key={i} className="popup-crt-bodyPartnerBoxRow" onClick={this.partnerClick.bind(this,data)}>
-                                <div className="popup-crt-bodyPartnerSpaceDiv">
-                                    <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
-                                    <span className="popup-crt-bodyTextContent">{data.username}</span>
+                    <div className="popup-crt-bodyTimeDate">
+                        <span className="popup-crt-bodyTextContent-time" onClick={this.setShowDate.bind(this,"start")}>{moment(startDate).format("YYYY. MM. DD (ddd)")}</span>
+                        {
+                            showDateStart && 
+                            <div className="popup-crt-datePicker">
+                                <DayPicker onDayClick={(day) => this.setState({ startDate : day })} />
+                                <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}><span>close</span></div>
+                            </div>
+                        }
+                        <span className="popup-crt-bodyTextContent-time" onClick={this.setShowTime.bind(this,"start")}>{startTime}</span>
+                        {
+                            showTimeStart &&
+                            <div className="popup-crt-timePicker">
+                                <Timekeeper
+                                    onChange={this.dateTime.bind(this)}
+                                    switchToMinuteOnHourSelect
+                                    closeOnMinuteSelect={true}
+                                    hour24Mode
+                                />
+                                <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}><span>close</span></div>
+                            </div>
+                        }
+                    </div>
+                    <div className="popup-crt-bodyTime">
+                        <span className="popup-crt-bodyText popup-crt-bodyDateText">종료일</span>
+                        <span className="popup-crt-bodyText">종료시간</span>
+                    </div>
+                    <div className="popup-crt-bodyTimeDate">
+                        <span className="popup-crt-bodyTextContent-time" onClick={this.setShowDate.bind(this,"end")}>{moment(endDate).format("YYYY. MM. DD (ddd)")}</span>
+                        {
+                            showDateEnd && 
+                            <div className="popup-crt-datePicker">
+                                <DayPicker onDayClick={(day) => this.setState({ endDate : day })} />
+                                <div className="popup-crt-showDate" onClick={this.setShowDate.bind(this,false)}>close</div>
+                            </div>
+                        }
+                        <span className="popup-crt-bodyTextContent-time" onClick={this.setShowTime.bind(this,"end")}>{endTime}</span>
+                        {
+                            showTimeEnd &&
+                            <div className="popup-crt-timePicker">
+                                <Timekeeper
+                                    onChange={this.dateTime.bind(this)}
+                                    switchToMinuteOnHourSelect
+                                    closeOnMinuteSelect={true}
+                                    hour24Mode
+                                />
+                                <div className="popup-crt-showTime" onClick={this.setShowTime.bind(this,false)}>close</div>
+                            </div>
+                        }
+                    </div>
+                    <span className="popup-crt-bodyText">카테고리</span>
+                    <div className="popup-crt-bodyCateContent">
+                        <button className="popup-crt-bodyCateBtns" onClick={this.cateClick.bind(this)}>
+                            <div className="popup-crt-bodyCateBtnDiv">
+                                <div className="popup-crt-bodyCateBtnDivDetail">
+                                    <div className="popup-crt-bodyCateMark" style={{ backgroundColor : currentTag.color }}></div>
+                                    <span className="popup-crt-bodyTextContent">{currentTag.name}</span>
                                 </div>
+                                <img alt="arrow" src={arrow} className="popup-crt-bodyCateArrow"></img>
                             </div>
-                        }) 
-                    }
+                        </button>
+                        <div className="popup-crt-bodyCateList" style={{ display : cateClick ? "flex" : "none" }}>
+                            {
+                                cateTag.map((data,i)=>{
+                                    return <button key={i} className="popup-crt-bodyCateBtn" onClick={this.cateClick.bind(this,data,i)}>
+                                        <div className="popup-crt-bodyCateBtnDiv">
+                                            <div className="popup-crt-bodyCateMark" style={{ backgroundColor : data.color }}></div>
+                                            <span className="popup-crt-bodyTextContent">{data.name}</span>
+                                        </div>
+                                    </button>
+                                })
+                            }
+                        </div>
+                    </div>
+                    <span className="popup-crt-bodyText">참여인원</span>
+                    <div className="popup-crt-bodyPartnerDiv">
+                        <img alt="char" src={charImg} className="popup-crt-bodyPartnerInputImg"></img>
+                        <input type="text" className="popup-crt-bodyPartnerInput" onChange={this.partnerInput.bind(this)} value={partnerInput}></input>
+                    </div>
+                    <div>
+                        <div className="popup-crt-bodyPartnerDroplist" style={{ display : partnerDrop }}>
+                            {
+                                partnerData && 
+                                partnerData.map((data,i)=> {
+                                    return <div key={i} className="popup-crt-bodyPartnerBoxRow" onClick={this.partnerClick.bind(this,data)}>
+                                        <div className="popup-crt-bodyPartnerSpaceDiv">
+                                            <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
+                                            <span className="popup-crt-bodyTextContent">{data.username}</span>
+                                        </div>
+                                    </div>
+                                })
+                            }
+                        </div>
+                    </div>
+                    <div className="popup-crt-bodyPartnerContent">
+                        {
+                            partnerSelt &&
+                            partnerSelt.map((data,i)=> {
+                                return <div key={i} className="popup-crt-bodyPartnerBox">
+                                    <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg2"></img>
+                                    <span className="popup-crt-bodyTextContentPartner">{data.username}</span>
+                                    <button className="popup-crt-bodyPartnerDelt" onClick={this.partnerCancel.bind(this,data.id)}><span className="popup-crt-bpdt">x</span></button>
+                                </div>
+                            })
+                        }
+                    </div>
+                    <span className="popup-crt-bodyText">메모 사항</span>
+                    <textarea className="popup-crt-bodyMemoContent" value={memoArea} onChange={this.memoArea.bind(this)}></textarea>
                 </div>
-                <div className="popup-crt-bodyPartnerContent">
-                    {
-                        partnerSelt &&
-                        partnerSelt.map((data,i)=> {
-                            return <div key={i} className="popup-crt-bodyPartnerBox">
-                                <img src={charImg} alt="char" className="popup-crt-bodyPartnerImg"></img>
-                                <span className="popup-crt-bodyTextContent">{data.username}</span>
-                                <button className="popup-crt-bodyPartnerDelt" onClick={this.partnerCancel.bind(this,data.id)}><span className="popup-crt-bpdt">x</span></button>
-                            </div>
-                        })
-                    }
+                <div className="popup-crt-btns">
+                    <button className="popup-crt-btnCreate" onClick={this.clickSave.bind(this,updateTF)}>
+                        <span className="popup-crt-btnSpan">{updateTF ? "수정" : "등록"}</span>
+                    </button>
                 </div>
-                <span className="popup-crt-bodyText">메모 사항</span>
-                <textarea className="popup-crt-bodyMemoContent" value={memoArea} onChange={this.memoArea.bind(this)}></textarea>
-            </div>
-            <div className="popup-crt-btns">
-                <button className="popup-crt-btnCreate" onClick={this.clickSave.bind(this,updateTF)}>
-                    <span className="popup-confirm-bodyMemoContent">{updateTF ? "수정" : "등록"}</span>
-                </button>
             </div>
         </div>
     }
@@ -905,50 +910,54 @@ class TestCal extends React.Component {
     // 스케줄용 팝업 창
     popupSchedule() {
         const { in_data,userGet } = this.state;
-        return <div className="popup-confirm-main" style={{
-            display : this.state.popupInvSchedule,
-        }}>
-            <div className="popup-confirm-header">
-                <span className="popup-confirm-headerTitle">일정 확인</span>
-                <span className="popup-confirm-headerCancel" onClick={this.clickCancel.bind(this)}>x</span>
-            </div>
-            <div className="popup-confirm-hAndBLine"></div>
-            <div className="popup-confirm-body">
-                <span className="popup-confirm-bodyText">제목</span>
-                <span className="popup-confirm-bodyTextContent">{in_data.title}</span>
-                <span className="popup-confirm-bodyText">시간</span>
-                <span className="popup-confirm-bodyTextContent">{moment(in_data.start).format("YYYY. MM. DD. (ddd) LT")} ~  {moment(in_data.end).format("YYYY. MM. DD. (ddd) LT")}</span>
-                <span className="popup-confirm-bodyText">카테고리</span>
-                <div className="popup-confirm-bodyCateContent">
-                    <div className="popup-confirm-bodyCateMark" style={{ backgroundColor : in_data.color }}></div>
-                    <span className="popup-confirm-bodyTextContent">{in_data.tag}</span>
+        return <div className="popup-confirm">
+            <div className="popup-confirm-main" style={{
+                display : this.state.popupInvSchedule,
+            }}>
+                <div className="popup-confirm-header">
+                    <span className="popup-confirm-headerTitle">일정 확인</span>
+                    <span className="popup-confirm-headerCancel" onClick={this.clickCancel.bind(this)}>x</span>
                 </div>
-                <span className="popup-confirm-bodyText">참여인원</span>
-                <div className="popup-confirm-bodyPartnerContent">
+                <div className="popup-confirm-hAndBLine"></div>
+                <div className="popup-confirm-body">
+                    <span className="popup-confirm-bodyText">제목</span>
+                    <span className="popup-confirm-bodyTextContent">{in_data.title}</span>
+                    <span className="popup-confirm-bodyText">시간</span>
+                    <span className="popup-confirm-bodyTextContent">{moment(in_data.start).format("YYYY. MM. DD. (ddd) LT")} ~  {moment(in_data.end).format("YYYY. MM. DD. (ddd) LT")}</span>
+                    <span className="popup-confirm-bodyText">카테고리</span>
+                    <div className="popup-confirm-bodyCateContent">
+                        <div className="popup-confirm-bodyCateMark" style={{ backgroundColor : in_data.color }}></div>
+                        <span className="popup-confirm-bodyTextContent">{in_data.tag}</span>
+                    </div>
+                    <span className="popup-confirm-bodyText">참여인원</span>
+                    <div className="popup-confirm-bodyPartnerContent">
+                        {
+                            in_data.partner &&
+                            in_data.partner.map((data,i)=>{
+                                return <div key={i} className="popup-confirm-bodyPartnerBox">
+                                    <img src={charImg} alt="char" className="popup-confirm-bodyPartnerImg"></img>
+                                    <span className="popup-confirm-bodyTextContent">{data.username}</span>
+                                </div>
+                            })
+                        }
+                    </div>
+                    <span className="popup-confirm-bodyText">메모 사항</span>
+                    <div className="popup-confirm-bodyTextContent">
+                        <span>{in_data.memo ? in_data.memo : ""}</span>
+                    </div>
+                </div>
+                <div className="popup-confirm-btns">
                     {
-                        in_data.partner &&
-                        in_data.partner.map((data,i)=>{
-                            return <div key={i} className="popup-confirm-bodyPartnerBox">
-                                <img src={charImg} alt="char" className="popup-confirm-bodyPartnerImg"></img>
-                                <span className="popup-confirm-bodyTextContent">{data.username}</span>
-                            </div>
-                        })
+                        userGet && <>
+                            <button className="popup-confirm-btnUpdat" onClick={this.popupUpdate.bind(this,in_data)}>
+                                <span className="popup-confirm-btnUpdatText">수정</span>
+                            </button>
+                            <button className="popup-confirm-btnDelet" onClick={this.beforeDeleteSchedule.bind(this,in_data.id,in_data.c_id)}>
+                                <span className="popup-confirm-btnDeletText">삭제</span>
+                            </button>
+                        </>
                     }
                 </div>
-                <span className="popup-confirm-bodyText">메모 사항</span>
-                <span className="popup-confirm-bodyTextContent">{in_data.memo ? in_data.memo : ""}</span>
-            </div>
-            <div className="popup-confirm-btns">
-                {
-                    userGet && <>
-                        <button className="popup-confirm-btnUpdat" onClick={this.popupUpdate.bind(this,in_data)}>
-                            <span className="popup-confirm-btnUpdatText">수정</span>
-                        </button>
-                        <button className="popup-confirm-btnDelet" onClick={this.beforeDeleteSchedule.bind(this,in_data.id,in_data.c_id)}>
-                            <span className="popup-confirm-btnDeletText">삭제</span>
-                        </button>
-                    </>
-                }
             </div>
         </div>
     }
@@ -980,7 +989,7 @@ class TestCal extends React.Component {
         // 팝업 창 처음부터 렌더
         const popupmini = this.popupCreate();
         const popupschedule = this.popupSchedule();
-        const { calendarDate,loading } = this.state;
+        const { loading } = this.state;
         return (
             <div className="tui-div">
                 {
@@ -988,11 +997,9 @@ class TestCal extends React.Component {
                         <img alt="Loging~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
-                <div>
-                    <button onClick={this.handleClickPrevNextButton.bind(this,"pre")}>이전 달</button>
-                    <button onClick={this.handleClickPrevNextButton.bind(this,"nex")}>다음 달</button>
-                    <button onClick={this.handleClickPrevNextButton.bind(this)}>오늘</button>
-                    <span>{calendarDate}</span> {/** 달력 현재 월 표시 */}
+                <div className="tui-monthBtnDiv">
+                    <span className="tui-monthText" onClick={this.handleClickPrevNextButton.bind(this,"pre")}>&lt; 이전 달</span>
+                    <span className="tui-monthText" onClick={this.handleClickPrevNextButton.bind(this,"nex")}>다음 달 &gt;</span>
                 </div>
                 { popupmini /*popup components create */ }
                 { popupschedule /*popup components schedule */ }

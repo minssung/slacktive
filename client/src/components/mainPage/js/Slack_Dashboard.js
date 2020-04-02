@@ -14,10 +14,6 @@ class SlackDashboard extends React.Component {
             // users list - state
             usersalldb : [],
             usertoken : [],
-            // time contents
-            //todayTimes : "",
-            // load mask
-            loading : "",
             // caeldnar  % general db
             dashDb : [],
             // today date
@@ -31,9 +27,6 @@ class SlackDashboard extends React.Component {
             usertoken : await this.props.Token,
         })
         await this.userListApi();   // user List Api
-        this.setState({
-            loading : "Loading",
-        })
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -74,11 +67,11 @@ class SlackDashboard extends React.Component {
     dataStateSwich(state) {
         let userState = "";
         switch(state) {
-            case "휴가관련" : userState = "gold"; break;
-            case "출장 / 미팅" : userState = "greenyellow"; break;
-            case "회의" : userState = "turquoise"; break;
-            case "생일" : userState = "violet"; break;
-            case "기타" : userState = "thistle"; break;
+            case "휴가관련" : userState = configs.colors[2]; break;
+            case "출장 / 미팅" : userState = configs.colors[0]; break;
+            case "회의" : userState = configs.colors[1]; break;
+            case "생일" : userState = configs.colors[3]; break;
+            case "기타" : userState = configs.colors[4]; break;
             default : break;
         }
         return userState;
@@ -92,14 +85,9 @@ class SlackDashboard extends React.Component {
         return (
             <div className="dash-boardDiv">
                 {
-                    !loading && <div className="loadMaskDiv">
-                        <img alt="Loding~" src={loadMask} className="loadMask"></img>
-                    </div>
-                }
-                {
                     dashData.map((data,i)=>{
                         return <Dashboard key={i}
-                            title={data.title ? data.title : data.user.username + " " + data.cate}
+                            title={data.title ? data.title : data.cate}
                             partner={data.partner ? data.user.username + data.partner.map((data,i)=>{ return i !== 0 ? data.username : "," + data.username}) : data.user.username}
                             textTime={this.dataTextTime.bind(this,data.time)}
                             color={this.dataStateSwich.bind(this,data.state)}

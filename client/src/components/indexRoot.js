@@ -5,6 +5,7 @@ import SlackLoginBtn from './loginPage/js/SlackLoginBtn';
 import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
+import moment from 'moment';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
@@ -35,7 +36,15 @@ class IndexRoot extends React.Component {
     }
 
     async componentDidMount(){
-        console.log("mount did ")
+        let pathname = "";
+        switch(window.location.pathname) {
+            case "/" : pathname = "bg_1"; break;
+            case "/my" : pathname = "bg_2"; break;
+            case "/cedar" : pathname = "bg_3"; break;
+            case "/etc" : pathname = "bg_4"; break;
+            default : break;
+        }
+        this.setState({ bgcolor : pathname });
         if(localStorage.getItem("usertoken")) {
             try {
                 await this.setState({
@@ -51,7 +60,7 @@ class IndexRoot extends React.Component {
                         vacationUser: values[3]
                     })
                 }, (err) => {
-                    console.log("promise all err : " + err);
+                    console.log("indexRoot promise all err : " + err);
                 })
                 const userOne = await axios.get(`${configs.domain}/user/one?userid=${this.state.usertoken}`);
                 if(!userOne.data.usertag){
@@ -107,35 +116,17 @@ class IndexRoot extends React.Component {
         const TimeCheck = await axios.get(`${configs.domain}/slack/onworktime?userid=${usertoken}`);
         let time = (TimeCheck.data.time).substring(11, 16);
         let timeArray = time.split(':');
-        let editTime = timeArray[0]+'시 '+timeArray[1]+'분';
+        let editTime = timeArray[0] + '시 ' + timeArray[1] + '분';
         
-        // 마지막 출근 기록에 지각이 아닌 출근으로 저장되어 있을 경우
-        // 슬랙에 출근을 늦게 입력했을 때를 위해
-        // 문제점 : 아래 정규식 처리과정에서 시, 분 모두 처리할 경우 시 만 처리하는 부분에서 에러가 발생. ( 예외처리하여 실질적 문제는 없음 )
-        // 의문점 : Promise.all 패턴으로 하면 조건에 안맞더라도 무조건 순서대로 처리하는가?
-        if (TimeCheck.data.state === '출근') {
-            // 시 만 입력 되었을 때
-            try {
-                if (TimeCheck.data.text === (/(\d*시)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.test(TimeCheck.data.text))) {
-                    time = (TimeCheck.data.text)
-                    timeArray = time.split(' ');
-                    editTime = timeArray[0];
-                }
-            } catch (err) {
-                console.log(err);
-            }
-            // 시, 분 모두 입력되었을 때
-            try {
-                if (TimeCheck.data.text === (/(\d*시)\s*(\d*분)\s*(출근|ㅊㄱ|퇴근|ㅌㄱ)/.test(TimeCheck.data.text))) {
-                    time = (TimeCheck.data.text)
-                    timeArray = time.split(' ');
-                    editTime = timeArray[0] + ' ' + timeArray[1];
-                }
-            } catch (err) {
-                console.log(err);
-            }
+        if(moment(TimeCheck.data.time).diff(new Date(), 'days') !== 0) {
+            return null;
         }
-        return editTime
+        if (TimeCheck.data.state === '출근') {
+            time = /^([0-9]{1,})?시?\s*([0-9]{1,})?분?\s*\W*?\s*(출근|ㅊㄱ|퇴근|ㅌㄱ|외근|ㅇㄱ)/.exec(TimeCheck.data.text);
+            time.shift();
+            editTime = (time[0] ? time[0] : timeArray[0]) + "시 " + (time[1] ? time[1] : timeArray[1]) + "분";
+        }
+        return editTime;
     }
 
     // 유저 토큰 확인
@@ -272,7 +263,7 @@ class IndexRoot extends React.Component {
                                             }
                                             <div className="intro">
                                                 {username}님, &nbsp;좋은아침!{<br></br>}
-                                                {onWorkTime}에 출근하셨네요
+                                                {onWorkTime ? onWorkTime + "에 출근하셨네요" : "아직 출근 전 이시네요"}
                                             </div>
                                             <div className="design">
                                                 <img className="cloud_1" src="img/cloud.png" alt="cloud_1"/>
@@ -295,14 +286,20 @@ class IndexRoot extends React.Component {
                                                 <img className="Todaycard" src="img/Todaycard.png" alt="Todaycard" />
                                             </div>
                                             <div className="app-dash">
-                                                <SlackDash Token={usertoken} dashData={dashDb}></SlackDash>
+                                                {
+                                                    dashDb[0] ? 
+                                                    <SlackDash Token={usertoken} dashData={dashDb}></SlackDash>
+                                                    :
+                                                    <div className="dash-empty">
+                                                        <span className="dash-emptyText">오늘의 일정이 없습니다.</span>
+                                                    </div>
+                                                }
                                             </div>
                                         </Route>
                                         <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
                                         <Route path="/cedar"></Route>
                                         <Route path="/etc"></Route>
                                     </div>
-                                    
                                 </div>
                             </div>
                             }

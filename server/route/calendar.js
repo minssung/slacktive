@@ -5,6 +5,7 @@ const models = require("../models");
 
 // DB Setting --------------------
 const Calendar = models.calendar;
+const User = models.user;
 const Op = models.Sequelize.Op;
  
 // ------------------------------------- DB CRUD -------------------------------------
@@ -23,6 +24,7 @@ router.get("/all", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select Calendar all err : " + err)
+        res.end();
     }
 });
 
@@ -46,6 +48,7 @@ router.get("/allTime", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select Calendar all err : " + err)
+        res.end();
     }
 });
 
@@ -59,7 +62,7 @@ router.get("/getTime", async(req, res) => {
             }],
             attributes : ['cate','textTime'],
             order : [[
-                'id' , 'ASC'
+                'ts' , 'desc'
             ]],
             where : {
                 textTime : {
@@ -73,6 +76,61 @@ router.get("/getTime", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select Calendar all err : " + err)
+        res.end();
+    }
+});
+// DB SelectAll One User Calendar --------------------
+router.get("/getTimeSetHoliday", async(req, res) => {
+    try {
+        const result = await Calendar.findAll({
+            include : [{
+                model : models.user,
+                attributes : ['username']
+            }],
+            attributes : ['cate','textTime'],
+            order : [[
+                'ts' , 'desc'
+            ]],
+            where : {
+                textTime : {
+                    [Op.like] : "%" + req.query.textTime + "%",
+                },
+                userId : {
+                    [Op.like] : "%" + req.query.userId + "%",
+                },
+            }
+        });
+        const resultSet = [];
+        let subCount = 0;
+        result.forEach(data => {
+            if(/휴가/g.test(data.dataValues.cate)) {
+                subCount += 1;
+                resultSet.push({
+                    cate : data.dataValues.cate,
+                    textTime : data.dataValues.textTime,
+                    user : data.dataValues.user,
+                })
+            } else if(/반차/g.test(data.dataValues.cate)) {
+                subCount += 0.5;
+                resultSet.push({
+                    cate : data.dataValues.cate,
+                    textTime : data.dataValues.textTime,
+                    user : data.dataValues.user,
+                })
+            }
+        })
+        await User.update({
+            holidaycount : (20 - subCount)
+        },{
+            where : {
+                id : req.query.userId
+            }
+        });
+        console.log(subCount)
+        res.send(subCount+"");
+    } catch(err) {
+        console.log("select Calendar all err : " + err)
+        res.end();
     }
 });
 
@@ -87,6 +145,7 @@ router.get("/one", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select Calendar one err : " + err);
+        res.end();
     }
 });
 
@@ -102,6 +161,7 @@ router.get("/oneRow", async(req, res) => {
         res.send(result);
     } catch (err){
         console.log("select chat one err : " + err);
+        res.end();
     }
 });
 
@@ -132,6 +192,7 @@ router.post("/create", async(req, res) => {
         });
     }catch(err) {
         console.error("created Calendar err : " + err);
+        res.end();
     }
     res.send(result);
 });
