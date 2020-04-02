@@ -54,7 +54,12 @@ class SlackDashboard extends React.Component {
     async dashDbApi() {
         try {
             const result = await axios.get(configs.domain+"/updatState");
-            await this.setState({ dashDb : result.data })
+            // console.log(result.data);
+            // console.log((result.data).length);
+            // if (((result.data).length) === 0) {
+            //     await this.setState({ dashDb : test })
+            // }
+            await this.setState({ dashDb : result.data });
         } catch(err) {
             console.log("calendar api err : " + err);
         }
@@ -107,7 +112,7 @@ class SlackDashboard extends React.Component {
                     dashDb.map((data,i)=>{
                         return <Dashboard key={i}
                             title={data.title ? data.title : data.user.username + " " + data.cate}
-                            partner={data.partner[0] ? data.user.username + "," + data.partner.map((data,i)=>{ return data.username }) : data.user.username}
+                            partner={data.partner ? data.user.username + "," + data.partner.map((data,i)=>{ return data.username }) : data.user.username}
                             textTime={this.dataTextTime.bind(this,data.time)}
                             color={this.dataStateSwich.bind(this,data.state)}
                         />

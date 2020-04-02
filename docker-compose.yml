@@ -1,7 +1,7 @@
 version: '3.7'
-
+ 
 services:
-  node-docker-dockerman:
+  dockerman:
     image: dockerman
     build: .
     volumes:

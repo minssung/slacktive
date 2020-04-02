@@ -12,9 +12,11 @@ let jwt = require("jsonwebtoken");
 const moment = require('moment');
 const Agenda = require('agenda');
 
+// const redis = require("redis");
+// let client = redis.createClient(6379, "localhost");
+
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');
-
 // -------------------- 초기 서버 ( app ) 설정 --------------------
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://slack.com");
@@ -36,10 +38,13 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
+    
+    client.get("a", (err,re)=>{
+        console.log(re);
+    })
+    
     res.send("Hello SlackApi World!");
 });
-
-
 
 // ---------- MongoDB 연동 ---------- //
 const mongoConnectionString = 'mongodb://'+configs.host+':27017/agenda';
@@ -52,10 +57,11 @@ try {
         // 2분
         agenda.define('Busy', {lockLifetime: 10000}, async job => {
             console.log('2분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post("http://localhost:5000/slackapi/channelHistory");
-            const HistoryCal = axios.post("http://localhost:5000/slackapi/channelHistoryCal");
-            await History;
-            await HistoryCal;
+            const History = axios.post(configs.domain+"/slackapi/channelHistory");
+            const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            await Promise.all([History,HistoryCal]).then((val)=>{
+                console.log("Promise All History Api Suce")
+            })
             await calendarStateUpdatFunc();
         });
         // 10분
@@ -63,8 +69,9 @@ try {
             console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelHistory");
             const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
-            await History;
-            await HistoryCal;
+            await Promise.all([History,HistoryCal]).then((val)=>{
+                console.log("Promise All History Api Suce")
+            })
             await calendarStateUpdatFunc();
         });
         // 2시간
@@ -72,8 +79,9 @@ try {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelHistory");
             const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
-            await History;
-            await HistoryCal;
+            await Promise.all([History,HistoryCal]).then((val)=>{
+                console.log("Promise All History Api Suce")
+            })
             await calendarStateUpdatFunc();
         });
         // 2시간
@@ -81,8 +89,9 @@ try {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelHistory");
             const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
-            await History;
-            await HistoryCal;
+            await Promise.all([History,HistoryCal]).then((val)=>{
+                console.log("Promise All History Api Suce")
+            })
             await calendarStateUpdatFunc();
         });
           
@@ -102,15 +111,17 @@ try {
 
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || configs.port;
-models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true})
-.then(() => {
+models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
     models.sequelize.sync({ force:false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
                 // await axios.get(configs.domain+"/slackapi/teamUsers");
-                // await axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
-                // await axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                // const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
+                // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                // await Promise.all([Cal,Gnr]).then((data)=>{
+                //     console.log("Initialize Success");
+                // });
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
@@ -197,8 +208,6 @@ app.get('/updateHistorys', async(req,res) => {
         const resultC = axios.post(configs.domain+"/slackapi/channelHistoryCal");
         const resultH = axios.post(configs.domain+"/slackapi/channelHistory");
         const updatDate = new Date();
-        await resultC;
-        await resultH;
         res.send(updatDate);
     } catch(err) {
         console.log("index api & history updat err : " + err)
@@ -221,9 +230,13 @@ async function calendarStateUpdatFunc() {
     const today = moment(new Date()).format('YYYY-MM-DD')
     let resultArray = [];
     try {
-        const resultCal = await axios.get(`${configs.domain}/calendar/allTime?textTime=${todays}`);
-        const resultGnr = await axios.get(`${configs.domain}/generals/allTime?textTime=${todays}`);
-        resultCal.data.forEach((data) => {
+        let resultCal = axios.get(`${configs.domain}/calendar/allTime?textTime=${todays}`);
+        let resultGnr = axios.get(`${configs.domain}/generals/allTime?textTime=${todays}`);
+        await Promise.all([resultCal,resultGnr]).then((val)=>{
+            resultCal = val[0].data;
+            resultGnr = val[1].data;
+        })
+        resultCal.forEach((data) => {
             let getDay = [];
             let update = false;
             if(/\d{4}-\d{2}-(\d{2}(,?\d{2}?)+)/.test(data.textTime)) {
@@ -269,7 +282,7 @@ async function calendarStateUpdatFunc() {
                 })
             }
         });
-        resultGnr.data.forEach((data) => {
+        resultGnr.forEach((data) => {
             // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
             let getDay = (data.textTime).split("~")
             getDay[0] =  moment(getDay[0], "YYYY-MM-DD")

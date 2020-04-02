@@ -159,7 +159,7 @@ router.post("/channelHistoryCal", async(req,res) =>{
                 individualHooks : true,
             })
         } catch(err) {
-            console.error("bulkcreate init err : " + err);
+            console.error("bulkcreate cal err : " + err);
         }
         await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
@@ -194,7 +194,7 @@ router.post("/channelHistoryInit", async(req,res) =>{
                 individualHooks : true,
             });
         } catch(err) {
-            console.error("bulkcreate atten arr : " + err);
+            console.error("bulkcreate Init atten arr : " + err);
         }
         res.send(resultArray);
     } catch(error) {
@@ -228,7 +228,7 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
                 individualHooks : true,
             })
         } catch(err) {
-            console.error("bulkcreate init err : " + err);
+            console.error("bulkcreate Init Cal err : " + err);
         }
         await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
@@ -428,13 +428,14 @@ router.get("/userGetVerify", async(req,res)=>{
 
 // 정규식을 거쳐 처리하는 함수 --------------------------------------------------
 function regFunc(channel ,resultSet,init, ...args){
-    if(channel === "times"){
+    let resultArray = [];
+    if(channel === "times") {
         // 출퇴근의 처리
         // args : 0 => real time
         // args : 1 => check time
         // args : 2 => time Reg result
         // args : 3 => state var
-        let resultArray = resultSet.map(data=> {
+        resultSet.forEach(data=> {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
             // data.text 조건문 처리
@@ -469,8 +470,24 @@ function regFunc(channel ,resultSet,init, ...args){
                             args[3] = (/출근/.test(args[2][2])) ? "지각" : args[2][2]
                             // 4시 50분 이후 입력 텍스트 경우
                         } else if(args[1] > configs.Pm0) {
-                            args[3] = (/퇴근/.test(args[2][2])) ? "퇴근" : args[2][2]
-                        }
+                            args[3] = (/퇴근/.test(args[2][2])) ? "퇴근" : args[2][2];
+                            // 야근 체크
+                            try {
+                                (async ()=> {
+                                    let useridCheck = await axios.get(`${configs.domain}/user/one?userid=${data.user}`);
+                                    let whatTime = await axios.get(`${configs.domain}/slack/onworktime?userid=${useridCheck.data.id}`);
+                                    let timeValue = await moment.unix(whatTime.data.ts).utcOffset("+09:00").format("HH:mm");
+                                    const timeArray = timeValue.split(':');
+                                    let setIntTime = parseInt(timeArray[0])+10+':'+parseInt(timeArray[1]);
+                                    let setStringTime = String(setIntTime);
+                                    if (args[1] > setStringTime) {
+                                        args[3] = (/퇴근/.test(args[2][2])) ? "야근" : args[2][2]
+                                    }
+                                })();
+                            } catch (error) {
+                                console.log('Night shift Error : '. error)
+                            };
+                        } 
                     }
                     // 유저 상태 업데이트
                     User.update({
@@ -483,13 +500,13 @@ function regFunc(channel ,resultSet,init, ...args){
                 }
                 // 추가해야 될 예외 처리
                 // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
-                return data.user && {
+                resultArray.push({
                     userId : data.user,
                     time : args[0],
                     ts : data.ts,
                     text : data.text,
                     state : args[3]
-                }
+                });
             } else {
                 if(!init){
                     errMessageMe(data,channel);
@@ -498,7 +515,6 @@ function regFunc(channel ,resultSet,init, ...args){
                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss")  + " , err Msg : " + data.text)
             }
         });
-        return resultArray;
     } else {
         // 일정용 처리
         // args : 0 => real time
@@ -507,7 +523,7 @@ function regFunc(channel ,resultSet,init, ...args){
         // args : 3 => text time
         // args : 4 => search
         let index = 0;
-        let resultArray = resultSet.map(data => {
+        resultSet.map(data => {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = configs.calendarReg.exec(data.text);
             args[2] = [];
@@ -583,7 +599,7 @@ function regFunc(channel ,resultSet,init, ...args){
                         }
                     }
                     // 반환
-                    return data.user && {
+                    resultArray.push({
                         userId : data.user,
                         time : args[0],
                         ts : data.ts,
@@ -591,7 +607,7 @@ function regFunc(channel ,resultSet,init, ...args){
                         cate : args[2][4],
                         textTime : args[3],
                         state : "휴가관련",
-                    }
+                    })
                 } catch(err){
                     console.log("Calendar init Reg err : " + err)
                 }
@@ -603,8 +619,8 @@ function regFunc(channel ,resultSet,init, ...args){
                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss") + " , err Msg : " + data.text)
             }
         });
-        return resultArray;
     }
+    return resultArray;
 }
 
 // 정규식에 어긋난 내용은 개인 슬랙 채널에 메시지를 보냄

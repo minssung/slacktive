@@ -958,6 +958,17 @@ class TestCal extends React.Component {
             popupInvSchedule : "none",
         })
     }
+
+    // 임시 개발용 갱신 버튼
+    updateComplete() {
+        const History = axios.post(configs.domain+"/slackapi/channelHistory");
+        const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+        Promise.all([History,HistoryCal]).then((val)=>{
+            console.log('갱신 완료');
+        });
+        window.location.href = '/';
+    }
+
     // ------------------------------ 렌더링 ------------------------------ //
     render() {
         // 팝업 창 처음부터 렌더
@@ -976,6 +987,7 @@ class TestCal extends React.Component {
                     <button onClick={this.handleClickPrevNextButton.bind(this,"nex")}>다음 달</button>
                     <button onClick={this.handleClickPrevNextButton.bind(this)}>오늘</button>
                     <span>{calendarDate}</span> {/** 달력 현재 월 표시 */}
+                    <button onClick={this.updateComplete}>갱신</button>
                 </div>
                 { popupmini /*popup components create */ }
                 { popupschedule /*popup components schedule */ }
