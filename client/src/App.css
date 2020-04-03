@@ -68,6 +68,7 @@ html, body, #root {
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    position: relative;
 }
 
 /* ---------- userInfo css ---------- */
@@ -184,6 +185,28 @@ html, body, #root {
     height: 100%;
 }
 
+.loadMaskDivLogin {
+    z-index: 2;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.loadMaskLogin {
+    z-index: 5;
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 25%;
+    left: 25%;
+}
+
 .loadMaskDiv {
     z-index: 2;
     position: absolute;
@@ -191,10 +214,14 @@ html, body, #root {
     height: 100%;
     top: 0px;
     left: 0px;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .loadMask {
-    z-index: 1;
+    z-index: 5;
     position: absolute;
     width: 100%;
     height: 100%;

@@ -35,7 +35,7 @@ class IndexRoot extends React.Component {
         this.prvCh = React.createRef();
     }
 
-    async componentDidMount(){
+    async componentDidMount() {
         let pathname = "";
         switch(window.location.pathname) {
             case "/" : pathname = "bg_1"; break;
@@ -118,7 +118,7 @@ class IndexRoot extends React.Component {
         let timeArray = time.split(':');
         let editTime = timeArray[0] + '시 ' + timeArray[1] + '분';
         
-        if(moment(TimeCheck.data.time).diff(new Date(), 'days') !== 0) {
+        if(moment(TimeCheck.data.time).startOf('day').diff(moment(new Date()).startOf('day'), 'days') !== 0) {
             return null;
         }
         if (TimeCheck.data.state === '출근') {

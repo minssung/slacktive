@@ -27,6 +27,13 @@ class mypage extends Component {
             nightShiftSub : "",
             holidayHistorys : [],   // 휴가 내역
             holidayCount : 0,
+            // modal
+            modalOnOff : "none",
+            modalDb : [],
+            modalDbAten : [],
+            modalDbAvg : [],
+            modalDbNit : [],
+            modalState : "",
         }
     }
     async componentDidMount(){
@@ -44,9 +51,11 @@ class mypage extends Component {
         const avgAten = this.avgAttenTimeApi();    // 평균 출근 시간
         const aten = this.attenApi();   // 출근
         const nigSft = this.nightShiftApi();  // 야근
-        const holidays = this.holidayUsageHistoryApi()  // 휴가
+        const holidays = this.holidayUsageHistoryApi();  // 휴가
+        const modalApiTardy = this.modalApi();
+        const modalApiAtten = this.modalApi("출근");
         // 전부 값이 처리 될때까지 대기
-        await Promise.all([tardy,avgAten,aten,nigSft,holidays]);
+        await Promise.all([tardy,avgAten,aten,nigSft,holidays,modalApiTardy,modalApiAtten]);
     }
     // ------------------------------ Api & Contents ------------------------------
     // 지각 횟 수 api ------------------------------
@@ -67,7 +76,7 @@ class mypage extends Component {
     }
     tardyContents(){
         const { tardys,tardysSub } = this.state;
-        return <div className="mypage-dashNumDiv">
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","tardy")}>
             <span className="mypage-numSpan">지각 횟수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/run.png"></img>
@@ -100,12 +109,19 @@ class mypage extends Component {
     }
     avgAttenTimeContents(){
         const { avgAtten,avgAttenSub } = this.state
-        return <div className="mypage-dashNumDiv">
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","avg")}>
             <span className="mypage-numSpan">평균 출근시간</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/clock.png"></img>
             <span className="mypage-numMainSpan">{avgAtten ? avgAtten[1] : "00"}시 {avgAtten ? avgAtten[2] : "00"}분</span>
-            <span className="mypage-numSpan">지난달보다 {moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes()}분 빠름</span>
+            <span className="mypage-numSpan">지난달보다&nbsp;
+                {
+                    moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() >= 0 ? 
+                    moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() + "분 빠름" 
+                    : 
+                    moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() + "분 느림"
+                }
+            </span>
         </div>
     }
     // 출근 횟 수 api ------------------------------
@@ -122,7 +138,7 @@ class mypage extends Component {
     }
     attenContents(){
         const { atten,holidayCount } = this.state;
-        return <div className="mypage-dashNumDiv">
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","atten")}>
             <span className="mypage-numSpan">출근 일수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/workplace.png"></img>
@@ -149,7 +165,7 @@ class mypage extends Component {
     }
     nightShiftContents(){
         const { nightShift,nightShiftSub } = this.state;
-        return <div className="mypage-dashNumDiv">
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","night")}>
             <span className="mypage-numSpan">야근 일수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/overtime.png"></img>
@@ -173,12 +189,143 @@ class mypage extends Component {
             console.log("Holiday Usage History err : " + err);
         }
     }
+    // 각 모달에 대한 api ------------------------------
+    async modalApi(stateSub) {
+        const { user } = this.state;
+        let state = `state=${"지각"}`;
+        if(stateSub === "출근") {
+            state = `state=${"지각"}&stateSub=${stateSub}`;
+        } else if(stateSub === "야근") {
+            state = `state=${stateSub}`;
+        }
+        try {
+            const result = await axios.get(`http://localhost:5000/slack/stateAll?userId=${user.data.id}&${state}`)
+            if(stateSub === "출근") {
+                this.setState({ modalDbAten : result.data })
+            } else if(stateSub === "야근") {
+                this.setState({ modalDbNit : result.data })
+            } else {
+                this.setState({ modalDb : result.data });
+            }
+        } catch (err) {
+            console.log("modal api err : " +  err)
+        }
+    }
+    modalCancel(bool, state) {
+        switch(state) {
+            case "tardy" : this.setState({
+                modalState : {
+                    title : "지각 횟수",
+                    month : "월 구분",
+                    count : "지각 횟수",
+                    num : 0,
+                }
+            }); break;
+            case "avg" :  this.setState({
+                modalState : {
+                    title : "평균 출근 시간",
+                    month : "월 구분",
+                    count : "평균 시간",
+                    num : 1,
+                }
+            }); break;
+            case "atten" :  this.setState({
+                modalState : {
+                    title : "출근 일수",
+                    month : "월 구분",
+                    count : "출근 일수",
+                    num : 2,
+                }
+            }); break;
+            case "night" :  this.setState({
+                modalState : {
+                    title : "야근 내역",
+                    month : "날짜",
+                    count : "초과 근무시간",
+                    num : 3,
+                }
+            }); break;
+            default : break;
+        }
+        this.setState({ modalOnOff : bool })
+    }
+    modalContents() {
+        const { modalOnOff,modalState,
+            modalDb,modalDbAten 
+        } = this.state;
+        return <div className="mypage-modal" style={{ display : modalOnOff }}>
+            <div className="mypage-modal-title">
+                <span className="mypage-modal-titleText">{modalState.title}</span>
+                <span className="mypage-modal-cancel" onClick={this.modalCancel.bind(this, "none")}>x</span>
+            </div>
+            <div className="mypage-modal-tag">
+                <span className="mypage-modal-month">{modalState.month}</span>
+                <span className="mypage-modal-count">{modalState.count}</span>
+            </div>
+            <div className="mypage-modal-lines"></div>
+            <div className="mypage-modal-subLine"></div>
+            <div className="mypage-modal-body">
+                <div className="mypage-modal-main">
+                    {
+                        modalState.num === 0 ?
+                        modalDb && modalDb.map((data,i)=>{
+                            let timeSet = /^(\d{4})-(\d{2})/.exec(data.date);
+                            return <div key={i} className="mypage-modal-index">
+                                <div className="mypage-modal-indexDiv1">
+                                    <span className="mypage-modal-indexMonth">{timeSet[1]+"년 " + timeSet[2] + "월"}</span>
+                                </div>
+                                <div className="mypage-modal-indexDiv2">
+                                    <span className="mypage-modal-indexCount">{data.state === 0 ? "없음" : <span className="mypage-modal-indexCountRed">{data.state + "번"}</span>}</span>
+                                </div>
+                            </div>
+                        })
+                        : modalState.num === 1 ?  
+                        modalDbAten && modalDbAten.map((data,i)=>{
+                            let timeSet = /^(\d{4})-(\d{2})/.exec(data.date);
+                            return <div key={i} className="mypage-modal-index">
+                                <div className="mypage-modal-indexDiv1">
+                                    <span className="mypage-modal-indexMonth">{timeSet[1]+"년 " + timeSet[2] + "월"}</span>
+                                </div>
+                                <div className="mypage-modal-indexDiv2">
+                                    <span className="mypage-modal-indexCount">{data.state === 0 ? "없음" : <span className="mypage-modal-indexCountRed">{data.state + "번"}</span>}</span>
+                                </div>
+                            </div>
+                        })
+                        : modalState.num === 2 ?
+                        modalDbAten && modalDbAten.map((data,i)=>{
+                            let timeSet = /^(\d{4})-(\d{2})/.exec(data.date);
+                            return <div key={i} className="mypage-modal-index">
+                                <div className="mypage-modal-indexDiv1">
+                                    <span className="mypage-modal-indexMonth">{timeSet[1]+"년 " + timeSet[2] + "월"}</span>
+                                </div>
+                                <div className="mypage-modal-indexDiv2">
+                                    <span className="mypage-modal-indexCount">{data.state === 0 ? "없음" : <span className="mypage-modal-indexCountRed">{data.state + "번"}</span>}</span>
+                                </div>
+                            </div>
+                        })
+                        : ""
+                    }
+                </div>
+                <div className="mypage-modal-btns">
+                    <span className="mypage-modal-left">&larr;</span>
+                    <button className="mypage-modal-btnNumsSelt">
+                        <span className="mypage-modal-btnSelt">1</span>
+                    </button>
+                    <span className="mypage-modal-right">&rarr;</span>
+                </div>
+            </div>
+        </div>
+    }
     // ------------------------------ rendering ------------------------------
     render() {
-        const { holidayHistorys,holidayCount } = this.state;           // 로드 마스크, 휴가 사용 내역, 오늘 날짜
-        let setTimes = "";                                              // 휴가 사용 내역 중 오늘 날짜와 계산용
+        const { holidayHistorys,holidayCount } = this.state;        // 로드 마스크, 휴가 사용 내역, 오늘 날짜
+        let setTimes = "";       // 휴가 사용 내역 중 오늘 날짜와 계산용
+        const modals = this.modalContents();
         return (
             <div className="mypage-mainDiv">
+                {
+                    <div className="mypage-modal-parents">{modals}</div>
+                }
                 <div className="mypage-upDiv">
                     <div className="mypage-progDiv">
                         <span className="mypage-progSpan">내 현황</span>
@@ -232,7 +379,7 @@ class mypage extends Component {
                                     <span className="mypage-downDashNumCate">{/반차/.test(data.cate) ? (/(반차)/.exec(data.cate))[1] : data.cate}</span>
                                     <span>
                                         {
-                                            moment(moment(new Date()).format("YYYY-MM-DD")).diff(setTimes[1], 'days') < 0 ? 
+                                            moment(moment(new Date())).startOf('day').diff(moment(setTimes[1]).startOf('day'), 'days') < 0 ? 
                                             <span className="mypage-downDashNumBool">[예정]&nbsp;&nbsp;{data.textTime}</span> 
                                             : 
                                             <span className="mypage-downDashNumTime">{data.textTime}</span>

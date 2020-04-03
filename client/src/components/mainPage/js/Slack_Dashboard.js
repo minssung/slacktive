@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import Dashboard from './Dashboard/Dashboard';
 import moment from 'moment';
-import loadMask from '../../../resource/loadmaskTest.gif'
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
@@ -80,7 +79,6 @@ class SlackDashboard extends React.Component {
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- rendering ---------- 
     render () {
-        const { loading } = this.state;
         const { dashData } = this.props;
         return (
             <div className="dash-boardDiv">

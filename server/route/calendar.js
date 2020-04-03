@@ -126,7 +126,6 @@ router.get("/getTimeSetHoliday", async(req, res) => {
                 id : req.query.userId
             }
         });
-        console.log(subCount)
         res.send(subCount+"");
     } catch(err) {
         console.log("select Calendar all err : " + err)

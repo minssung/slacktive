@@ -57,9 +57,11 @@ app.get('/', async(req, res) => {
     //     })
     // }
 
-    // let a = "2020-02-03 10:43"
-    // let b = "2020-02-03 09:20"
-    // console.log(moment.duration(moment(a).diff(b)).asMinutes());
+    let a = "2020-05-03"
+    console.log(
+        moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
+    )
+
 });
 
 // ---------- MongoDB 연동 ---------- //

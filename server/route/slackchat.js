@@ -6,9 +6,10 @@ const moment = require("moment");
 // DB Setting --------------------
 const Slack = models.slackchat;
 const Op = models.Sequelize.Op;
+
 // ------------------------------------- DB CRUD -------------------------------------
 
-// DB SelectAll --------------------
+// 전체 가져오기 --------------------
 router.get("/all", async(req, res) => {
     try {
         const result = await Slack.findAll({
@@ -27,7 +28,7 @@ router.get("/all", async(req, res) => {
     }
 });
 
-// DB Select State AVG --------------------
+// 해당 스태이트에 맞는 내용 및 이전 달과 비교값까지 가져오기 --------------------
 router.get("/state", async(req, res) => {
     try {
         let setTime = req.query.time;
@@ -50,7 +51,24 @@ router.get("/state", async(req, res) => {
     }
 });
 
-// DB Select State --------------------
+// 스태이트의 모든 값 가져오기 --------------------
+router.get("/stateAll", async(req, res) => {
+    try {
+        let whereQuery = `state='${req.query.state}'`
+        if(req.query.stateSub) {
+            whereQuery = `(state='${req.query.state}' or state='${req.query.stateSub}')`
+        }
+        const queryStateAll = `SELECT DATE_FORMAT(time, '%Y-%m') AS date, count(state) AS state FROM slackchats where userid='${req.query.userId}' and ${whereQuery} GROUP BY DATE_FORMAT(time, '%Y-%m') ORDER BY date DESC;`
+        
+        let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select chat state err : " + err);
+        res.end();
+    }
+});
+
+// 해당 스태이트의 값 타임에 맞게 가져오기 --------------------
 router.get("/getState", async(req, res) => {
     try {
         let result = await Slack.findOne({
@@ -69,7 +87,7 @@ router.get("/getState", async(req, res) => {
     }
 });
 
-// DB Select time AVG --------------------
+// 평균 시간 값 가져오기 --------------------
 router.get("/time", async(req, res) => {
     try {
         let setTime = req.query.time;

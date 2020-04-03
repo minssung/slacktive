@@ -1,8 +1,9 @@
 .mypage-mainDiv {
-    display: flex;
     flex-direction: column;
     width: 100%;
     height: 1248px;
+    position: relative;
+    display: flex;
 }
 
 .mypage-upDiv {
@@ -228,6 +229,7 @@
     flex-direction: column;
     width: 238px;
     height: 122px;
+    cursor: pointer;
 }
 
 .mypage-numSpan {
@@ -360,4 +362,184 @@
     font-size: 18px;
     color: #000000;
     font-weight: 300;
+}
+/* ---------- ---------- ---------- modal ---------- ---------- ---------- */
+.mypage-modal-parents {
+    width: 100%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: 10%;
+}
+
+.mypage-modal {
+    position: relative;
+    width: 570px;
+    height: 544px;
+    border-radius: 20px;
+    background-color: #ffffff;
+    z-index: 100;
+}
+
+.mypage-modal-title {
+    height: 48px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 30px;
+}
+
+.mypage-modal-cancel {
+    padding-top: 16px;
+    padding-right: 16px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.mypage-modal-titleText {
+    padding-left: 40px;
+    padding-top: 30px;
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.mypage-modal-tag {
+    display: flex;
+    flex-direction: row;
+    margin-left: 39px;
+    margin-bottom: 13px;
+}
+
+.mypage-modal-month {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #777777;
+    margin-right: 255px;
+}
+
+.mypage-modal-count {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #777777;
+}
+
+.mypage-modal-lines {
+    width: 100%;
+    height: 3px;
+    background-color: rgba(177, 177, 177, 0.37);
+}
+
+.mypage-modal-subLine {
+    height: 3px;
+    width: 152px;
+    background-color: rgb(122, 122, 122);
+    position: absolute;
+    margin-top: -2.5px;
+    margin-left: 338px;
+}
+
+.mypage-modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mypage-modal-main {
+    height: 336px;
+}
+
+.mypage-modal-index {
+    height: 56px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 1px solid rgba(182, 182, 182, 0.24);
+}
+
+.mypage-modal-indexDiv1 {
+    width: 298px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.mypage-modal-indexDiv2 {
+    width: 192px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.mypage-modal-indexMonth {
+    font-family: NanumBarunGothic;
+    font-size: 20px;
+    color: #000000;
+}
+
+.mypage-modal-indexCount {
+    font-family: NanumBarunGothic;
+    font-size: 20px;
+    color: #000000;
+}
+
+.mypage-modal-indexCountRed {
+    font-family: NanumBarunGothic;
+    font-size: 20px;
+    color: #ff4d4d;
+}
+
+.mypage-modal-btns {
+    height: 97px;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.mypage-modal-left {
+    font-size: 21px;
+    color: #d8d9d9;
+    cursor: pointer;
+}
+
+.mypage-modal-btnNumsSelt {
+    width: 37px;
+    height: 37px;
+    background-color: #6c84ff;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.mypage-modal-btnSelt {
+    font-family: NanumBarunGothic;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+}
+
+.mypage-modal-btnNums {
+    width: 37px;
+    height: 37px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.mypage-modal-btn {
+    font-family: NanumBarunGothic;
+    font-size: 22px;
+    font-weight: bold;
+    color: #777777;
+}
+
+.mypage-modal-right {
+    font-size: 21px;
+    color: #6c84ff;
+    cursor: pointer;
 }
