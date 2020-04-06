@@ -68,6 +68,18 @@ router.get("/stateAll", async(req, res) => {
     }
 });
 
+// 스태이트의 모든 값 가져오기 --------------------
+router.get("/stateAllAvg", async(req, res) => {
+    try {
+        const queryStateAll = `SELECT time, text FROM slackchats where userid='${req.query.userId}' and (state="지각" or state="출근" or state="외근") order by time desc`
+        let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select chat state err : " + err);
+        res.end();
+    }
+});
+
 // 해당 스태이트의 값 타임에 맞게 가져오기 --------------------
 router.get("/getState", async(req, res) => {
     try {

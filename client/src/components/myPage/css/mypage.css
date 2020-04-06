@@ -418,7 +418,7 @@
     font-size: 15px;
     font-weight: bold;
     color: #777777;
-    margin-right: 255px;
+    width: 300px;
 }
 
 .mypage-modal-count {
@@ -491,13 +491,21 @@
     color: #ff4d4d;
 }
 
-.mypage-modal-btns {
+.mypage-modal-bot {
     height: 97px;
     width: 90%;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+}
+
+.mypage-modal-btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 70%;
 }
 
 .mypage-modal-left {

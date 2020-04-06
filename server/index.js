@@ -57,10 +57,12 @@ app.get('/', async(req, res) => {
     //     })
     // }
 
-    let a = "2020-05-03"
-    console.log(
-        moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
-    )
+    // let a = "2020-05-03"
+    // console.log(
+    //     moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
+    // )
+
+    console.log(12%5)
 
 });
 
