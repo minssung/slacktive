@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import SlackLoginBtn from './loginPage/js/SlackLoginBtn';
 import TuiCalendar from './mainPage/js/TuiCalendar';
 import SlackDash from './mainPage/js/Slack_Dashboard';
@@ -27,7 +27,6 @@ class IndexRoot extends React.Component {
             },
             preColor : "#ff0000",
             task : '',
-            vertical : 'vertical_checked_1',
             dashDb : [],
         }
         this.tag = React.createRef();
@@ -156,7 +155,7 @@ class IndexRoot extends React.Component {
     }
     // 배경 변경
     bgBtn(num) {
-        this.setState({ bgcolor : 'bg_'+num, vertical : 'vertical_checked_'+num})
+        this.setState({ bgcolor : 'bg_'+num})
     };
     // 유저 정보 등록
     async clickUserInfoSave() {
@@ -234,71 +233,73 @@ class IndexRoot extends React.Component {
                                     <div className={vertical}></div>
                                     <div className="vertical"></div>
                                     <div className="app-rightDiv">
-                                        <Route exact path="/">
-                                            {
-                                                !userinfoSet &&
-                                                <div className="app-userInfoDiv">
-                                                    <div className="app-userInfo">
-                                                        <div className="userInfo-colorDiv">
-                                                            <span className="userInfo-colorText">당신의 일정에 표시할 색을 선택하세요.</span>
-                                                            <input type="color" name="color" ref={this.color} onChange={this.inputChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
+                                        <Switch>
+                                            <Route exact path="/">
+                                                {
+                                                    !userinfoSet &&
+                                                    <div className="app-userInfoDiv">
+                                                        <div className="app-userInfo">
+                                                            <div className="userInfo-colorDiv">
+                                                                <span className="userInfo-colorText">당신의 일정에 표시할 색을 선택하세요.</span>
+                                                                <input type="color" name="color" ref={this.color} onChange={this.inputChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
+                                                            </div>
+                                                            <div className="userInfo-colorDiv">
+                                                                <span className="userInfo-colorText">당신만의 메시지를 받을 슬랙 본인 채널ID를 입력하세요.</span>
+                                                                <input type="text" name="prvCh" ref={this.prvCh} onChange={this.inputChange.bind(this)} value={prvCh} className="userInfo-colorInput"></input>
+                                                            </div>
+                                                            <div className="userInfo-TagDiv">
+                                                                <span className="userInfo-TagText">당신의 부서를 선택하세요.</span>
+                                                                <select ref={this.tag}>
+                                                                    <option>개발팀</option>
+                                                                    <option>디자인팀</option>
+                                                                    <option>전략기획팀</option>
+                                                                </select>
+                                                            </div>
+                                                            <button className="userInfo-button" type="button" onClick={this.clickUserInfoSave.bind(this)}>
+                                                                <span className="userInfo-buttonText">등록</span>
+                                                            </button>
                                                         </div>
-                                                        <div className="userInfo-colorDiv">
-                                                            <span className="userInfo-colorText">당신만의 메시지를 받을 슬랙 본인 채널ID를 입력하세요.</span>
-                                                            <input type="text" name="prvCh" ref={this.prvCh} onChange={this.inputChange.bind(this)} value={prvCh} className="userInfo-colorInput"></input>
-                                                        </div>
-                                                        <div className="userInfo-TagDiv">
-                                                            <span className="userInfo-TagText">당신의 부서를 선택하세요.</span>
-                                                            <select ref={this.tag}>
-                                                                <option>개발팀</option>
-                                                                <option>디자인팀</option>
-                                                                <option>전략기획팀</option>
-                                                            </select>
-                                                        </div>
-                                                        <button className="userInfo-button" type="button" onClick={this.clickUserInfoSave.bind(this)}>
-                                                            <span className="userInfo-buttonText">등록</span>
-                                                        </button>
                                                     </div>
+                                                }
+                                                <div className="intro">
+                                                    {username}님, &nbsp;좋은아침!{<br></br>}
+                                                    {onWorkTime ? onWorkTime + "에 출근하셨네요" : "아직 출근 전 이시네요"}
                                                 </div>
-                                            }
-                                            <div className="intro">
-                                                {username}님, &nbsp;좋은아침!{<br></br>}
-                                                {onWorkTime ? onWorkTime + "에 출근하셨네요" : "아직 출근 전 이시네요"}
-                                            </div>
-                                            <div className="design">
-                                                <img className="cloud_1" src="img/cloud.png" alt="cloud_1"/>
-                                                <img className="cloud_2" src="img/cloud2.png" alt="cloud_2"/>
-                                                <img className="cloud_3" src="img/cloud3.png" alt="cloud_3"/>
-                                                {
-                                                    task === '개발팀' &&
-                                                    <img className="task" src="img/developer.png" alt="task"/>
-                                                }
-                                            </div>
-                                            <div className="people">
-                                                <span className="tardy">지각자&nbsp;&nbsp;&nbsp;{tardyUser}</span>
-                                                <span className="vacation">휴가자&nbsp;&nbsp;&nbsp;{vacationUser}</span>
-                                            </div>
-                                            <TuiCalendar Token={usertoken} changeDashDb={this.changeDashDb.bind(this)} />
-                                            <div className="design_2">
-                                                <img className="zandi" src="img/zandi.png" alt="zandi" />
-                                                <img className="tree" src="img/tree.png" alt="tree" />
-                                                <img className="cat" src="img/cat.png" alt="cat" />
-                                                <img className="Todaycard" src="img/Todaycard.png" alt="Todaycard" />
-                                            </div>
-                                            <div className="app-dash">
-                                                {
-                                                    dashDb[0] ? 
-                                                    <SlackDash Token={usertoken} dashData={dashDb}></SlackDash>
-                                                    :
-                                                    <div className="dash-empty">
-                                                        <span className="dash-emptyText">오늘의 일정이 없습니다.</span>
-                                                    </div>
-                                                }
-                                            </div>
-                                        </Route>
-                                        <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
-                                        <Route path="/cedar"></Route>
-                                        <Route path="/etc"></Route>
+                                                <div className="design">
+                                                    <img className="cloud_1" src="img/cloud.png" alt="cloud_1"/>
+                                                    <img className="cloud_2" src="img/cloud2.png" alt="cloud_2"/>
+                                                    <img className="cloud_3" src="img/cloud3.png" alt="cloud_3"/>
+                                                    {
+                                                        task === '개발팀' &&
+                                                        <img className="task" src="img/developer.png" alt="task"/>
+                                                    }
+                                                </div>
+                                                <div className="people">
+                                                    <span className="tardy">지각자&nbsp;&nbsp;&nbsp;{tardyUser}</span>
+                                                    <span className="vacation">휴가자&nbsp;&nbsp;&nbsp;{vacationUser}</span>
+                                                </div>
+                                                <TuiCalendar Token={usertoken} changeDashDb={this.changeDashDb.bind(this)} />
+                                                <div className="design_2">
+                                                    <img className="zandi" src="img/zandi.png" alt="zandi" />
+                                                    <img className="tree" src="img/tree.png" alt="tree" />
+                                                    <img className="cat" src="img/cat.png" alt="cat" />
+                                                    <img className="Todaycard" src="img/Todaycard.png" alt="Todaycard" />
+                                                </div>
+                                                <div className="app-dash">
+                                                    {
+                                                        dashDb[0] ? 
+                                                        <SlackDash Token={usertoken} dashData={dashDb}></SlackDash>
+                                                        :
+                                                        <div className="dash-empty">
+                                                            <span className="dash-emptyText">오늘의 일정이 없습니다.</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </Route>
+                                            <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
+                                            <Route path="/cedar"></Route>
+                                            <Route path="/etc"></Route>
+                                        </Switch>
                                     </div>
                                 </div>
                             </div>

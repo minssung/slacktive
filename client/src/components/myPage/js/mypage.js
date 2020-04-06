@@ -1,4 +1,4 @@
-import React , {Component} from 'react';
+import React from 'react';
 import '../css/mypage.css';
 import moment from 'moment';
 import axios from 'axios';
@@ -7,7 +7,7 @@ import MyDashboard from './My_Dashboard/MyDashboard';
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
 
-class mypage extends Component {
+class mypage extends React.Component {
     constructor(props){
         super(props);
         this.state = {
@@ -35,6 +35,8 @@ class mypage extends Component {
             modalBtn : [],
             modalRes : "",
             modalNum : 0,
+            // transition
+            mainClass : "mypage-mainDiv-fade",
         }
     }
     async componentDidMount(){
@@ -56,6 +58,7 @@ class mypage extends Component {
         const modalApi = this.modalApi();   // 모달
         // 전부 값이 처리 될때까지 대기
         await Promise.all([tardy,avgAten,aten,nigSft,holidays,modalApi]);
+        this.setState({ mainClass : "mypage-mainDiv"})
     }
     // ------------------------------ Api & Contents ------------------------------
     // 지각 횟 수 api ------------------------------
@@ -347,11 +350,11 @@ class mypage extends Component {
     }
     // ------------------------------ rendering ------------------------------
     render() {
-        const { holidayHistorys,holidayCount } = this.state;        // 로드 마스크, 휴가 사용 내역, 오늘 날짜
+        const { holidayHistorys,holidayCount,mainClass } = this.state;        // 로드 마스크, 휴가 사용 내역, 오늘 날짜
         let setTimes = "";       // 휴가 사용 내역 중 오늘 날짜와 계산용
         const modals = this.modalContents();
         return (
-            <div className="mypage-mainDiv">
+            <div className={mainClass}>
                 {
                     <div className="mypage-modal-parents">{modals}</div>
                 }

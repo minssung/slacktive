@@ -4,6 +4,17 @@
     height: 1248px;
     position: relative;
     display: flex;
+    opacity: 1;
+    transition: all .5s;
+}
+
+.mypage-mainDiv-fade {
+    flex-direction: column;
+    width: 0%;
+    height: 1248px;
+    position: relative;
+    display: flex;
+    opacity: 0;
 }
 
 .mypage-upDiv {

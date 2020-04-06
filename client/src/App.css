@@ -265,38 +265,6 @@ html, body, #root {
     z-index: 3;
 }
 
-.vertical_checked_1 {
-    width: 5px;
-    height: 60px;
-    background-color: #ffffff;
-    margin-left: -5px;
-    margin-top: 72px;
-}
-
-.vertical_checked_2 {
-    width: 5px;
-    height: 60px;
-    background-color: #ffffff;
-    margin-left: -5px;
-    margin-top: 154px;
-}
-
-.vertical_checked_3 {
-    width: 5px;
-    height: 60px;
-    background-color: #ffffff;
-    margin-left: -5px;
-    margin-top: 236px;
-}
-
-.vertical_checked_4 {
-    width: 5px;
-    height: 60px;
-    background-color: #ffffff;
-    margin-left: -5px;
-    margin-top: 318px;
-}
-
 /* 인트로 css */
 .intro {
     width: 50%;
