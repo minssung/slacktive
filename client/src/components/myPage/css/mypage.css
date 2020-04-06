@@ -376,21 +376,33 @@
 }
 /* ---------- ---------- ---------- modal ---------- ---------- ---------- */
 .mypage-modal-parents {
-    width: 100%;
     position: absolute;
     display: flex;
     flex-direction: column;
+    align-self: center;
     align-items: center;
-    top: 10%;
+    top: 8%;
 }
 
 .mypage-modal {
-    position: relative;
+    position: fixed;
     width: 570px;
     height: 544px;
     border-radius: 20px;
     background-color: #ffffff;
     z-index: 100;
+    opacity: 1;
+    transition: all .7s;
+}
+
+.mypage-modal-inv {
+    position: relative;
+    width: 570px;
+    height: 544px;
+    border-radius: 20px;
+    opacity: 0;
+    background-color: #ffffff;
+    z-index: 0;
 }
 
 .mypage-modal-title {
@@ -548,6 +560,7 @@
     border-radius: 50%;
     border: none;
     cursor: pointer;
+    background-color: #ffffff;
 }
 
 .mypage-modal-btn {

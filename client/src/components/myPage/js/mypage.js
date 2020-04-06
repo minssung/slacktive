@@ -28,7 +28,7 @@ class mypage extends React.Component {
             holidayHistorys : [],   // 휴가 내역
             holidayCount : 0,
             // modal
-            modalOnOff : "none",
+            modalOnOff : "mypage-modal-inv",
             modalDb : [],
             modalState : "",
             numState : 1,
@@ -79,7 +79,7 @@ class mypage extends React.Component {
     }
     tardyContents(){
         const { tardys,tardysSub } = this.state;
-        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","지각")}>
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,true,"지각")}>
             <span className="mypage-numSpan">지각 횟수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/run.png"></img>
@@ -112,7 +112,7 @@ class mypage extends React.Component {
     }
     avgAttenTimeContents(){
         const { avgAtten,avgAttenSub } = this.state
-        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","평균시간")}>
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,true,"평균시간")}>
             <span className="mypage-numSpan">평균 출근시간</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/clock.png"></img>
@@ -141,7 +141,7 @@ class mypage extends React.Component {
     }
     attenContents(){
         const { atten,holidayCount } = this.state;
-        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","출근")}>
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,true,"출근")}>
             <span className="mypage-numSpan">출근 일수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/workplace.png"></img>
@@ -168,7 +168,7 @@ class mypage extends React.Component {
     }
     nightShiftContents(){
         const { nightShift,nightShiftSub } = this.state;
-        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","야근")}>
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,true,"야근")}>
             <span className="mypage-numSpan">야근 일수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/overtime.png"></img>
@@ -277,7 +277,7 @@ class mypage extends React.Component {
             }); break;
             default : break;
         }
-        this.setState({ modalOnOff : bool });
+        this.setState({ modalOnOff : bool ? "mypage-modal" : "mypage-modal-inv" });
     }
     arrowClick(arrow) {
         if(arrow === "left") {
@@ -292,10 +292,10 @@ class mypage extends React.Component {
         const { modalOnOff, modalState,
             modalDb, numState, modalBtn
         } = this.state;
-        return <div className="mypage-modal" style={{ display : modalOnOff }}>
+        return <div className={modalOnOff}>
             <div className="mypage-modal-title">
                 <span className="mypage-modal-titleText">{modalState.title}</span>
-                <span className="mypage-modal-cancel" onClick={this.modalCancel.bind(this, "none")}>x</span>
+                <span className="mypage-modal-cancel" onClick={this.modalCancel.bind(this, false)}>x</span>
             </div>
             <div className="mypage-modal-tag">
                 <span className="mypage-modal-month">{modalState.month}</span>
