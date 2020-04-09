@@ -58,12 +58,22 @@ router.get("/stateAll", async(req, res) => {
         if(req.query.stateSub) {
             whereQuery = `(state='${req.query.state}' or state='${req.query.stateSub}')`
         }
-        const queryStateAll = `SELECT DATE_FORMAT(time, '%Y-%m') AS date, count(state) AS state FROM slackchats where userid='${req.query.userId}' and ${whereQuery} GROUP BY DATE_FORMAT(time, '%Y-%m') ORDER BY date DESC;`
+        const queryStateAll = `
+                SELECT d.date, ifnull(s.state,0) as state FROM (
+                SELECT DATE_FORMAT(time, '%Y-%m') AS date
+                FROM slackchats where userid='${req.query.userId}' 
+                GROUP BY DATE_FORMAT(time, '%Y-%m') ORDER BY date DESC
+                ) as d LEFT JOIN (
+                SELECT DATE_FORMAT(time, '%Y-%m') as date, count(state) as state 
+                FROM slackchats WHERE userid='${req.query.userId}' and ${whereQuery} 
+                group by DATE_FORMAT(time, '%Y-%m')
+                ) as s on d.date = s.date;`
         
-        let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true, required : false})
+        console.log(result)
         res.send(result);
     } catch (err){
-        console.log("select chat state err : " + err);
+        console.log("select chat state err : " + err); 
         res.end();
     }
 });

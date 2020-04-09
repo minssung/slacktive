@@ -38,7 +38,6 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    
     // let a = moment("2020-03-30");
     // let b = moment("2020-03-31");
     // console.log(a.diff(b,"days"))
@@ -61,9 +60,6 @@ app.get('/', async(req, res) => {
     // console.log(
     //     moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
     // )
-
-    console.log(12%5)
-
 });
 
 // ---------- MongoDB 연동 ---------- //
@@ -136,13 +132,29 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
+                client.get("init", async(err, val)=> {
+                    if(err) {
+                        console.log("new init Set Err : " + err);
+                    }
+                    if(val) {
+                        console.log("new init aleardy Set");
+                    } else {
+                        client.set("init", "init", redis.print);
+                        await axios.get(configs.domain+"/slackapi/teamUsers");
+                        const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
+                        const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                        await Promise.all([Cal,Gnr]).then((data)=>{
+                            console.log("Initialize Success");
+                        });
+                    }
+                })
                 // await axios.get(configs.domain+"/slackapi/teamUsers");
                 // const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
                 // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
                 // await Promise.all([Cal,Gnr]).then((data)=>{
                 //     console.log("Initialize Success");
                 // });
-                await axios.get("http://localhost:5000/")
+                // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
@@ -152,7 +164,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
             }
         });
     });
-})
+});
 // -------------------- slack 연동 login & access p_token created --------------------
 app.get('/login', async(req, res) => {
     try {

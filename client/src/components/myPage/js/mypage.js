@@ -168,7 +168,7 @@ class mypage extends React.Component {
     }
     nightShiftContents(){
         const { nightShift,nightShiftSub } = this.state;
-        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,true,"야근")}>
+        return <div className="mypage-dashNumDiv" onClick={this.modalCancel.bind(this,"","야근")}>
             <span className="mypage-numSpan">야근 일수</span>
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/overtime.png"></img>
