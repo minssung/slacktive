@@ -10,7 +10,7 @@
 
 .mypage-mainDiv-fade {
     flex-direction: column;
-    width: 0%;
+    width: 70%;
     height: 1248px;
     position: relative;
     display: flex;
@@ -346,20 +346,26 @@
     align-items: center;
     position: relative;
 }
-
+/*
+#d6ff98
+#87dffa
+#b1c1ff
+#fddb87
+*/
 .mypage-downDashBox {
     width: 63px;
     height: 33px;
-    background-color: #d6ff98;
     margin-right: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .mypage-downDashNumCate {
     font-family: BusanBada;
     font-size: 18px;
     color: #000000;
-    position: absolute;
-    padding-left: 17px;
 }
 
 .mypage-downDashNumBool {

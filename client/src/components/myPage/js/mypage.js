@@ -55,9 +55,8 @@ class mypage extends React.Component {
         const aten = this.attenApi();   // 출근
         const nigSft = this.nightShiftApi();  // 야근
         const holidays = this.holidayUsageHistoryApi();  // 휴가
-        const modalApi = this.modalApi();   // 모달
         // 전부 값이 처리 될때까지 대기
-        await Promise.all([tardy,avgAten,aten,nigSft,holidays,modalApi]);
+        await Promise.all([tardy,avgAten,aten,nigSft,holidays]);
         this.setState({ mainClass : "mypage-mainDiv"})
     }
     // ------------------------------ Api & Contents ------------------------------
@@ -281,8 +280,11 @@ class mypage extends React.Component {
     }
     arrowClick(arrow) {
         if(arrow === "left") {
+            if(this.state.modalNum <= 0)
+                return;
             this.setState({ modalNum : this.state.modalNum -5});
         } else {
+            if(this.state.modalDb.length)
             this.setState({ modalNum : this.state.modalNum +5});
         }
         this.modalApi(this.state.modalRes);
@@ -352,6 +354,7 @@ class mypage extends React.Component {
     render() {
         const { holidayHistorys,holidayCount,mainClass } = this.state;        // 로드 마스크, 휴가 사용 내역, 오늘 날짜
         let setTimes = "";       // 휴가 사용 내역 중 오늘 날짜와 계산용
+        let backgoundColors = "";
         const modals = this.modalContents();
         return (
             <div className={mainClass}>
@@ -406,9 +409,21 @@ class mypage extends React.Component {
                         {   // 휴가 사용 내역 표시
                             holidayHistorys.map((data,i)=>{
                                 setTimes = /(\d{4}-\d{2}-\d{2})/.exec(data.textTime);
+                                if(/반차/.test(data.cate)) {
+                                    backgoundColors = "#d6ff98";
+                                } else if(/휴가/.test(data.cate)) {
+                                    backgoundColors = "#87dffa";
+                                } else if(/대휴/.test(data.cate)) {
+                                    backgoundColors = "#b1c1ff";
+                                } else if(/병가/.test(data.cate)) {
+                                    backgoundColors = "#fddb87";
+                                } else {
+                                    backgoundColors = "#b4b4b4";
+                                }
                                 return <div key={i} className="mypage-downDashNum">
-                                    <div className="mypage-downDashBox"></div>
-                                    <span className="mypage-downDashNumCate">{/반차/.test(data.cate) ? (/(반차)/.exec(data.cate))[1] : data.cate}</span>
+                                    <div className="mypage-downDashBox" style={{ backgroundColor: backgoundColors }}>
+                                        <span className="mypage-downDashNumCate">{/반차/.test(data.cate) ? (/(반차)/.exec(data.cate))[1] : data.cate}</span>
+                                    </div>
                                     <span>
                                         {
                                             moment(moment(new Date())).startOf('day').diff(moment(setTimes[1]).startOf('day'), 'days') < 0 ? 
