@@ -1,7 +1,89 @@
-.Employee-mainDiv {
-    
+/* 전체 div css */
+.Employee_mainDiv {
+    width: 100%;
+    height: 100%;
 }
 
+.TopMiddle_div {
+    margin-left: 31px;
+    margin-right: 34px;
+    margin-top: 50px;
+}
+
+/* 테이블 감싸는 div css */
+.table_container {
+    width: 610px;
+    height: 810px;
+    border-radius: 20px;
+    background-color: #ffffff;
+    margin-top: 27px;
+}
+
+/* 근태 현황 div css */
+.status_row {
+    margin-left: 40px;
+    padding-top: 30px;
+    margin-right: 22px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* 근태 현황 text css */
+.status_text {
+    width: 71px;
+    height: 18px;
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #000000;
+}
+
+/* 월통계 배경 css */
+.status_MonthOrYear {
+    width: 84px;
+    height: 30px;
+    object-fit: contain;
+    border-radius: 27.5px;
+    background-color: #2e3681;
+    margin-left: 393px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* 월통계 oval css */
+.status_MonthOrYear_oval {
+    width: 20px;
+    height: 20px;
+    border-radius: 50px;
+    object-fit: contain;
+    background-color: #ffffff;
+    display: inline-block;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+/* 월통계 text css */
+.status_MonthOrYear_text {
+    width: 41px;
+    height: 17px;
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #ffffff;
+    margin-left: 5px;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+/* 직원 현황 text css */
 .Employee_title {
     width: 115px;
     height: 30px;

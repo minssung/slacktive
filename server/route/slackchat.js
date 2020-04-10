@@ -158,13 +158,13 @@ router.delete("/delete", async(req, res) => {
 });
 
 // DB halfVacation --------------------
-router.get("/tardy", async(req, res) => {
+router.get("/stateload", async(req, res) => {
     try {
-        const query = `select * from slackchats where state='지각' and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
+        const query = `select * from slackchats where state='${req.query.state}' and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
         let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
         res.send(result);
     } catch (err){
-        console.log("select all tardy user err : " + err);
+        console.log("select state load err : " + err);
     }
 });
 

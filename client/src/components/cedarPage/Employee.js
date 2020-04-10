@@ -41,101 +41,81 @@ class Employee extends Component {
         result.data.forEach(async(data)=>{
             let vacationApi = axios.get(`${configs.domain}/calendar/vacation?cate=휴가&userid=${data.id}&time=${today}&time2=${today2}`);
             let halfVacationApi = axios.get(`${configs.domain}/calendar/halfVacation?userid=${data.id}&time=${today}&time2=${today2}`);
-            let tardyApi = axios.get(`${configs.domain}/slack/tardy?userid=${data.id}&time=${today}&time2=${today2}`);
+            let tardyApi = axios.get(`${configs.domain}/slack/stateload?state=지각&userid=${data.id}&time=${today}&time2=${today2}`);
             let onworkApi = axios.get(`${configs.domain}/slack/onwork?userid=${data.id}&time=${today}&time2=${today2}`);
+            let NightShiftApi = axios.get(`${configs.domain}/slack/stateload?state=야근&userid=${data.id}&time=${today}&time2=${today2}`);
 
-            await Promise.all([vacationApi,halfVacationApi,tardyApi,onworkApi]).then(val=>{
+            await Promise.all([vacationApi,halfVacationApi,tardyApi,onworkApi,NightShiftApi]).then(val=>{
                 halfVacationApi = val[1].data.length/2;
                 vacationApi = val[0].data.length + halfVacationApi;
                 tardyApi = val[2].data.length;
                 onworkApi = val[3].data.length;
+                NightShiftApi = val[4].data.length;
             })
 
             array.push({
                 username : data.username,
                 vac : vacationApi,
                 tardy : tardyApi,
-                onworktime : onworkApi
+                onworktime : onworkApi,
+                nightshift : NightShiftApi
             });
         })
         console.log(array);
 
         await this.setState({container : array})
         
-        // const resultUser = await Promise.all(result.data.map(async(data, i) => {
-        //     const today = moment(new Date()).format('YYYY-MM');
-        //     const vacationApi = await axios.get(`${configs.domain}/calendar/vacation?cate=휴가&userid=${data.id}&time=${today}`);
-        //     const halfVacationApi = await axios.get(`${configs.domain}/calendar/halfVacation?userid=${data.id}&time=${today}`);
-        //     const tardyApi = await axios.get(`${configs.domain}/slack/tardy?userid=${data.id}&time=${today}`);
-        //     const onworkApi = await axios.get(`${configs.domain}/slack/onwork?userid=${data.id}&time=${today}`);
-
-        //     // 사용 휴가 체크
-        //     const halfVac = halfVacationApi.data.length/2;
-        //     const vac = vacationApi.data.length+halfVac;
-        //     // 지각 체크
-        //     const tardy = tardyApi.data.length;
-        //     // 출근 체크
-        //     const onwork = onworkApi.data.length;
-
-        //     // const plus = [data].concat(vac,tardy,onwork)
-
-        //     return (
-        //         // plus
-        //         // console.log(plus)
-        //         // console.log(data),
-        //         // console.log(data.username, '사용 휴가', vac),
-        //         // console.log(data.username, '지각', tardy),
-        //         // console.log(data.username, '출근', onwork)
-        //         null
-        //     )
-        // }));
-        // await this.setState({
-        //     container : resultUser
-        // })
-
-        // console.log('resultUser', resultUser);
     }
 
     render() {
-        const { loading, container } = this.state;           // 로드 마스크
+        const { loading, container } = this.state;
         // console.log('container', container);
         return (
-            <div className="Employee-mainDiv">
+            <div className="Employee_mainDiv">
                 {
                     // 로드 마스크
                     !loading && <div className="loadMaskDiv">
                         <img alt="Logind~" src={loadMask} className="loadMask"></img>
                     </div>
                 }
-                <div>
-                    <h1 className="Employee_title">직원현황</h1>
-                </div>
+                <div className="TopMiddle_div">
+                    <div>
+                        <h1 className="Employee_title">직원 현황</h1>
+                    </div>
 
-                <table className="container">
-                    <thead>
-                        <tr>
-                            <td>순번</td>
-                            <td>이름</td>
-                            <td>사용 휴가</td>
-                            <td>지각</td>
-                            <td>야근</td>
-                            <td>총 휴가</td>
-                            <td>출근</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            container.map((data, i) => {
-                                    console.log(data)
-                                    return <TableInfo key={i} 
-                                    index={i+1} name={data.username} useVac={data.vac} tardy={data.tardy}
-                                    onWork={data.onworktime}></TableInfo>
-                            })
-                        }
-                    </tbody>
-                        
-                </table>
-                
+                    <div className="table_container">
+                        <div className="status_row">
+                            <span className="status_text">근태 현황</span>
+                            <span className="status_MonthOrYear">
+                                <span className="status_MonthOrYear_oval"></span>
+                                <span className="status_MonthOrYear_text">월통계</span>
+                            </span>
+                        </div>
+                        <table className="table_box">
+                            <thead>
+                                <tr>
+                                    <td>순번</td>
+                                    <td>이름</td>
+                                    <td>사용 휴가</td>
+                                    <td>지각</td>
+                                    <td>야근</td>
+                                    <td>총 휴가</td>
+                                    <td>출근</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    container.map((data, i) => {
+                                            console.log(data)
+                                            return <TableInfo key={i} 
+                                            index={i+1} name={data.username} useVac={data.vac} tardy={data.tardy}
+                                            onWork={data.onworktime} nightShift={data.nightshift}></TableInfo>
+                                    })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 
             </div>
         );
