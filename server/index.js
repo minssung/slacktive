@@ -39,9 +39,9 @@ app.use("/slackapi", slack_router);
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
     
-    client.get("a", (err,re)=>{
-        console.log(re);
-    })
+    // client.get("a", (err,re)=>{
+    //     console.log(re);
+    // })
     
     res.send("Hello SlackApi World!");
 });

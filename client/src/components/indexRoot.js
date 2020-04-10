@@ -9,7 +9,6 @@ import Employee from './cedarPage/Employee';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
-console.log(configs);
 
 class IndexRoot extends React.Component {
     constructor(props){
