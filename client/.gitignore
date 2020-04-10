@@ -24,9 +24,5 @@ yarn-debug.log*
 yarn-error.log*
 
 #etc
-<<<<<<< HEAD
 /src/client_config.js
 /src/devClient_config.js
-=======
-# /src/client_config.js
->>>>>>> e2822a81adfa7a2f24702cf520ed5a70e3b8f42d
