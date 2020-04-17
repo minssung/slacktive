@@ -32,7 +32,7 @@
 .status_text {
     width: 71px;
     height: 18px;
-    font-family: 12LotteMartDream;
+    font-family: LotteMartDream;
     font-size: 18px;
     font-weight: bold;
     font-stretch: normal;
@@ -87,7 +87,7 @@
 .Employee_title {
     width: 115px;
     height: 30px;
-    font-family: 12LotteMartDream;
+    font-family: LotteMartDream;
     font-size: 30px;
     font-weight: 500;
     font-stretch: normal;
@@ -96,3 +96,55 @@
     letter-spacing: normal;
     color: #ffffff;
   }
+
+/* 상단 줄 */
+.top_row {
+    display: flex;
+    justify-content: center;
+    padding-top: 30px;
+}
+
+/* 상단 text css */
+.top_row span {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #777777;
+}
+
+/* 상단 구분선 */
+.employee_vertical {
+    border-bottom: 3px solid #d8d9d9;
+    margin-top: 11px;
+    margin-bottom: 14px;
+}
+
+/* 데이터 구분선 */
+.employee_vertical_2 {
+    width: 550px;
+    border-bottom: 1px solid #e6e7e7;
+    margin: 14px auto 14px auto;
+}
+
+/* 데이터 div css */
+.info_row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* 데이터 span css */
+.info-row span {
+    display: flex;
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+}
