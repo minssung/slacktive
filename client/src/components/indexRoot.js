@@ -25,13 +25,11 @@ class IndexRoot extends React.Component {
                 tag : "",   // 사용자 부서
                 prvCh : "", // 사용자 채널
             },
-            preColor : "#ff0000",
             task : '',
             dashDb : [],
         }
         this.tag = React.createRef();
         this.color = React.createRef();
-        this.prvCh = React.createRef();
     }
 
     async componentDidMount() {
@@ -163,10 +161,6 @@ class IndexRoot extends React.Component {
             alert("부서를 선택하세요.")
             return;
         }
-        if(!this.color.current.value) {
-            alert("색상을 선택하세요.")
-            return;
-        }
         if(!this.prvCh.current.value) {
             alert("개인 슬랙 채널 ID를 입력하세요.")
             return;
@@ -175,7 +169,6 @@ class IndexRoot extends React.Component {
             await axios.put(configs.domain+"/user/update",{
                 userid : this.state.usertoken,
                 usertag : this.tag.current.value,
-                usercolor : this.color.current.value,
                 userchannel : this.prvCh.current.value,
             });
             this.setState({
@@ -188,15 +181,9 @@ class IndexRoot extends React.Component {
     }
     // 컬러 및 채널 아이디 입력 인풋 변경 감지용  
     async inputChange(e) {
-        if(e.target.name === "color"){
-            this.setState({
-                preColor : e.target.value,
-            })
-        } else {
-            this.setState({
-                prvCh : e.target.value,
-            })
-        }
+        this.setState({
+            prvCh : e.target.value,
+        })
     }
     // 대시보드에 들어갈 데이터
     changeDashDb(data){
@@ -205,7 +192,7 @@ class IndexRoot extends React.Component {
         })
     }
     render() {
-        const { usertoken, userinfoSet, preColor, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task, vertical, dashDb } = this.state;
+        const { usertoken, userinfoSet, username, onWorkTime, tardyUser, vacationUser, bgcolor, prvCh, task, vertical, dashDb } = this.state;
         return (
             <div className="app-firstDiv">
                 <Router>
@@ -239,10 +226,6 @@ class IndexRoot extends React.Component {
                                                     !userinfoSet &&
                                                     <div className="app-userInfoDiv">
                                                         <div className="app-userInfo">
-                                                            <div className="userInfo-colorDiv">
-                                                                <span className="userInfo-colorText">당신의 일정에 표시할 색을 선택하세요.</span>
-                                                                <input type="color" name="color" ref={this.color} onChange={this.inputChange.bind(this)} value={preColor} className="userInfo-colorInput"></input>
-                                                            </div>
                                                             <div className="userInfo-colorDiv">
                                                                 <span className="userInfo-colorText">당신만의 메시지를 받을 슬랙 본인 채널ID를 입력하세요.</span>
                                                                 <input type="text" name="prvCh" ref={this.prvCh} onChange={this.inputChange.bind(this)} value={prvCh} className="userInfo-colorInput"></input>

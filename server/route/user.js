@@ -128,7 +128,6 @@ router.put("/update", async(req, res) => {
             usertag : req.body.usertag,
             p_token : req.body.p_token,
             state : req.body.state,
-            usercolor : req.body.usercolor,
             userchannel : req.body.userchannel,
             holidaycount : req.body.holidaycount,
             }, {

@@ -580,9 +580,9 @@ class TestCal extends React.Component {
     // 시계 팝업 제어용
     setShowTime(bool) {
         if(bool === "end") {
-            this.setState({ showTimeEnd : true })
+            this.setState({ showTimeEnd : true, showTimeStart : false })
         } else if(bool === "start"){
-            this.setState({ showTimeStart : true})
+            this.setState({ showTimeStart : true, showTimeEnd : false })
         } else {
             this.setState({ showTimeStart : bool, showTimeEnd : bool })
         }

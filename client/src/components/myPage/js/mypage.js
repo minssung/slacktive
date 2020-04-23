@@ -29,12 +29,14 @@ class mypage extends React.Component {
             holidayCount : 0,
             // modal
             modalOnOff : "mypage-modal-inv",
-            modalDb : [],
-            modalState : "",
-            numState : 1,
-            modalBtn : [],
-            modalRes : "",
-            modalNum : 0,
+            modalDb : [],       // 모달의 전체 내용을 담을 곳
+            modalBtn : [],      // 모달에 들어갈 버튼 수
+            modalState : "",    // 클릭한 모달이 무엇인지
+            currentPage : 1,    // 현재 페이지 번호
+            groupPage : 5,      // 한 그룹에 보여질 페이지 수
+            currentGroup : 0,   // 현재 그룹
+            maxPage : 5,        // 총 페이지 수
+            pageContents : 6,   // 페이지에 보여질 갯 수
             // transition
             mainClass : "mypage-mainDiv-fade",
         }
@@ -205,43 +207,41 @@ class mypage extends React.Component {
         }
         try {
             let result = await axios.get(`http://localhost:5000/slack/${url}?userId=${user.data.id}&${state}`)
-            this.setState({ modalDb : result.data, modalRes : stateSub })
-            let num = 0;
-            this.setState({
-                modalBtn : (result.data).map((data,i)=>{
-                    if(i%6 === 0) {
-                        ++num;
-                        if(this.state.modalNum >= num) {
-                            return null;
-                        }
-                        if(this.state.modalNum + 5 < num) {
-                            return null;
-                        }
-                        let classNames = "mypage-modal-btnNums";
-                        let classNamesSpan = "mypage-modal-btn"
-                        if(this.state.numState === num) {
-                            classNames = "mypage-modal-btnNumsSelt";
-                            classNamesSpan = "mypage-modal-btnSelt";
-                        }
-                        return <button className={classNames} key={i} onClick={this.modalNum.bind(this,num,stateSub)}>
-                            <span className={classNamesSpan}>{num}</span>
-                        </button>
-                    }
-                    return null;
-                })
-            })
+            this.setState({ modalDb : result.data });
+            this.setState({ maxPage : parseInt(this.state.modalDb.length/this.state.pageContents + 1) })
+            this.modalBoard("f");
         } catch (err) {
             console.log("modal api err : " +  err)
         }
     }
-    // 모달 팝업창의 번호 클릭 시
-    modalNum(num,stateSub) {
-        this.modalApi(stateSub);
-        this.setState({ numState : num })
+    // 모달 게시판 번호 생성
+    modalBoard(bool,index) {
+        const { currentPage,maxPage } = this.state;
+        let pageArr = [];
+        let k = bool === "f" ? currentPage - (index ? index : 0) : index;
+        for(let i=k, j=0; i<=maxPage; i++,j++) {
+            if(j >= 5) break;
+            let classNames = "mypage-modal-btnNums";
+            let classNamesSpan = "mypage-modal-btn"
+            if(currentPage === i) {
+                classNames = "mypage-modal-btnNumsSelt";
+                classNamesSpan = "mypage-modal-btnSelt";
+            }
+            let btn = <button key={i} className={classNames} onClick={this.modalNum.bind(this,i,j)}>
+                <span className={classNamesSpan}>{i}</span>
+            </button>
+            pageArr.push(btn);
+        }
+        this.setState({ modalBtn : pageArr });
+    }
+    // 모달의 페이지 번호 클릭 시
+    async modalNum(num,j) {
+        await this.setState({ currentPage : num });
+        this.modalBoard("f",j);
     }
     // 모달을 클릭할 시
     modalCancel(bool, state) {
-        this.setState({ numState : 1, modalNum : 0 });
+        this.setState({ currentPage : 1, currentGroup : 0 });
         if(state) {
             this.modalApi(state);
         }
@@ -278,26 +278,36 @@ class mypage extends React.Component {
         }
         this.setState({ modalOnOff : bool ? "mypage-modal" : "mypage-modal-inv" });
     }
-    arrowClick(arrow) {
+    // 모달의 화살표를 클릭할 시
+    async arrowClick(arrow) {
+        const { currentPage, maxPage, groupPage } = this.state;
         if(arrow === "left") {
-            if(this.state.modalNum <= 0)
-                return;
-            this.setState({ modalNum : this.state.modalNum -5});
+            if(currentPage <= groupPage)
+                await this.setState({ currentPage : 1 })
+            else {
+                // let de = currentPage%groupPage === 0 ? currentPage - groupPage : currentPage - (currentPage%groupPage);
+                await this.setState({ currentGroup : this.state.currentGroup -1 })
+                await this.setState({ currentPage : (this.state.groupPage * this.state.currentGroup) + 5 })
+            }
         } else {
-            if(this.state.modalDb.length)
-            this.setState({ modalNum : this.state.modalNum +5});
+            if(currentPage >= maxPage - groupPage)
+                await this.setState({ currentPage : maxPage });
+            else {
+                await this.setState({ currentGroup : this.state.currentGroup +1 });
+                await this.setState({ currentPage : (this.state.groupPage * this.state.currentGroup) + 1 })
+            }
         }
-        this.modalApi(this.state.modalRes);
+        this.modalBoard("t",((this.state.groupPage * this.state.currentGroup) + 1));
     }
     // 모달 팝업창
     modalContents() {
         const { modalOnOff, modalState,
-            modalDb, numState, modalBtn
+            modalDb, currentPage, modalBtn, pageContents
         } = this.state;
         return <div className={modalOnOff}>
             <div className="mypage-modal-title">
                 <span className="mypage-modal-titleText">{modalState.title}</span>
-                <span className="mypage-modal-cancel" onClick={this.modalCancel.bind(this, false)}>x</span>
+                <span className="mypage-modal-cancel" onClick={this.modalCancel.bind(this, false,false)}>x</span>
             </div>
             <div className="mypage-modal-tag">
                 <span className="mypage-modal-month">{modalState.month}</span>
@@ -309,10 +319,9 @@ class mypage extends React.Component {
                 <div className="mypage-modal-main">
                     {
                         modalDb && modalDb.map((data,i)=>{
-                            let numB = (numState - 1) * 6;
-                            let numF = numState * 6;
-                            let month = "";
-                            let count = "";
+                            if((currentPage - 1) * pageContents > i || currentPage * pageContents <= i)
+                                return null;
+                            let month,count = "";
                             if(data.date) {
                                 let timeSet = /^(\d{4})-(\d{2})/.exec(data.date);
                                 month = `${timeSet[1]}년 ${timeSet[2]}월`;
@@ -322,12 +331,6 @@ class mypage extends React.Component {
                                 let timeSet = /^\d{4}-\d{2}-\d{2}\s*(\d{2}):(\d{2}):\d{2}/.exec(data.time);
                                 month = moment(data.time).format("YYYY. M. D (ddd)");
                                 count = <span className="mypage-modal-indexCountRed">{(times[1] ? times[1] + "시" : timeSet[1] + "시 ") + (times[2] ? times[2] + "분" : timeSet[2] + "분")}</span>
-                            }
-                            if(numB > i) {
-                                return null;
-                            }
-                            if(numF <= i) {
-                                return null;
                             }
                             return <div key={i} className="mypage-modal-index">
                                 <div className="mypage-modal-indexDiv1">
