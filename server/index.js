@@ -38,28 +38,22 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    // let a = moment("2020-03-30");
-    // let b = moment("2020-03-31");
-    // console.log(a.diff(b,"days"))
-    // let h = moment(new Date()).format("YYYY-MM-DD");
-    // let n = /-(\d{2}-\d{2})/.exec(h)
-    // if(n[1] === "01-01") {
-    //     client.get("newYear", (err, val)=>{
-    //         if(err) {
-    //             console.log("new Holiday Set Err : " + err);
-    //         }
-    //         if(val) {
-    //             console.log("new Holiday aleardy Set");
-    //         } else {
-    //             client.set("newYear", "holidayCountSet", redis.print);
-    //         }
-    //     })
-    // }
 
-    // let a = "2020-05-03"
-    // console.log(
-    //     moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
-    // )
+    function solution(n) {
+        let move = 1;
+        for(let i=n; i>2;) {
+            if(i%2 !== 0) {
+                i--;
+                move++;
+            } else
+                i /= 2;
+        }
+        return move;
+    }
+    let result1 = solution(5);
+    let result2 = solution(6);
+    let result3 = solution(5000);
+    console.log(result1, result2, result3);
 });
 
 // ---------- MongoDB 연동 ---------- //
@@ -154,7 +148,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
                 // await Promise.all([Cal,Gnr]).then((data)=>{
                 //     console.log("Initialize Success");
                 // });
-                // await axios.get("http://localhost:5000/")
+                await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
                 console.log('현재 시간 : ', nowtimeString);
