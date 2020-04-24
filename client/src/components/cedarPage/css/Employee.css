@@ -1,3 +1,193 @@
-.Employee-mainDiv {
-    
+/* 전체 div css */
+.Employee_mainDiv {
+    width: 100%;
+    height: 100%;
+}
+
+.TopMiddle_div {
+    margin-left: 31px;
+    margin-right: 34px;
+    margin-top: 50px;
+}
+
+/* 테이블 감싸는 div css */
+.table_container {
+    width: 610px;
+    height: 810px;
+    border-radius: 20px;
+    background-color: #ffffff;
+    margin-top: 27px;
+}
+
+/* 근태 현황 div css */
+.status_row {
+    margin-left: 40px;
+    padding-top: 30px;
+    margin-right: 22px;
+    vertical-align: middle;
+    display: flex;
+}
+
+/* 근태 현황 text css */
+.status_text {
+    width: 71px;
+    height: 18px;
+    font-family: LotteMartDream;
+    font-size: 18px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #000000;
+    padding-top: 6px;
+}
+
+/* 월통계 배경 css */
+.status_MonthOrYear {
+    width: 84px;
+    height: 30px;
+    object-fit: contain;
+    border-radius: 27.5px;
+    background-color: #2e3681;
+    margin-left: 393px;
+    vertical-align: middle;
+    display: flex;
+}
+
+/* 월통계 oval css */
+.status_MonthOrYear_oval {
+    width: 20px;
+    height: 20px;
+    border-radius: 50px;
+    object-fit: contain;
+    background-color: #ffffff;
+    display: inline-block;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+/* 월통계 text css */
+.status_MonthOrYear_text {
+    width: 41px;
+    height: 17px;
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #ffffff;
+    margin-left: 5px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+/* 직원 현황 text css */
+.Employee_title {
+    width: 115px;
+    height: 30px;
+    font-family: LotteMartDream;
+    font-size: 30px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #ffffff;
+  }
+
+/* 상단 줄 */
+.top_row {
+    display: flex;
+    justify-content: center;
+    padding-top: 30px;
+}
+
+/* 상단 text css */
+.top_row span {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #777777;
+}
+
+/* 상단 구분선 */
+.employee_vertical {
+    border-bottom: 3px solid #d8d9d9;
+    margin-top: 11px;
+    margin-bottom: 14px;
+}
+
+/* 상단 구분선 Bold */
+.employee_vertical-bold {
+    width: 190px;
+    border-bottom: 3px solid #777777;
+    margin-top: -17px;
+    margin-bottom: 14px;
+    margin-left: auto;
+    margin-right: 198px;
+}
+
+/* 데이터 구분선 */
+.employee_vertical_2 {
+    width: 550px;
+    border-bottom: 1px solid #e6e7e7;
+    margin: 14px auto 14px auto;
+}
+
+/* 데이터 div css */
+.info_row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* 데이터 span css */
+.info-row span {
+    display: flex;
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+}
+
+/* footer 디자인 css */
+footer {
+    width: 100%;
+    position: relative;
+    display: flex;
+}
+
+.ground {
+    width: 678px;
+    height: 40px;
+    object-fit: contain;
+    margin-top: 123px;
+}
+
+.item1 {
+    position: absolute;
+    width: 163.8px;
+    height: 52px;
+    object-fit: contain;
+    margin-top: 87px;
+    margin-left: 19px;
+}
+
+.item2 {
+    position: absolute;
+    width: 84px;
+    height: 52px;
+    object-fit: contain;
+    margin-top: 87px;
+    margin-left: 559px;
 }

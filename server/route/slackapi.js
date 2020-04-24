@@ -28,7 +28,8 @@ router.get("/teamUsers", async(req,res)=>{
             }
         });
         try {
-            result.data.ok === true
+            if (result.data.ok === true)
+                console.log('result.data.ok === true')
         } catch (err) {
             console.log('어딘가 문제가 있군 그래', err);
         }
@@ -115,16 +116,53 @@ router.post("/channelHistory", async(req,res) =>{
         let timeCheck = "";     // 시간 비교 용도
         let timeReg = [];       // 시간을 정규식으로 처리
         let stateSet = "";      // 상태 디비 입력 용도
-        let resultArray = [];
-        resultArray = regFunc("times",resultSet,Changetime,timeCheck,timeReg,stateSet);
-        try {
-            await Slackchat.bulkCreate(resultArray,{
-                individualHooks : true,
-            });
-        } catch(err) {
-            console.error("bulkcreate atten arr : " + err);
-        }
-        res.send(resultArray);
+        let HnM = "";           // 시, 분
+
+        regFunc("times",resultSet,Changetime,timeCheck,timeReg,stateSet,HnM).then( async resultArray => {
+            // 야근 체크
+            try {
+                for (let i = 0; i < resultArray.length; i++) {
+                    // 퇴근 메세지 입력 시
+                    if (resultArray[i].state === '퇴근') {
+    
+                        if ((resultArray[i].refineTime >= "19:00") || (resultArray[i].refineTime < "08:30")) {
+                            // API 호출 및 데이터 정제
+                            let useridCheck = await axios.get(`${configs.domain}/user/one?userid=${resultArray[i].userId}`);
+                            let whatTime = await axios.get(`${configs.domain}/slack/onworktime?userid=${useridCheck.data.id}`);
+                            let timeValue = await moment.unix(whatTime.data.ts).utcOffset("+09:00").format("HH:mm");
+                            let timeArray = timeValue.split(':');
+                            let setIntTime = parseInt(timeArray[0])+10+':'+(timeArray[1]);
+                            let setStringTime = String(setIntTime);
+    
+                            // 출근 시간보다 10 시간 뒤에 퇴근 찍거나, 00시 ~ 08시 30분 사이에 퇴근 시 야근 처리
+                            if ((resultArray[i].refineTime >= setStringTime) || (resultArray[i].refineTime >= "00:00")) {
+                                // 배열 데이터 수정
+                                resultArray[i].state = '야근';
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.log('Night Shift Error : ' + err);
+                console.log('배열형식의 채팅 데이터', resultArray);
+            }
+
+            // bulkCreate
+            try {
+                await Slackchat.bulkCreate(resultArray,{
+                    individualHooks : true,
+                });
+            } catch(err) {
+                console.error("bulkcreate atten arr : " + err);
+            }
+    
+            // Response
+            await res.send(resultArray);
+
+            // Promise error catch
+        }).catch( error => {
+            console.log("regFunc Promise Error : " + error);
+        })
     } catch(error) {
         console.log("slack channel history err : " + error);
     }
@@ -427,7 +465,7 @@ router.get("/userGetVerify", async(req,res)=>{
 });
 
 // 정규식을 거쳐 처리하는 함수 --------------------------------------------------
-function regFunc(channel ,resultSet,init, ...args){
+async function regFunc(channel ,resultSet,init, ...args){
     let resultArray = [];
     if(channel === "times") {
         // 출퇴근의 처리
@@ -435,7 +473,7 @@ function regFunc(channel ,resultSet,init, ...args){
         // args : 1 => check time
         // args : 2 => time Reg result
         // args : 3 => state var
-        resultSet.forEach(data=> {
+        resultSet.forEach( async data => {
             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
             args[1] = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
             // data.text 조건문 처리
@@ -470,24 +508,8 @@ function regFunc(channel ,resultSet,init, ...args){
                             args[3] = (/출근/.test(args[2][2])) ? "지각" : args[2][2]
                             // 4시 50분 이후 입력 텍스트 경우
                         } else if(args[1] > configs.Pm0) {
-                            args[3] = (/퇴근/.test(args[2][2])) ? "퇴근" : args[2][2];
-                            // 야근 체크
-                            try {
-                                (async ()=> {
-                                    let useridCheck = await axios.get(`${configs.domain}/user/one?userid=${data.user}`);
-                                    let whatTime = await axios.get(`${configs.domain}/slack/onworktime?userid=${useridCheck.data.id}`);
-                                    let timeValue = await moment.unix(whatTime.data.ts).utcOffset("+09:00").format("HH:mm");
-                                    const timeArray = timeValue.split(':');
-                                    let setIntTime = parseInt(timeArray[0])+10+':'+parseInt(timeArray[1]);
-                                    let setStringTime = String(setIntTime);
-                                    if (args[1] > setStringTime) {
-                                        args[3] = (/퇴근/.test(args[2][2])) ? "야근" : args[2][2]
-                                    }
-                                })();
-                            } catch (error) {
-                                console.log('Night shift Error : '. error)
-                            };
-                        } 
+                            args[3] = (/퇴근/.test(args[2][2])) ? "퇴근" : args[2][2]
+                        }
                     }
                     // 유저 상태 업데이트
                     User.update({
@@ -495,18 +517,19 @@ function regFunc(channel ,resultSet,init, ...args){
                     },{
                         where : { id : data.user }
                     })
+                    // 추가해야 될 예외 처리
+                    // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
+                    resultArray.push({
+                        userId : data.user,
+                        time : args[0],
+                        refineTime : args[1],
+                        ts : data.ts,
+                        text : data.text,
+                        state : args[3]
+                    });
                 } catch (err) {
                     console.log("Reg Times Err : " + err)
                 }
-                // 추가해야 될 예외 처리
-                // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
-                resultArray.push({
-                    userId : data.user,
-                    time : args[0],
-                    ts : data.ts,
-                    text : data.text,
-                    state : args[3]
-                });
             } else {
                 if(!init){
                     errMessageMe(data,channel);

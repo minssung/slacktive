@@ -39,9 +39,9 @@ app.use("/slackapi", slack_router);
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
     
-    client.get("a", (err,re)=>{
-        console.log(re);
-    })
+    // client.get("a", (err,re)=>{
+    //     console.log(re);
+    // })
     
     res.send("Hello SlackApi World!");
 });
@@ -121,7 +121,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
                 // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
                 // await Promise.all([Cal,Gnr]).then((data)=>{
                 //     console.log("Initialize Success");
-                // });
+                // }).catch(err=>{console.log('Init Error',err)});
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')

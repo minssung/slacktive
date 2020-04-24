@@ -173,5 +173,27 @@ router.delete("/delete", async(req, res) => {
     res.send(result);
 });
 
+// DB vacation --------------------
+router.get("/vacation", async(req, res) => {
+    try {
+        const query = `select * from calendars where cate='${req.query.cate}' and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select vacation err : " + err);
+    }
+});
+
+// DB halfVacation --------------------
+router.get("/halfVacation", async(req, res) => {
+    try {
+        const query = `select * from calendars where cate like '%반차' and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select halfVacation err : " + err);
+    }
+});
+
 // Module Exports --------------------
 module.exports = router;

@@ -157,5 +157,27 @@ router.delete("/delete", async(req, res) => {
     }
 });
 
+// DB halfVacation --------------------
+router.get("/stateload", async(req, res) => {
+    try {
+        const query = `select * from slackchats where state='${req.query.state}' and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select state load err : " + err);
+    }
+});
+
+// DB halfVacation --------------------
+router.get("/onwork", async(req, res) => {
+    try {
+        const query = `select * from slackchats where (state='지각' or state='출근') and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+    } catch (err){
+        console.log("select all tardy user err : " + err);
+    }
+});
+
 // Module Exports --------------------
 module.exports = router;
