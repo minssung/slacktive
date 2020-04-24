@@ -9,6 +9,7 @@
     "@toast-ui/react-calendar": "^1.0.5",
     "axios": "^0.19.1",
     "http-proxy-middleware": "^0.20.0",
+    "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "passport": "^0.4.1",
     "passport-slack": "0.0.7",
@@ -19,8 +20,8 @@
     "react-live-clock": "^3.1.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
-    "serve-handler": "^6.1.2",
-    "react-timekeeper": "^2.0.4"
+    "react-timekeeper": "^2.0.4",
+    "serve-handler": "^6.1.2"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -28,7 +28,8 @@ router.get("/teamUsers", async(req,res)=>{
             }
         });
         try {
-            result.data.ok === true
+            if (result.data.ok === true)
+                console.log('result.data.ok === true')
         } catch (err) {
             console.log('어딘가 문제가 있군 그래', err);
         }

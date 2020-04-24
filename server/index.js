@@ -121,7 +121,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
                 // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
                 // await Promise.all([Cal,Gnr]).then((data)=>{
                 //     console.log("Initialize Success");
-                // });
+                // }).catch(err=>{console.log('Init Error',err)});
                 // await axios.get("http://localhost:5000/")
                 // < ----------- 현재 시간의 date string ----------- >
                 let nowtimeString = moment(new Date()).format('HH:mm')
