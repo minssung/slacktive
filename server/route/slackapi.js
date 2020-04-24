@@ -89,6 +89,7 @@ router.post("/messagePost", async(req,res)=>{
         res.send(result.data);
     }catch(err){
         console.log("slack post message err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -165,6 +166,7 @@ router.post("/channelHistory", async(req,res) =>{
         })
     } catch(error) {
         console.log("slack channel history err : " + error);
+        res.status(500).send(error);
     }
 });
 
@@ -268,7 +270,6 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
         } catch(err) {
             console.error("bulkcreate Init Cal err : " + err);
         }
-        await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
     } catch(error) {
         console.log("slack channelCal history err : " + error);
@@ -298,6 +299,7 @@ router.get("/channelMembers", async(req,res)=>{
         res.send(array);
     } catch(err){
         console.log("slack channel members err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -325,6 +327,7 @@ router.post("/channelList", async(req,res)=>{
         res.send(array);
     }catch(err){
         console.log("slack channel list err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -347,6 +350,7 @@ router.post("/messageDelete", async(req,res)=>{
         res.send(result.data);
     }catch(err){
         console.log("slack message delete err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -371,6 +375,7 @@ router.post("/messageUpdate", async(req,res)=>{
         res.send(result.data);
     }catch(err){
         console.log("slack channel msg update err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -407,6 +412,7 @@ router.post("/usersInfo", async(req,res)=>{
         res.send(resultJson);
     }catch(err){
         console.log("slack user info err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -426,6 +432,7 @@ router.post("/botInfo", async(req,res)=>{
         res.send(result.data);
     }catch(err){
         console.log(err);
+        res.status(500).send(err);
     }
 });
 
@@ -446,6 +453,7 @@ router.post("/authInfo", async(req,res)=>{
         res.send(result.data);
     }catch(err){
         console.log("slack auth identity test err : " + err);
+        res.status(500).send(err);
     }
 });
 
@@ -460,6 +468,7 @@ router.get("/userGetVerify", async(req,res)=>{
         }
     }catch(err){
         console.log("user Get verify err : " + err);
+        res.status(500).send(err);
     }
     res.send(result)
 });
@@ -689,6 +698,7 @@ errMessageMe = async(data,channel) => {
         });
     } catch(err){
         console.log("reg post me message err : " + err);
+        res.status(500).send(err);
     }
 }
 

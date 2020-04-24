@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import Dashboard from './Dashboard/Dashboard';
 import moment from 'moment';
-import loadMask from '../../../resource/loadmaskTest.gif'
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
@@ -14,10 +13,6 @@ class SlackDashboard extends React.Component {
             // users list - state
             usersalldb : [],
             usertoken : [],
-            // time contents
-            //todayTimes : "",
-            // load mask
-            loading : "",
             // caeldnar  % general db
             dashDb : [],
             // today date
@@ -28,13 +23,9 @@ class SlackDashboard extends React.Component {
     // ---------- user Token verify & Mount & axios ---------- 
     async componentDidMount(){
         await this.setState({
-            usertoken : await this.props.Token
+            usertoken : await this.props.Token,
         })
         await this.userListApi();   // user List Api
-        await this.dashDbApi();     // cal & gnr Api
-        this.setState({
-            loading : "Loading",
-        })
     }
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
@@ -51,19 +42,6 @@ class SlackDashboard extends React.Component {
         }
     }
     // ---------- calendar / general Api & Render----------
-    async dashDbApi() {
-        try {
-            const result = await axios.get(configs.domain+"/updatState");
-            // console.log(result.data);
-            // console.log((result.data).length);
-            // if (((result.data).length) === 0) {
-            //     await this.setState({ dashDb : test })
-            // }
-            await this.setState({ dashDb : result.data });
-        } catch(err) {
-            console.log("calendar api err : " + err);
-        }
-    }
     dataTextTime(time) {
         let userTime
         let dayArr = [];
@@ -88,11 +66,12 @@ class SlackDashboard extends React.Component {
     dataStateSwich(state) {
         let userState = "";
         switch(state) {
-            case "휴가관련" : userState = "gold"; break;
-            case "출장 / 미팅" : userState = "greenyellow"; break;
-            case "회의" : userState = "turquoise"; break;
-            case "생일" : userState = "violet"; break;
-            case "기타" : userState = "thistle"; break;
+            case "휴가관련" : userState = configs.colors[2]; break;
+            case "출장 / 미팅" : userState = configs.colors[0]; break;
+            case "회의" : userState = configs.colors[1]; break;
+            case "생일" : userState = configs.colors[3]; break;
+            case "기타" : userState = configs.colors[4]; break;
+            default : break;
         }
         return userState;
     }
@@ -100,19 +79,14 @@ class SlackDashboard extends React.Component {
     // ---------- ---------- ---------- ---------- ---------- ---------- ----------
     // ---------- rendering ---------- 
     render () {
-        const { loading,dashDb } = this.state;
+        const { dashData } = this.props;
         return (
             <div className="dash-boardDiv">
                 {
-                    !loading && <div className="loadMaskDiv">
-                        <img alt="Logind~" src={loadMask} className="loadMask"></img>
-                    </div>
-                }
-                {
-                    dashDb.map((data,i)=>{
+                    dashData.map((data,i)=>{
                         return <Dashboard key={i}
-                            title={data.title ? data.title : data.user.username + " " + data.cate}
-                            partner={data.partner ? data.user.username + "," + data.partner.map((data,i)=>{ return data.username }) : data.user.username}
+                            title={data.title ? data.title : data.cate}
+                            partner={data.partner ? data.user.username + data.partner.map((data,i)=>{ return i !== 0 ? data.username : "," + data.username}) : data.user.username}
                             textTime={this.dataTextTime.bind(this,data.time)}
                             color={this.dataStateSwich.bind(this,data.state)}
                         />

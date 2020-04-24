@@ -24,9 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         holidaycount : {
             type: DataTypes.DOUBLE,
         },
-        usercolor : {
-            type: DataTypes.STRING,
-        },
         userchannel : {
             type: DataTypes.STRING,
         },

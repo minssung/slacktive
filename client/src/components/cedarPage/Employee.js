@@ -22,6 +22,7 @@ class Employee extends Component {
         }
     }
 
+    // (i+1) + (currentpage -1) * pageSize
     handlePageChange = (page) => {
         this.setState({ currentPage: page });
     }

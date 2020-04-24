@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import loadMask from '../../../resource/loadmaskTest.gif'
+import loadMask from '../../../resource/loaded.gif'
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
@@ -51,8 +51,8 @@ class SlackLoginBtn extends React.Component {
         return (
             <div className="slacklogin-maindiv">
                 {
-                    loading && <div className="loadMaskDiv">
-                        <img alt="Logind~" src={loadMask} className="loadMask"></img>
+                    loading && <div className="loadMaskDivLogin">
+                        <img alt="Logind~" src={loadMask} className="loadMaskLogin"></img>
                     </div>
                 }
                 <a onClick={this.ClickSlackLogin.bind(this)} href="/#">

@@ -1,37 +1,46 @@
-.popup-confirm-main {
-    width: 540px;
-    height: 600px;
-    border: 1px solid rgba(85, 85, 85, 0.199);
-    border-radius: 30px;
-    background-color: white;
+.popup-confirm {
     position: absolute;
+    left: 0%;
+    top: 0%;
     z-index: 500;
-    top: 5%;
-    left: 30%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.popup-confirm-main {
+    width: 570px;
+    height: 641px;
+    border: 1px solid rgba(85, 85, 85, 0.199);
+    border-radius: 20px;
+    background-color: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .popup-confirm-header {
-    width: 90%;
-    height: 10%;
+    width: 514px;
+    height: 65px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
-    padding-left: 20px;
+    padding-left: 16px;
 }
 
 .popup-confirm-headerTitle {
     font-size: 18px;
     font-weight: bold;
-    padding-top: 8px;
+    padding-top: 30px;
+    padding-bottom: 17px;
 }
 
 .popup-confirm-headerCancel {
-    padding-bottom: 12px;
-    font-size: 28px;
+    padding-bottom: 16px;
+    padding-top: 10px;
+    font-size: 30px;
+    cursor: pointer;
 }
 
 .popup-confirm-hAndBLine {
@@ -43,38 +52,35 @@
 .popup-confirm-body {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    width: 90%;
-    padding-left: 20px;
-    margin-bottom: 40px;
-    margin-top: 10px;
+    width: 530px;
+    margin-bottom: 44px;
+    padding-left: 40px;
 }
 
 .popup-confirm-bodyText {
     color: #777777;
     font-size: 15px;
+    margin-top: 30px;
     margin-bottom: 17px;
-    margin-top: 17px;
 }
 
 .popup-confirm-bodyTextContent {
     font-size: 18px;
+    color: #000000;
+    overflow: hidden;
 }
 
 .popup-confirm-bodyCateContent {
-    margin-bottom: 6px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
     align-items: center;
-    width: 110px;
 }
 
 .popup-confirm-bodyCateMark {
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     background-color: greenyellow;
+    margin-right: 10px;
 }
 
 .popup-confirm-bodyPartnerContent {
@@ -84,51 +90,55 @@
 }
 
 .popup-confirm-bodyPartnerBox {
-    border: 1px solid rgba(153, 153, 153, 0.514);
-    width: 130px;
-    height: 45px;
+    border-radius: 4px;
+    border: solid 1px #d8d9d9;
+    width: 104px;
+    height: 41px;
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
     align-items: center;
-    margin-right: 10px;
-    overflow-x: hidden;
+    margin-right: 16px;
 }
 
 .popup-confirm-bodyPartnerImg {
-    border: 1px solid rgba(97, 97, 97, 0.39);
-    width: 45px;
-    height: 35px;
-    margin-right: 7px;
-    margin-left: 7px;
+    width: 31px;
+    height: 31px;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 .popup-confirm-btns {
-    width: 80%;
-    height: 40px;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
 }
 
 .popup-confirm-btnUpdat {
-    width: 43%;
+    width: 194px;
+    height: 41px;
     border-radius: 10px;
     border: solid 2px #6c84ff;
+    background-color: white;
+    margin-right: 16px;
+    margin-left: 83px;
 }
 
 .popup-confirm-btnUpdatText {
     color: #6c84ff;
     font-size: 18px;
+    font-weight: bold;
 }
 
 .popup-confirm-btnDelet {
-    width: 43%;
+    width: 194px;
+    height: 41px;
     border-radius: 10px;
-    border: solid 2px #777777;;
+    border: solid 2px #777777;
+    background-color: white;
+    margin-right: 75px;
 }
 
 .popup-confirm-btnDeletText {
     color: #777777;
     font-size: 16px;
+    font-weight: bold;
 }

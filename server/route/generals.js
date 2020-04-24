@@ -23,7 +23,8 @@ router.get("/all", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select General all err : " + err)
+        console.log("select General all err : " + err);
+        res.end();
     }
 });
 
@@ -46,7 +47,8 @@ router.get("/allTime", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select General all err : " + err)
+        console.log("select General all err : " + err);
+        res.end();
     }
 });
 
@@ -72,7 +74,8 @@ router.get("/getTime", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select General all err : " + err)
+        console.log("select General all err : " + err);
+        res.end();
     }
 });
 
@@ -87,6 +90,7 @@ router.get("/one", async(req, res) => {
         res.send(result);
     } catch(err) {
         console.log("select General one err : " + err);
+        res.end();
     }
 });
 
@@ -133,6 +137,7 @@ router.post("/create", async(req, res) => {
         });
     }catch(err) {
         console.error("created General err : " + err);
+        res.end();
     }
     res.send(result);
 });
@@ -184,6 +189,7 @@ router.get("/state", async(req, res) => {
         res.send(result);
     } catch (err){
         console.log("select chat one err : " + err);
+        res.end();
     }
 });
 

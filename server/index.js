@@ -12,8 +12,8 @@ let jwt = require("jsonwebtoken");
 const moment = require('moment');
 const Agenda = require('agenda');
 
-// const redis = require("redis");
-// let client = redis.createClient(6379, "localhost");
+const redis = require("redis");
+let client = redis.createClient(6379, "localhost");
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');
@@ -38,12 +38,28 @@ app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    
-    // client.get("a", (err,re)=>{
-    //     console.log(re);
-    // })
-    
-    res.send("Hello SlackApi World!");
+    // let a = moment("2020-03-30");
+    // let b = moment("2020-03-31");
+    // console.log(a.diff(b,"days"))
+    // let h = moment(new Date()).format("YYYY-MM-DD");
+    // let n = /-(\d{2}-\d{2})/.exec(h)
+    // if(n[1] === "01-01") {
+    //     client.get("newYear", (err, val)=>{
+    //         if(err) {
+    //             console.log("new Holiday Set Err : " + err);
+    //         }
+    //         if(val) {
+    //             console.log("new Holiday aleardy Set");
+    //         } else {
+    //             client.set("newYear", "holidayCountSet", redis.print);
+    //         }
+    //     })
+    // }
+
+    // let a = "2020-05-03"
+    // console.log(
+    //     moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
+    // )
 });
 
 // ---------- MongoDB 연동 ---------- //
@@ -116,6 +132,22 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
+                client.get("init", async(err, val)=> {
+                    if(err) {
+                        console.log("new init Set Err : " + err);
+                    }
+                    if(val) {
+                        console.log("new init aleardy Set");
+                    } else {
+                        client.set("init", "init", redis.print);
+                        await axios.get(configs.domain+"/slackapi/teamUsers");
+                        const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
+                        const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                        await Promise.all([Cal,Gnr]).then((data)=>{
+                            console.log("Initialize Success");
+                        });
+                    }
+                })
                 // await axios.get(configs.domain+"/slackapi/teamUsers");
                 // const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
                 // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
@@ -132,7 +164,7 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
             }
         });
     });
-})
+});
 // -------------------- slack 연동 login & access p_token created --------------------
 app.get('/login', async(req, res) => {
     try {
@@ -146,6 +178,7 @@ app.get('/login', async(req, res) => {
         res.send(result.data);
     } catch(err) {
         console.log("login trying err : " + err);
+        res.end();
     }
 });
 app.get('/login-access', async(req,res) => {
@@ -169,6 +202,7 @@ app.get('/login-access', async(req,res) => {
         res.send(usertoken);
     } catch(err) {
         console.log("login access err : " + err);
+        res.end();
     }
 });
 // -------------------- ********** --------------------
@@ -207,10 +241,12 @@ app.get('/updateHistorys', async(req,res) => {
     try {
         const resultC = axios.post(configs.domain+"/slackapi/channelHistoryCal");
         const resultH = axios.post(configs.domain+"/slackapi/channelHistory");
+        await Promise.all([resultC,resultH]);
         const updatDate = new Date();
         res.send(updatDate);
     } catch(err) {
-        console.log("index api & history updat err : " + err)
+        console.log("index api & history updat err : " + err);
+        res.end();
     }
 })
 // 갱신 버튼 누를 시 즉시 상태 업데이트 시도
@@ -220,6 +256,7 @@ app.get('/updatState', async(req,res) => {
         result = await calendarStateUpdatFunc();
     } catch (err) {
         console.log("updat state err : " + err);
+        res.end();
     }
     res.send(result)
 });
@@ -263,16 +300,8 @@ async function calendarStateUpdatFunc() {
                     update = true;
                 }
             }
-            // 검증에서 true 일 시 업데이트
-            if(update){
-                models.user.update({
-                    id : data.userId,
-                    state : data.cate,
-                }, {
-                    where : {
-                        id : data.userId,
-                    }
-                })
+            // 해당하는 결과 푸시
+            if(update) {
                 resultArray.push({
                     state : data.state,
                     time : data.textTime,
@@ -281,6 +310,23 @@ async function calendarStateUpdatFunc() {
                     user : data.user,
                 })
             }
+            // 레디스 조회 후 데이터 변화가 없으면 유저 업댓 x
+            client.get(data.userId, (err,val)=>{
+                if(err) {
+                    console.log("redis user updat err : " + err);
+                }
+                if(val !== data.cate && update) {
+                    console.log(data.cate)
+                    client.set(data.userId, data.cate, redis.print);
+                    models.user.update({
+                        state : data.cate,
+                    },{
+                        where : {
+                            id : data.userId,
+                        }
+                    })
+                }
+            })
         });
         resultGnr.forEach((data) => {
             // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
