@@ -191,16 +191,20 @@ router.post("/channelHistoryCal", async(req,res) =>{
         let calReg = [];
         let textTimes = "";
         let search = "";
-        let resultArray = regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,search)
-        try {
-            await Calendar.bulkCreate(resultArray,{
-                individualHooks : true,
-            })
-        } catch(err) {
-            console.error("bulkcreate cal err : " + err);
-        }
-        await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
-        res.send(resultArray);
+        regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,search).then( async resultArray => {
+            try {
+                await Calendar.bulkCreate(resultArray,{
+                    individualHooks : true,
+                })
+            } catch(err) {
+                console.error("bulkcreate cal err : " + err);
+            }
+            await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
+            res.send(resultArray);
+        }).catch( error => {
+            console.log("regFunc Promise Error : " + error);
+        })
+        
     } catch(error) {
         console.log("slack channel history cal err : " + error);
     }
@@ -225,16 +229,20 @@ router.post("/channelHistoryInit", async(req,res) =>{
         let timeCheck = "";     // 시간 비교 용도
         let timeReg = [];       // 시간을 정규식으로 처리
         let stateSet = "";      // 상태 디비 입력 용도
-        let resultArray = [];
-        resultArray = regFunc("times",resultSet,"init",Changetime,timeCheck,timeReg,stateSet);
-        try {
-            await Slackchat.bulkCreate(resultArray,{
-                individualHooks : true,
-            });
-        } catch(err) {
-            console.error("bulkcreate Init atten arr : " + err);
-        }
-        res.send(resultArray);
+        // let resultArray = [];
+        regFunc("times",resultSet,"init",Changetime,timeCheck,timeReg,stateSet).then( async resultArray => {
+            try {
+                await Slackchat.bulkCreate(resultArray,{
+                    individualHooks : true,
+                });
+            } catch(err) {
+                console.error("bulkcreate Init atten arr : " + err);
+            }
+            await res.send(resultArray);
+        }).catch( error => {
+            console.log("regFunc Promise Error : " + error);
+        })
+        
     } catch(error) {
         console.log("slack channel history atten init err : " + error);
     }
@@ -260,16 +268,19 @@ router.post("/channelHistoryInitCal", async(req,res) =>{
         let calReg = [];
         let textTimes = "";
         let search = "";
-        let resultArray = regFunc("calendar",resultSet,"init",Changetime,calReg,calArray,textTimes,search)
-        try {
-            await Calendar.bulkCreate(resultArray,{
-                individualHooks : true,
-            })
-        } catch(err) {
-            console.error("bulkcreate Init Cal err : " + err);
-        }
-        await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
-        res.send(resultArray);
+        regFunc("calendar",resultSet,"init",Changetime,calReg,calArray,textTimes,search).then( async resultArray => {
+            try {
+                await Calendar.bulkCreate(resultArray,{
+                    individualHooks : true,
+                })
+            } catch(err) {
+                console.error("bulkcreate Init Cal err : " + err);
+            }
+            await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
+            await res.send(resultArray);
+        }).catch( error => {
+            console.log("regFunc Promise Error : " + error);
+        })
     } catch(error) {
         console.log("slack channelCal history err : " + error);
     }

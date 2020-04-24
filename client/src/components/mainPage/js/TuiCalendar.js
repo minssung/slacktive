@@ -965,7 +965,7 @@ class TestCal extends React.Component {
         const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
         Promise.all([History,HistoryCal]).then((val)=>{
             console.log('갱신 완료');
-        });
+        }).catch(err=>{console.log('갱신 실패', err)});
         window.location.href = '/';
     }
 
