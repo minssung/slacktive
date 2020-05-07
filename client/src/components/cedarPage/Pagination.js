@@ -9,10 +9,18 @@ class Pagination extends Component {
         }
     }
 
+    // groupPage(index) {
+    //     if(index > 5) {
+            
+    //     }
+    // }
+
     render() {
         const { personCount, pageSize, currentPage, onPageChange } = this.props;
         const maxPage = Math.ceil(personCount / pageSize);
         const pageArray = _.range(1, (maxPage + 1));
+        // const pageIndex = pageArray.length;
+        // this.groupPage(pageIndex)
 
         return (
             <nav className="page_container">

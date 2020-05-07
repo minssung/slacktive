@@ -31,6 +31,7 @@ class IndexRoot extends React.Component {
         }
         this.tag = React.createRef();
         this.color = React.createRef();
+        this.prvCh = React.createRef();
     }
 
     async componentDidMount() {
@@ -73,6 +74,7 @@ class IndexRoot extends React.Component {
             } catch (err){
                 console.log("usertoken create or userinfo err : " + err)
             }
+            
         }
     }
 
@@ -181,7 +183,7 @@ class IndexRoot extends React.Component {
         }
     }
     // 컬러 및 채널 아이디 입력 인풋 변경 감지용  
-    async inputChange(e) {
+    inputChange(e) {
         this.setState({
             prvCh : e.target.value,
         })

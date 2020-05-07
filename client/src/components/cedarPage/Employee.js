@@ -6,7 +6,6 @@ import './css/Employee.css';
 import TableInfo from './TableInfo';
 import Pagination from './Pagination';
 import { Paginate } from './utils/Paginate';
-import _ from 'lodash';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../devClient_config') : configs = require('../../client_config');
@@ -16,13 +15,11 @@ class Employee extends Component {
         super(props);
         this.state = {
             container : [],     // 직원 데이터
-            pageSize : 11,       // 한 페이지당 들어가는 직원 데이터 수 (테스트용, 원래는 12로 해야함)
+            pageSize : 12,       // 한 페이지당 들어가는 직원 데이터 수 (테스트용, 원래는 12로 해야함)
             currentPage : 1,    // 현재 보고있는 페이지
             loading : ''
         }
     }
-
-    // (i+1) + (currentpage -1) * pageSize
     handlePageChange = (page) => {
         this.setState({ currentPage: page });
     }
@@ -82,9 +79,7 @@ class Employee extends Component {
         const { loading, container, pageSize, currentPage } = this.state;
         const { length: personCount } = this.state.container;
 
-        const personData = Paginate(container, currentPage, pageSize);
-        console.log('현재 페이지의 배열', personData);
-
+        const personArray = Paginate(container, currentPage, pageSize);
         return (
             <div className="Employee_mainDiv">
                 {
@@ -119,10 +114,10 @@ class Employee extends Component {
                         <div className="employee_vertical-bold"></div>
                         <div>
                             {
-                                personData.map((data, i) => {
+                                personArray.map((data, i) => {
                                     return (
                                         <TableInfo key={i} 
-                                            index={i+1} name={data.username} useVac={data.vac} tardy={data.tardy}
+                                            index={(i+1) + (currentPage-1) * pageSize} name={data.username} useVac={data.vac} tardy={data.tardy}
                                             onWork={data.onworktime} nightShift={data.nightshift} allVac='20'>
                                         </TableInfo>
                                     )
