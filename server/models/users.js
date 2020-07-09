@@ -6,26 +6,26 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         username: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(20),
             allowNull: false
         },
         usertag : {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(10),
         },
         useremail: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(50),
         },
         userphone: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(20),
         },
         state : {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(20),
         },
         holidaycount : {
             type: DataTypes.DOUBLE,
         },
         userchannel : {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(20),
         },
         p_token : {
             type: DataTypes.STRING,
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     });
     User.associate = function(models) {
         User.hasMany(models.slackchat)
-        User.hasMany(models.calendar)
+        User.hasMany(models.holiday)
         User.hasMany(models.general)
     }
     return User;

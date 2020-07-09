@@ -4,7 +4,7 @@ const router = express.Router();
 const models = require("../models");
 
 // DB Setting --------------------
-const Calendar = models.calendar;
+const Holiday = models.holiday;
 const User = models.user;
 const Op = models.Sequelize.Op;
  
@@ -12,10 +12,9 @@ const Op = models.Sequelize.Op;
 // DB SelectAll --------------------
 router.get("/all", async(req, res) => {
     try {
-        const result = await Calendar.findAll({
+        const result = await Holiday.findAll({
             include : [{
                 model : models.user,
-                attributes : ['username','usercolor']
             }],
             order : [[
                 'id' , 'ASC'
@@ -23,15 +22,15 @@ router.get("/all", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select Calendar all err : " + err)
+        console.log("select Holiday all err : " + err)
         res.end();
     }
 });
 
-// DB SelectAll Users Calendar --------------------
-router.get("/allTime", async(req, res) => {
+// DB SelectAll Users Holiday --------------------
+router.get("/alltime", async(req, res) => {
     try {
-        const result = await Calendar.findAll({
+        const result = await Holiday.findAll({
             include : [{
                 model : models.user,
                 attributes : ['username','usertag']
@@ -47,15 +46,15 @@ router.get("/allTime", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select Calendar all err : " + err)
+        console.log("select Holiday all err : " + err)
         res.end();
     }
 });
 
-// DB SelectAll One User Calendar --------------------
-router.get("/getTime", async(req, res) => {
+// DB SelectAll One User Holiday --------------------
+router.get("/gettime", async(req, res) => {
     try {
-        const result = await Calendar.findAll({
+        const result = await Holiday.findAll({
             include : [{
                 model : models.user,
                 attributes : ['username']
@@ -75,14 +74,14 @@ router.get("/getTime", async(req, res) => {
         });
         res.send(result);
     } catch(err) {
-        console.log("select Calendar all err : " + err)
+        console.log("select Holiday all err : " + err)
         res.end();
     }
 });
-// DB SelectAll One User Calendar --------------------
-router.get("/getTimeSetHoliday", async(req, res) => {
+// DB SelectAll One User Holiday --------------------
+router.get("/gettimesetholiday", async(req, res) => {
     try {
-        const result = await Calendar.findAll({
+        const result = await Holiday.findAll({
             include : [{
                 model : models.user,
                 attributes : ['username']
@@ -128,7 +127,7 @@ router.get("/getTimeSetHoliday", async(req, res) => {
         });
         res.send(subCount+"");
     } catch(err) {
-        console.log("select Calendar all err : " + err)
+        console.log("select Holiday all err : " + err)
         res.end();
     }
 });
@@ -136,14 +135,14 @@ router.get("/getTimeSetHoliday", async(req, res) => {
 // DB SelectOne --------------------
 router.get("/one", async(req, res) => {
     try {
-        const result = await Calendar.findOne({
+        const result = await Holiday.findOne({
             where : {
                 id : req.query.id
             }
         });
         res.send(result);
     } catch(err) {
-        console.log("select Calendar one err : " + err);
+        console.log("select Holiday one err : " + err);
         res.end();
     }
 });
@@ -151,7 +150,7 @@ router.get("/one", async(req, res) => {
 // DB SelectOne Id --------------------
 router.get("/oneRow", async(req, res) => {
     try {
-        let result = await Calendar.findOne({
+        let result = await Holiday.findOne({
             limit : 1,
             order : [
                 [ 'time','DESC']
@@ -168,29 +167,17 @@ router.get("/oneRow", async(req, res) => {
 router.post("/create", async(req, res) => {
     let result = false;
     try{
-        await Calendar.findOrCreate({
-            where : {
-                ts : req.body.ts,
-                textTime : req.body.textTime,
-                userId : req.body.userId,
-                cate : req.body.cate,
-            },
-            defaults : {
-                text: req.body.text,
-                cate : req.body.cate,
-                ts : req.body.ts,
-                time : req.body.time,
-                textTime : req.body.textTime,
-                textTitle : req.body.textTitle,
-                userId : req.body.userId,
-            }
-        }).spread((none, created)=>{
-            if(created){
-                result = true;
-            }
+        await Holiday.create({
+            text: req.body.text,
+            time : req.body.time,
+            ts : req.body.ts,
+            cate : req.body.cate,
+            state : req.body.state,
+            textTime : req.body.textTime,
+            userId : req.body.userId,
         });
     }catch(err) {
-        console.error("created Calendar err : " + err);
+        console.error("created Holiday err : " + err);
         res.end();
     }
     res.send(result);
@@ -200,18 +187,18 @@ router.post("/create", async(req, res) => {
 router.put("/update", async(req, res) => {
     let result = true;
     try {
-        await Calendar.update({ 
+        await Holiday.update({ 
             text: req.body.text,
             cate : req.body.cate,
+            state : req.body.state,
             textTime : req.body.textTime,
             }, {
             where: {
                 id : req.body.id,
-                userId : req.body.userId
             }
         });
     } catch(err) {
-        console.error("Calendar update err : " + err);
+        console.error("Holiday update err : " + err);
         result = false;
     }
     res.send(result);
@@ -221,14 +208,14 @@ router.put("/update", async(req, res) => {
 router.delete("/delete", async(req, res) => {
     let result = true;
     try {
-        await Calendar.destroy({
+        await Holiday.destroy({
             where: {
                 id: req.query.id
             }
         });
     } catch(err) {
         result = false;
-        console.log("delete Calendar err : " + err);
+        console.log("delete Holiday err : " + err);
     }
     res.send(result);
 });

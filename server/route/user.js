@@ -21,7 +21,7 @@ router.get("/all", async(req, res) => {
 });
 
 // DB 유저 찾기 --------------------
-router.get("/search", async(req, res) => {
+router.get("/searchuser", async(req, res) => {
     try {
         const result = await User.findAll({
             where : {
@@ -38,31 +38,18 @@ router.get("/search", async(req, res) => {
 });
 
 // DB SelectAll 지각자 체크 --------------------
-router.get("/tardyall", async(req, res) => {
+router.get("/stateall", async(req, res) => {
+    let state = req.query.state;
     try {
         const result = await User.findAll({
             where : {
-                state : '지각'
+                state : state,
             }
         });
         res.send(result);
     } catch(err) {
         console.log("select users all err : " + err);
         res.end();
-    }
-});
-
-// DB SelectAll 휴가자 체크 --------------------
-router.get("/vacationall", async(req, res) => {
-    try {
-        const result = await User.findAll({
-            where : {
-                state : '휴가'
-            }
-        });
-        res.send(result);
-    } catch(err) {
-        console.log("select users all err : " + err)
     }
 });
 
@@ -87,7 +74,7 @@ router.get("/state", async(req, res) => {
         let result = await models.sequelize.query(stateQuery, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
         res.send(result);
     } catch (err){
-        console.log("select chat one err : " + err);
+        console.log("select user one err : " + err);
         res.end();
     }
 });
@@ -129,6 +116,27 @@ router.put("/update", async(req, res) => {
             p_token : req.body.p_token,
             state : req.body.state,
             userchannel : req.body.userchannel,
+            holidaycount : req.body.holidaycount,
+            }, {
+            where: {
+                id : req.body.userid
+            }
+        });
+        result = true;
+    } catch(err) {
+        console.error("user update err : " + err);
+        result = false;
+    }
+    console.log("update : " + result);
+    res.send(result);
+});
+
+// DB Update --------------------
+router.put("/updatesh", async(req, res) => {
+    let result = null;
+    try {
+        await User.update({ 
+            state : req.body.state,
             holidaycount : req.body.holidaycount,
             }, {
             where: {

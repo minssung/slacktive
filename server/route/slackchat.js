@@ -15,7 +15,6 @@ router.get("/all", async(req, res) => {
         const result = await Slack.findAll({
             include : [{
                 model : models.user,
-                attributes : ['username']
             }],
             order : [[
                 'id' , 'ASC'
@@ -52,7 +51,7 @@ router.get("/state", async(req, res) => {
 });
 
 // 스태이트의 모든 값 가져오기 --------------------
-router.get("/stateAll", async(req, res) => {
+router.get("/stateall", async(req, res) => {
     try {
         let whereQuery = `state='${req.query.state}'`
         if(req.query.stateSub) {
@@ -72,7 +71,7 @@ router.get("/stateAll", async(req, res) => {
 });
 
 // 스태이트의 모든 값 가져오기 --------------------
-router.get("/stateAllAvg", async(req, res) => {
+router.get("/stateallavg", async(req, res) => {
     try {
         const queryStateAll = `SELECT time, text FROM slackchats where (state="지각" or state="출근" or state="외근") order by time desc`
         let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
@@ -84,7 +83,7 @@ router.get("/stateAllAvg", async(req, res) => {
 });
 
 // 해당 스태이트의 값 타임에 맞게 가져오기 --------------------
-router.get("/getState", async(req, res) => {
+router.get("/getstate", async(req, res) => {
     try {
         let result = await Slack.findOne({
             where : {
@@ -172,19 +171,13 @@ router.get("/onworktime", async(req, res) => {
 // DB FindOrCreate --------------------
 router.post("/create", async(req, res) => {
     try {
-        let result = await Slack.findOrCreate({
-            where : {
-                ts : req.body.ts,
-                userId : req.body.userId
-            },
-            defaults : {
-                id : req.body.id,
-                userId: req.body.userId, 
-                text : req.body.text,
-                time : req.body.time,
-                state : req.body.state,
-                ts : req.body.ts,
-            }
+        let result = await Slack.create({
+            userId: req.body.userId, 
+            text : req.body.text,
+            time : req.body.time,
+            state : req.body.state,
+            textTime : req.body.textTime,
+            ts : req.body.ts,
         });
         res.send(result);
     } catch(err) {
@@ -197,9 +190,9 @@ router.post("/create", async(req, res) => {
 router.put("/update", async(req, res) => {
     try {
         const result = await Slack.update({ 
-            userId: req.body.userId, 
             text: req.body.text,
             state : req.body.state,
+            textTime : req.body.textTime,
         }, {
             where: {
                 ts : req.body.ts

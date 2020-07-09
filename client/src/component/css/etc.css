@@ -1,0 +1,178 @@
+.etc-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 1080px;
+    animation-name: mypageload;
+    animation-duration: 1s;
+}
+
+.etc-div {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.etc-title {
+    font-family: 12LotteMartDream;
+    font-size: 30px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+.etc-boxs {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* --- etc card section --- */
+.etc-card {
+    width: 292px;
+    height: 169px;
+    object-fit: contain;
+    border-radius: 29px;
+    background-image: linear-gradient(to top, #4484ff, #9fd3e3);
+    background-image: linear-gradient(to top, #7482ff, #b2a6ff);
+    display: flex;
+    justify-content: center;
+    margin: 4.5px;
+    cursor: pointer;
+}
+
+.etc-card-margin {
+    width: 85%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.etc-card-title {
+    margin-top: 24px;
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.etc-card-content {
+    margin-top: 21px;
+    font-family: NanumBarunGothic;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.etc-card-date {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #ffffff;
+    margin-top: 27px;
+}
+
+.etc-card-img {
+    position: absolute;
+    width: 118.6px;
+    height: 117.4px;
+    object-fit: contain;
+    right: 0;
+    margin-top: 24px;
+}
+
+/* --- guide box section ---*/
+.etc-guide {
+    margin-top: 44px;
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.etc-guide-box {
+    margin-top: 19px;
+    height: 176px;
+    border-radius: 14px;
+    background-color: #ffffff;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.etc-guide-margin {
+    width: 85%;
+}
+
+.etc-guide-title {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.etc-guide-title-text {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+}
+
+.etc-guide-filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 66px;
+    height: 30px;
+    object-fit: contain;
+    border-radius: 27.5px;
+    background-color: #4f4f4f;
+}
+
+.etc-guide-circle {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    background-color: #ffffff;
+    border-radius: 50%;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.etc-guide-filter-text {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.etc-guide-version {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.etc-guide-version-text {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+}
+
+.etc-guide-line {
+    margin-top: 19.5px;
+    height: 1px;
+    width: 100%;
+    display: flex;
+    background-color: rgba(128, 128, 128, 0.137);
+}
+
+.etc-guide-logout {
+    margin-top: 20px;
+    cursor: pointer;
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ff4d4d;
+}
