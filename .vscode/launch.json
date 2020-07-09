@@ -1,5 +1,14 @@
 {
     "configurations": [
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch NODE Program",
+        "program": "${workspaceFolder}/test.js",
+        "skipFiles": [
+            "<node_internals>/**"
+        ]
+    },
         
         {
             "type": "node",

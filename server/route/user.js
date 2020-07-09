@@ -2,6 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const models = require("../models");
+const moment = require('moment');
+const axios = require('axios');
 
 // DB Setting --------------------
 const User = models.user;
@@ -9,6 +11,10 @@ const Op = models.Sequelize.Op;
 
 const stateQuery = "select max(id), state from users group by state";
 // ------------------------------------- DB CRUD -------------------------------------
+
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../devServer_config') : configs = require('../server_config');
+
 // DB SelectAll --------------------
 router.get("/all", async(req, res) => {
     try {

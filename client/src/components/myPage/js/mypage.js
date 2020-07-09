@@ -118,14 +118,19 @@ class mypage extends React.Component {
             <img className="mypage-numImgStart" alt="err" src="img/stars.png"></img>
             <img className="mypage-numImg" alt="err" src="img/clock.png"></img>
             <span className="mypage-numMainSpan">{avgAtten ? avgAtten[1] : "00"}시 {avgAtten ? avgAtten[2] : "00"}분</span>
-            <span className="mypage-numSpan">지난달보다&nbsp;
-                {
-                    moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() >= 0 ? 
-                    moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() + "분 빠름" 
-                    : 
-                    moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() + "분 느림"
-                }
-            </span>
+            {
+                avgAttenSub ?
+                <span className="mypage-numSpan">지난달보다&nbsp;
+                    {
+                        moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() >= 0 ? 
+                        moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() + "분 빠름" 
+                        : 
+                        moment.duration(moment(avgAttenSub[1]).diff(avgAttenSub[0])).asMinutes() + "분 느림"
+                    }
+                </span>
+                :
+                <span className="mypage-numSpan">No data</span>
+            }
         </div>
     }
     // 출근 횟 수 api ------------------------------

@@ -7,6 +7,7 @@ const chat_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
 const calendar_router = require("./route/calendar");
 const generals_router = require("./route/generals");
+const employee_router = require("./route/employee");
 const axios = require("axios");
 let jwt = require("jsonwebtoken");
 const moment = require('moment');
@@ -33,6 +34,7 @@ app.use("/user", user_router);
 app.use("/slack", chat_router);
 app.use("/calendar", calendar_router);
 app.use("/generals", generals_router);
+app.use("/employee", employee_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
@@ -263,8 +265,8 @@ app.get('/updatState', async(req,res) => {
 
 // calendar 내용 토대로 오늘 날짜의 일정이 있는 사람의 상태를 체크 및 업뎃 -> 휴가, 병가, 미팅, 회의 등..
 async function calendarStateUpdatFunc() {
-    const todays = moment(new Date()).format('YYYY-MM-')
-    const today = moment(new Date()).format('YYYY-MM-DD')
+    const todays = moment().format('YYYY-MM-')
+    const today = moment().format('YYYY-MM-DD')
     let resultArray = [];
     try {
         let resultCal = axios.get(`${configs.domain}/calendar/allTime?textTime=${todays}`);

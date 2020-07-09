@@ -1,5 +1,4 @@
 import React , {Component} from 'react';
-import moment from 'moment';
 import axios from 'axios';
 import loadMask from '../../resource/loadmaskTest.gif';
 import './css/Employee.css';
@@ -17,66 +16,45 @@ class Employee extends Component {
             container : [],     // 직원 데이터
             pageSize : 12,       // 한 페이지당 들어가는 직원 데이터 수 (테스트용, 원래는 12로 해야함)
             currentPage : 1,    // 현재 보고있는 페이지
-            loading : ''
+            loading : '',
+            // personCount: 14
         }
     }
     handlePageChange = (page) => {
-        this.setState({ currentPage: page });
+        this.setState({ currentPage: page }, async() => await this.allUser());
+        
     }
 
     async componentDidMount(){
         // 직원 근태 현황 데이터 호출
         await this.allUser();
+
+        // await this.initCount();
         // 로드 마스크
         this.setState({
             loading : "Loading",
         });
     }
 
+    async initCount() {
+        const result = await axios.get(configs.domain+"/employee/dataCount");
+        this.setState({ personCount: result.data });
+    }
+
     // 직원 근태 현황 불러오기
     async allUser() {
-        const result = await axios.get(configs.domain+"/user/all");
-        // console.log(result.data);
+        const result = await axios.post(configs.domain+"/employee/status", {
+            pageSize: this.state.pageSize,
+            currentPage: this.state.currentPage
+        });
+        this.setState({ container: result.data });
 
-        const today = moment(new Date()).format('YYYY-MM');
-        // 현재 날짜에서 다음 달 구하기
-        const date = new Date();
-        const onePlusMonth = date.setMonth(date.getMonth() + 1);
-        const today2 = moment(onePlusMonth).format('YYYY-MM');
-
-        let array = [];
-
-        const apiStart = async() => {
-            for (const data of result.data) {
-                let vacationApi = axios.get(`${configs.domain}/calendar/vacation?cate=휴가&userid=${data.id}&time=${today}&time2=${today2}`);
-                let halfVacationApi = axios.get(`${configs.domain}/calendar/halfVacation?userid=${data.id}&time=${today}&time2=${today2}`);
-                let tardyApi = axios.get(`${configs.domain}/slack/stateload?state=지각&userid=${data.id}&time=${today}&time2=${today2}`);
-                let onworkApi = axios.get(`${configs.domain}/slack/onwork?userid=${data.id}&time=${today}&time2=${today2}`);
-                let NightShiftApi = axios.get(`${configs.domain}/slack/stateload?state=야근&userid=${data.id}&time=${today}&time2=${today2}`);
-    
-                await Promise.all([vacationApi,halfVacationApi,tardyApi,onworkApi,NightShiftApi]).then(val=>{
-                    halfVacationApi = val[1].data.length/2;
-                    vacationApi = val[0].data.length + halfVacationApi;
-                    tardyApi = val[2].data.length;
-                    onworkApi = val[3].data.length;
-                    NightShiftApi = val[4].data.length;
-                })
-    
-                array.push({
-                    username : data.username,
-                    vac : vacationApi,
-                    tardy : tardyApi,
-                    onworktime : onworkApi,
-                    nightshift : NightShiftApi
-                });
-            }
-            this.setState({container : array});
-        }
-        apiStart();
+        console.log('allUser run', this.state.container)
     }
 
     render() {
         const { loading, container, pageSize, currentPage } = this.state;
+        // console.log('currentPage', currentPage)
         const { length: personCount } = this.state.container;
 
         const personArray = Paginate(container, currentPage, pageSize);

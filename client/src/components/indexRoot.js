@@ -7,6 +7,7 @@ import SlackDash from './mainPage/js/Slack_Dashboard';
 import Mypage from './myPage/js/mypage';
 import Employee from './cedarPage/Employee';
 import moment from 'moment';
+import EtcPage from './etcPage/EtcPage';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../devClient_config') : configs = require('../client_config');
@@ -284,7 +285,7 @@ class IndexRoot extends React.Component {
                                             </Route>
                                             <Route path="/my"><Mypage Token={usertoken}></Mypage></Route>
                                             <Route path="/cedar"><Employee Token={usertoken}></Employee></Route>
-                                            <Route path="/etc"></Route>
+                                            <Route path="/etc"><EtcPage></EtcPage></Route>
                                         </Switch>
                                     </div>
                                 </div>
