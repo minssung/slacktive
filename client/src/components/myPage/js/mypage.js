@@ -290,12 +290,11 @@ class mypage extends React.Component {
             if(currentPage <= groupPage)
                 await this.setState({ currentPage : 1 })
             else {
-                // let de = currentPage%groupPage === 0 ? currentPage - groupPage : currentPage - (currentPage%groupPage);
                 await this.setState({ currentGroup : this.state.currentGroup -1 })
                 await this.setState({ currentPage : (this.state.groupPage * this.state.currentGroup) + 5 })
             }
         } else {
-            if(currentPage >= maxPage - groupPage)
+            if(currentPage > maxPage - (this.state.groupPage * this.state.currentGroup) + 1)
                 await this.setState({ currentPage : maxPage });
             else {
                 await this.setState({ currentGroup : this.state.currentGroup +1 });

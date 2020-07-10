@@ -1,0 +1,381 @@
+.mypage-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    animation-name: mypageload;
+    animation-duration: 1s;
+}
+
+@keyframes mypageload {
+    0% {
+        opacity: 0;
+        margin-left: 30%;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.mypage-top {
+    width: 90%;
+}
+
+.mypage-bot {
+    width: 100%;
+}
+
+/* --- title and holiday section ---*/
+.mypage-title {
+    font-family: 12LotteMartDream;
+    font-size: 30px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-top: 50px;
+}
+
+.mypage-holiday-box {
+    height: 241px;
+    border-radius: 30px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 33px;
+    justify-content: space-between;
+}
+
+.mypage-holiday-left {
+    display: flex;
+    flex-direction: column;
+    margin-left: 30px;
+}
+
+.mypage-holiday-title {
+    margin-top: 24px;
+    font-family: NanumBarunGothic;
+    font-size: 20px;
+    color: #000000;
+}
+
+.mypage-holiday-count {
+    margin-top: 58px;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.mypage-holiday-count-current {
+    font-family: NeoDunggeunmo;
+    font-size: 45px;
+    color: #000000;
+    z-index: 20;
+}
+
+.mypage-holiday-count-add {
+    font-family: NeoDunggeunmo;
+    font-size: 30px;
+    color: #6c84ff;
+    z-index: 20;
+    margin-bottom: 8px;
+}
+
+.mypage-holiday-count-total {
+    font-family: NeoDunggeunmo;
+    font-size: 30px;
+    color: #000000;
+    z-index: 20;
+    margin-bottom: 5px;
+}
+
+.mypage-holiday-count-deco {
+    width: 182px;
+    height: 13px;
+    background-color: #e0ff21;
+    bottom: 0;
+    margin-bottom: 10px;
+    position: absolute;
+    z-index: 10;
+}
+
+.mypage-holiday-text {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    font-weight: 300;
+    color: #000000;
+    margin-top: 19px;
+}
+
+.mypage-holiday-right {
+    display: flex;
+    flex-direction: row;
+    margin-right: 30px;
+}
+
+.mypage-holiday-right-images {
+    display: flex;
+    flex-direction: column;
+}
+
+.mypage-holiday-usa {
+    width: 117.4px;
+    height: 62.5px;
+    position: absolute;
+    margin-top: 10.9px;
+    margin-left: 10px;
+}
+
+.mypage-holiday-bottle {
+    width: 127px;
+    height: 161.3px;
+    margin-top: 56.5px;
+}
+
+.mypage-holiday-right-counts {
+    display: flex;
+    flex-direction: column;
+    margin-left: 15px;
+}
+
+.mypage-holiday-right-counts-top {
+    font-family: NeoDunggeunmo;
+    font-size: 30px;
+    color: #6c84ff;
+    margin-top: 100px;
+}
+
+.mypage-holiday-right-counts-bot {
+    font-family: NeoDunggeunmo;
+    font-size: 30px;
+    color: #000000;
+    margin-top: 16px;
+}
+
+/* --- mycard section ---*/
+.mypage-mycard-title {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.mypage-mycard-title-text {
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.mypage-mycard-filter-box {
+    width: 84px;
+    height: 30px;
+    border-radius: 27.5px;
+    background-color: #2e3681;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mypage-mycard-circle {
+    width: 20px;
+    height: 20px;
+    background-color: #ffffff;
+    margin-left: 5px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.mypage-mycard-filter {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.mypage-mycard-div {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.mycard-main {
+    width: 292px;
+    height: 169px;
+    border-radius: 29px;
+    background-image: linear-gradient(to top, #a665e5, #ff92eb);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.mycard-div {
+    width: 85%;
+    position: relative;
+}
+
+.mycard-title {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.mycard-data {
+    font-family: NanumBarunGothic;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-top: 21px;
+}
+
+.mycard-img-stars {
+    width: 118.6px;
+    height: 117.4px;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.mycard-img-illu {
+    width: 64px;
+    height: 59px;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.mycard-result {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #ffffff;
+    margin-top: 27px;
+}
+
+/* --- images section ---*/
+.mypage-images-box {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    height: 60px;
+    position: relative;
+}
+
+.mypage-img-ground {
+    height: 20px;
+}
+
+@media screen and (min-width: 769px) {
+    .mypage-img-ground {
+        width: 100%;
+        height: 20px;
+    }    
+}
+
+.mypage-img-cang {
+    width: 123px;
+    height: 54px;
+    position: absolute;
+    margin-left: 22px;
+    bottom: 0;
+    margin-bottom: 6px;
+}
+
+.mypage-img-castle {
+    width: 200px;
+    height: 59px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+/* --- holiday history section ---*/
+.mypage-history-main {
+    background-color: white;
+    min-height: 200px;
+}
+
+.mypage-history-title {
+    margin-left: 41px;
+    display: flex;
+    flex-direction: column;
+}
+
+.mypage-history-title-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 27px;
+    margin-bottom: 31px;
+}
+
+.mypage-history-circle {
+    width: 8px;
+    height: 8px;
+    background-color: #e6628b;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.mypage-history-text {
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: 500;
+    color: #000000;
+}
+
+.mypage-history-box {
+    margin-bottom: 31px;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-main {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.history-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 63px;
+    height: 33px;
+    font-family: BusanBada;
+    font-size: 18px;
+    color: #000000;
+    margin-right: 30px;
+    position: relative;
+}
+
+.history-none {
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    background-color: rgb(255, 255, 255);
+    right: 0;
+    margin-right: -14px;
+    z-index: 3;
+}
+
+.history-state {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+    margin-right: 10px;
+}
+
+.history-data {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+}

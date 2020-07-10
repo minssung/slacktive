@@ -5,7 +5,7 @@ const models = require("./models");
 const user_router = require("./route/user");
 const chat_router = require("./route/slackchat");
 const slack_router = require("./route/slackapi");
-const calendar_router = require("./route/calendar");
+const holiday_router = require("./route/holiday");
 const generals_router = require("./route/generals");
 const employee_router = require("./route/employee");
 const axios = require("axios");
@@ -32,36 +32,15 @@ app.use(express.urlencoded({ extended: true }));
 // DB
 app.use("/user", user_router);
 app.use("/slack", chat_router);
-app.use("/calendar", calendar_router);
 app.use("/generals", generals_router);
 app.use("/employee", employee_router);
+app.use("/holiday", holiday_router);
+app.use("/general", generals_router);
 // API
 app.use("/slackapi", slack_router);
 // Default
 app.get('/', async(req, res) => {
     //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-    // let a = moment("2020-03-30");
-    // let b = moment("2020-03-31");
-    // console.log(a.diff(b,"days"))
-    // let h = moment(new Date()).format("YYYY-MM-DD");
-    // let n = /-(\d{2}-\d{2})/.exec(h)
-    // if(n[1] === "01-01") {
-    //     client.get("newYear", (err, val)=>{
-    //         if(err) {
-    //             console.log("new Holiday Set Err : " + err);
-    //         }
-    //         if(val) {
-    //             console.log("new Holiday aleardy Set");
-    //         } else {
-    //             client.set("newYear", "holidayCountSet", redis.print);
-    //         }
-    //     })
-    // }
-
-    // let a = "2020-05-03"
-    // console.log(
-    //     moment(a).startOf('day').diff(moment(new Date()).startOf('day'), 'days')
-    // )
 });
 
 // ---------- MongoDB 연동 ---------- //
@@ -114,11 +93,11 @@ try {
         });
           
         (async () => { // IIFE to give access to async/await
-        await agenda.start();
-        await agenda.every('*/2 9-11 * * *', 'Busy');
-        await agenda.every('*/10 12-18 * * *', 'First');
-        await agenda.every('*/60 19-23/2 * * *', 'Second');
-        await agenda.every('*/60 0-8/2 * * *', 'Third');
+        // await agenda.start();
+        // await agenda.every('*/2 9-11 * * *', 'Busy');
+        // await agenda.every('*/10 12-18 * * *', 'First');
+        // await agenda.every('*/60 19-23/2 * * *', 'Second');
+        // await agenda.every('*/60 0-8/2 * * *', 'Third');
         })();
         
     });
@@ -130,36 +109,32 @@ try {
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || configs.port;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
-    models.sequelize.sync({ force:false }).then(()=>{
+    models.sequelize.sync({ force : true }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                client.get("init", async(err, val)=> {
-                    if(err) {
-                        console.log("new init Set Err : " + err);
-                    }
-                    if(val) {
-                        console.log("new init aleardy Set");
-                    } else {
-                        client.set("init", "init", redis.print);
-                        await axios.get(configs.domain+"/slackapi/teamUsers");
-                        const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
-                        const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
-                        await Promise.all([Cal,Gnr]).then((data)=>{
-                            console.log("Initialize Success");
-                        });
-                    }
-                })
-                // await axios.get(configs.domain+"/slackapi/teamUsers");
-                // const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
-                // const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
-                // await Promise.all([Cal,Gnr]).then((data)=>{
-                //     console.log("Initialize Success");
-                // }).catch(err=>{console.log('Init Error',err)});
-                // await axios.get("http://localhost:5000/")
+                // client.get("init", async(err, val)=> {
+                //     if(err) {
+                //         console.log("new init Set Err : " + err);
+                //     }
+                //     if(val) {
+                //         console.log("new init aleardy Set");
+                //     } else {
+                //         client.set("init", "init", redis.print);
+                //         await axios.get(configs.domain+"/slackapi/teamUsers");
+                //         const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
+                //         const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
+                //         await Promise.all([Cal,Gnr]).then((data)=>{
+                //             console.log("Initialize Success");
+                //         });
+                //     }
+                // })
+                
+                await axios.get(configs.domain+"/slackapi/teamusers");
+                await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
                 // < ----------- 현재 시간의 date string ----------- >
-                let nowtimeString = moment(new Date()).format('HH:mm')
-                console.log('현재 시간 : ', nowtimeString);
+                console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
                 
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
@@ -172,7 +147,7 @@ app.get('/login', async(req, res) => {
     try {
         const result = await axios.get("https://slack.com/oauth/authorize",{
             params : {
-                scope : 'chat:write:user,users:read',
+                scope : ['chat:write:user','users:read'],
                 client_id : configs.c_id,
                 redirect_uri : configs.redirectDomain,
             }
@@ -217,7 +192,7 @@ function getToken(data){
         },
             configs.secretKey,
         {
-            expiresIn : '600m'
+            expiresIn : '2400m'
         });
         return getToken;
     } catch(err) {
@@ -237,118 +212,3 @@ app.get('/verify', (req,res)=>{
     }
 });
 // -------------------- ********** --------------------
-
-// -------------------- index Api --------------------
-app.get('/updateHistorys', async(req,res) => {
-    try {
-        const resultC = axios.post(configs.domain+"/slackapi/channelHistoryCal");
-        const resultH = axios.post(configs.domain+"/slackapi/channelHistory");
-        await Promise.all([resultC,resultH]);
-        const updatDate = new Date();
-        res.send(updatDate);
-    } catch(err) {
-        console.log("index api & history updat err : " + err);
-        res.end();
-    }
-})
-// 갱신 버튼 누를 시 즉시 상태 업데이트 시도
-app.get('/updatState', async(req,res) => {
-    let result = [];
-    try {
-        result = await calendarStateUpdatFunc();
-    } catch (err) {
-        console.log("updat state err : " + err);
-        res.end();
-    }
-    res.send(result)
-});
-
-// calendar 내용 토대로 오늘 날짜의 일정이 있는 사람의 상태를 체크 및 업뎃 -> 휴가, 병가, 미팅, 회의 등..
-async function calendarStateUpdatFunc() {
-    const todays = moment().format('YYYY-MM-')
-    const today = moment().format('YYYY-MM-DD')
-    let resultArray = [];
-    try {
-        let resultCal = axios.get(`${configs.domain}/calendar/allTime?textTime=${todays}`);
-        let resultGnr = axios.get(`${configs.domain}/generals/allTime?textTime=${todays}`);
-        await Promise.all([resultCal,resultGnr]).then((val)=>{
-            resultCal = val[0].data;
-            resultGnr = val[1].data;
-        })
-        resultCal.forEach((data) => {
-            let getDay = [];
-            let update = false;
-            if(/\d{4}-\d{2}-(\d{2}(,?\d{2}?)+)/.test(data.textTime)) {
-                getDay = (data.textTime).split(",")
-                // , 기준 일 시 배열로 나눠서 각각 오늘 날짜와 검증
-                for (let index = 0; index < getDay.length; index++) {
-                    if(index !== 0) {
-                        getDay[index] = todays + getDay[index]
-                    }
-                    if(getDay[index] === today){
-                        update = true;
-                        break;
-                    }
-                }
-            // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
-            } else if(/~/.test(data.textTime)) {
-                getDay = (data.textTime).split("~")
-                if(moment(getDay[0]).diff(today) <= 0 && moment(getDay[1]).diff(today) >= 0){
-                    update = true;
-                }
-            } else {
-                // 단일 날짜가 오늘 날짜인지 검증
-                if(data.textTime === today){
-                    update = true;
-                }
-            }
-            // 해당하는 결과 푸시
-            if(update) {
-                resultArray.push({
-                    state : data.state,
-                    time : data.textTime,
-                    cate : data.cate,
-                    userid : data.userId,
-                    user : data.user,
-                })
-            }
-            // 레디스 조회 후 데이터 변화가 없으면 유저 업댓 x
-            client.get(data.userId, (err,val)=>{
-                if(err) {
-                    console.log("redis user updat err : " + err);
-                }
-                if(val !== data.cate && update) {
-                    console.log(data.cate)
-                    client.set(data.userId, data.cate, redis.print);
-                    models.user.update({
-                        state : data.cate,
-                    },{
-                        where : {
-                            id : data.userId,
-                        }
-                    })
-                }
-            })
-        });
-        resultGnr.forEach((data) => {
-            // ~ 기준 일 시 각각 나누고 오늘 날짜와 시간 차를 계산하여 검증
-            let getDay = (data.textTime).split("~")
-            getDay[0] =  moment(getDay[0], "YYYY-MM-DD")
-            getDay[1] =  moment(getDay[1], "YYYY-MM-DD")
-            if(moment(getDay[0]).diff(today) <= 0 && moment(getDay[1]).diff(today) >= 0){
-                resultArray.push({
-                    state : data.tag,
-                    time : data.textTime,
-                    partner : data.partner,
-                    userid : data.userId,
-                    user : data.user,
-                    title : data.title,
-                    content : data.content,
-                })
-            }
-        });
-        return resultArray;
-    } catch (err){
-        console.log("scheduler err code calendars selt : " + err);
-    }
-}

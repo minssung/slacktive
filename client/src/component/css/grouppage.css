@@ -1,0 +1,232 @@
+.grouppage-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation-name: mypageload;
+    animation-duration: 1s;
+    overflow-x: scroll;
+}
+
+.grouppage-top {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+.grouppage-bot {
+    width: 100%;
+}
+
+/* --- title and box section ---*/
+.grouppage-title {
+    font-family: 12LotteMartDream;
+    font-size: 30px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.grouppage-box {
+    width: 100%;
+    min-width: 610px;
+    height: 810px;
+    border-radius: 20px;
+    background-color: #ffffff;
+    margin-top: 27px;
+}
+
+.grouppage-box-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    margin-left: 40px;
+    margin-right: 22px;
+}
+
+.grouppage-box-title-text {
+    font-family: 12LotteMartDream;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.grouppage-box-title-filter {
+    width: 84px;
+    height: 30px;
+    border-radius: 27.5px;
+    background-color: #2e3681;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.grouppage-filter-circle {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    background-color: #ffffff;
+    border-radius: 50%;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.grouppage-filter-text {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.grouppage-box-header {
+    margin-top: 26px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    margin-bottom: 11px;
+}
+
+.grouppage-box-header-text {
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #777777;
+}
+
+.grouppage-box-lines {
+    width: 100%;
+    height: 3px;
+    display: flex;
+    flex-direction: row;
+}
+
+.grouppage-box-line1 {
+    width: 35%;
+    height: 3px;
+    background-color: #d8d9d9;
+}
+
+.grouppage-box-line2 {
+    width: 30%;
+    height: 3px;
+    background-color: #979797;
+}
+
+.grouppage-box-line3 {
+    width: 35%;
+    height: 3px;
+    background-color: #d8d9d9;
+}
+
+.grouppage-box-items {
+    display: flex;
+    flex-direction: column;
+    width: 97%;
+}
+
+.grouppage-box-btn-nums {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 37px;
+}
+
+/* --- item section ---*/
+.groupitem-main {
+    height: 48px;
+    border-bottom: 1px solid rgba(179, 179, 179, 0.432);
+    margin-left: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.groupitem-id {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+    width: 10px;
+}
+
+.groupitem-name {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+    width: 60px;
+    margin-right: 25px;
+    margin-left: -10px;
+}
+
+.groupitem-holiday {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #4ea9ff;
+    width: 30px;
+}
+
+.groupitem-tardy {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #ff4d4d;
+    width: 30px;
+    margin-right: 10px;
+}
+
+.groupitem-overtime {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #f2994a;
+    width: 30px;
+    margin-right: 10px;
+}
+
+.groupitem-total {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+    width: 30px;
+}
+
+.groupitem-atten {
+    font-family: NanumBarunGothic;
+    font-size: 18px;
+    color: #000000;
+    width: 40px;
+}
+
+/* --- img section ---*/
+.grouppage-image-div {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    margin-top: 115px;
+}
+
+.grouppage-image-ground {
+    width: 100%;
+    height: 40px;
+}
+
+.grouppage-image-item {
+    position: absolute;
+    object-fit: contain;
+    height: 52px;
+    bottom: 0;
+    margin-left: 22px;
+    margin-bottom: 24px;
+}
+
+.grouppage-image-alpaca {
+    position: absolute;
+    height: 52px;
+    object-fit: contain;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 24px;
+    margin-right: 22px;
+}

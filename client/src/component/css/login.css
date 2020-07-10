@@ -1,0 +1,28 @@
+.login-main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+}
+
+/* --------------------- load mask ---------------*/
+
+.load-mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
+
+.login-btn {
+    border: none;
+    cursor: pointer;
+    outline: none;
+}

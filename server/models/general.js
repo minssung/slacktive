@@ -16,17 +16,16 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
         tag: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(30),
         },
         partner: {
             type: DataTypes.JSON,
         },
-        textTime: {
-            type: DataTypes.STRING,
-            allowNull: false,
+        startDate : {
+            type: DataTypes.STRING(20),
         },
-        state : {
-            type : DataTypes.STRING,
+        endDate : {
+            type: DataTypes.STRING(20),
         },
     });
     General.associate = function(models) {
