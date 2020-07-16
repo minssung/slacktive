@@ -158,7 +158,7 @@ router.post("/channelhistory", async(req,res) =>{
         // }).catch( error => {
         //     console.log("regFunc Promise Error : " + error);
         // })
-        const resultArray = initFuncHoliday(resultSet, false);
+        const resultArray = initFunc(resultSet, true);
 
         try {
             await Slackchat.bulkCreate(resultArray,{
@@ -516,6 +516,14 @@ function initFunc(data, init) {
                 state : cate,
                 textTime : textTime,
             });
+
+            // user 테이블에 state 반영
+            User.update({
+                state : cate
+            },{
+                where : { id : data.user }
+            })
+
         } else {
             console.log("정규식에 해당하지 않는 채팅입니다. 채팅내용, 시간 = ", data.text, moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm"))
             if(!init) errMessageMe(data, "times")

@@ -54,50 +54,50 @@ try {
         // 2분
         agenda.define('Busy', {lockLifetime: 10000}, async job => {
             console.log('2분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post(configs.domain+"/slackapi/channelHistory");
-            const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const History = axios.post(configs.domain+"/slackapi/channelhistory");
+            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            await calendarStateUpdatFunc();
+            // await calendarStateUpdatFunc();
         });
         // 10분
         agenda.define('First', {lockLifetime: 10000}, async job => {
             console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post(configs.domain+"/slackapi/channelHistory");
-            const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const History = axios.post(configs.domain+"/slackapi/channelhistory");
+            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            await calendarStateUpdatFunc();
+            // await calendarStateUpdatFunc();
         });
         // 2시간
         agenda.define('Second', {lockLifetime: 10000}, async job => {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post(configs.domain+"/slackapi/channelHistory");
-            const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const History = axios.post(configs.domain+"/slackapi/channelhistory");
+            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            await calendarStateUpdatFunc();
+            // await calendarStateUpdatFunc();
         });
         // 2시간
         agenda.define('Third', {lockLifetime: 10000}, async job => {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
-            const History = axios.post(configs.domain+"/slackapi/channelHistory");
-            const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const History = axios.post(configs.domain+"/slackapi/channelhistory");
+            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            await calendarStateUpdatFunc();
+            // await calendarStateUpdatFunc();
         });
           
         (async () => { // IIFE to give access to async/await
-        // await agenda.start();
-        // await agenda.every('*/2 9-11 * * *', 'Busy');
-        // await agenda.every('*/10 12-18 * * *', 'First');
-        // await agenda.every('*/60 19-23/2 * * *', 'Second');
-        // await agenda.every('*/60 0-8/2 * * *', 'Third');
+        await agenda.start();
+        await agenda.every('*/2 9-11 * * *', 'Busy');
+        await agenda.every('*/10 12-18 * * *', 'First');
+        await agenda.every('*/60 19-23/2 * * *', 'Second');
+        await agenda.every('*/60 0-8/2 * * *', 'Third');
         })();
         
     });
@@ -109,30 +109,30 @@ try {
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || configs.port;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
-    models.sequelize.sync({ force : true }).then(()=>{
+    models.sequelize.sync({ force : false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                // client.get("init", async(err, val)=> {
-                //     if(err) {
-                //         console.log("new init Set Err : " + err);
-                //     }
-                //     if(val) {
-                //         console.log("new init aleardy Set");
-                //     } else {
-                //         client.set("init", "init", redis.print);
-                //         await axios.get(configs.domain+"/slackapi/teamUsers");
-                //         const Cal = axios.post(configs.domain+"/slackapi/channelHistoryInitCal");
-                //         const Gnr = axios.post(configs.domain+"/slackapi/channelHistoryInit");
-                //         await Promise.all([Cal,Gnr]).then((data)=>{
-                //             console.log("Initialize Success");
-                //         });
-                //     }
-                // })
+                client.get("init", async(err, val)=> {
+                    if(err) {
+                        console.log("new init Set Err : " + err);
+                    }
+                    if(val) {
+                        console.log("new init aleardy Set");
+                    } else {
+                        client.set("init", "init", redis.print);
+                        await axios.get(configs.domain+"/slackapi/teamUsers");
+                        const Cal = axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                        const Gnr = axios.post(configs.domain+"/slackapi/channelhistoryinittime");
+                        await Promise.all([Cal,Gnr]).then((data)=>{
+                            console.log("Initializde Success");
+                        });
+                    }
+                })
                 
-                await axios.get(configs.domain+"/slackapi/teamusers");
-                await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
-                await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
+                // await axios.get(configs.domain+"/slackapi/teamusers");
+                // await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                // await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
                 // < ----------- 현재 시간의 date string ----------- >
                 console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
                 
