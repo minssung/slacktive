@@ -4,6 +4,11 @@ import React, { Component } from 'react';
 import Card from './card';
 import Tui from './tui';
 
+import axios from 'axios';
+
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+
 class Main extends Component {
     constructor(props) {
         super(props);
@@ -32,6 +37,7 @@ class Main extends Component {
                             {"조준명"}님, 좋은아침!<br></br>
                             {"9시 45분"}에 출근하셨네요.
                             <img src="/img/cloud.png" alt="cloud" className="main-img-cloud1"></img>
+                            <button onClick={() => axios.post(configs.domain+"/slackapi/channelhistory")} style={{marginLeft: 100}}>갱신</button>
                         </div>
                         <div style={{position:"relative"}}>
                             <img src="/img/developer.png" alt="cloud" className="main-img"></img>

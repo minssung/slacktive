@@ -107,71 +107,54 @@ router.post("/channelhistory", async(req,res) =>{
             }
         });
         const resultSet = (result.data.messages).reverse();
-        // let Changetime = "";    // 디비에 들어갈 리얼 타임
-        // let timeCheck = "";     // 시간 비교 용도
-        // let timeReg = [];       // 시간을 정규식으로 처리
-        // let stateSet = "";      // 상태 디비 입력 용도
-        // let HnM = "";           // 시, 분
 
-        // regFunc("times",resultSet,Changetime,timeCheck,timeReg,stateSet,HnM).then( async resultArray => {
-        //     // 야근 체크
-        //     try {
-        //         for (let i = 0; i < resultArray.length; i++) {
-        //             // 퇴근 메세지 입력 시
-        //             if (resultArray[i].state === '퇴근') {
+        initFunc(resultSet, true).then( async resultArray => {
+            // 야근 체크
+            try {
+                for (let i = 0; i < resultArray.length; i++) {
+                    // 퇴근 메세지 입력 시
+                    if (resultArray[i].state === '퇴근') {
     
-        //                 if ((resultArray[i].refineTime >= "19:00") || (resultArray[i].refineTime < "08:30")) {
-        //                     // API 호출 및 데이터 정제
-        //                     let useridCheck = await axios.get(`${configs.domain}/user/one?userid=${resultArray[i].userId}`);
-        //                     let whatTime = await axios.get(`${configs.domain}/slack/onworktime?userid=${useridCheck.data.id}`);
-        //                     let timeValue = await moment.unix(whatTime.data.ts).utcOffset("+09:00").format("HH:mm");
-        //                     let timeArray = timeValue.split(':');
-        //                     let setIntTime = parseInt(timeArray[0])+10+':'+(timeArray[1]);
-        //                     let setStringTime = String(setIntTime);
+                        if ((resultArray[i].textTime >= "19:00") || (resultArray[i].textTime < "08:30")) {
+                            // API 호출 및 데이터 정제
+                            let useridCheck = await axios.get(`${configs.domain}/user/one?userid=${resultArray[i].userId}`);
+                            let whatTime = await axios.get(`${configs.domain}/slack/onworktime?userid=${useridCheck.data.id}`);
+                            let timeValue = await moment.unix(whatTime.data.ts).utcOffset("+09:00").format("HH:mm");
+                            let timeArray = timeValue.split(':');
+                            let setIntTime = parseInt(timeArray[0])+10+':'+(timeArray[1]);
+                            let setStringTime = String(setIntTime);
     
-        //                     // 출근 시간보다 10 시간 뒤에 퇴근 찍거나, 00시 ~ 08시 30분 사이에 퇴근 시 야근 처리
-        //                     if ((resultArray[i].refineTime >= setStringTime) || (resultArray[i].refineTime >= "00:00")) {
-        //                         // 배열 데이터 수정
-        //                         resultArray[i].state = '야근';
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     } catch (err) {
-        //         console.log('Night Shift Error : ' + err);
-        //         console.log('배열형식의 채팅 데이터', resultArray);
-        //     }
+                            // 출근 시간보다 10 시간 뒤에 퇴근 찍거나, 00시 ~ 08시 30분 사이에 퇴근 시 야근 처리
+                            if ((resultArray[i].textTime >= setStringTime) || (resultArray[i].textTime >= "00:00")) {
+                                // 배열 상태 데이터 수정
+                                resultArray[i].state = '야근';
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.log('Night Shift Error : ' + err);
+                console.log('배열형식의 채팅 데이터', resultArray);
+            }
 
-        //     // bulkCreate
-        //     try {
-        //         await Slackchat.bulkCreate(resultArray,{
-        //             individualHooks : true,
-        //         });
-        //     } catch(err) {
-        //         console.error("bulkcreate atten arr : " + err);
-        //     }
-    
-        //     // Response
-        //     await res.send(resultArray);
-
-        //     // Promise error catch
-        // }).catch( error => {
-        //     console.log("regFunc Promise Error : " + error);
-        // })
-        const resultArray = initFunc(resultSet, true);
-
-        try {
-            await Slackchat.bulkCreate(resultArray,{
-                individualHooks : true,
+            try {
+                await Slackchat.bulkCreate(resultArray,{
+                    individualHooks : true,
             });
-        } catch(err) {
-            console.error("bulkcreate atten arr : " + err);
-            res.status(500).send(err);
-        }
-        res.send(resultArray);
-    } catch(error) {
-        console.log("slack channel history err : " + error);
-        res.status(500).send(error);
+            } catch(err) {
+                console.error("bulkcreate atten arr : " + err);
+                res.status(500).send(err);
+            }
+
+            await res.send(resultArray);
+
+        }).catch(error => {
+                console.log("slack channel history err : " + error);
+                res.status(500).send(error);
+        })
+    } catch (err) {
+        console.log('History Error', err);
+        res.status(500).send(err)
     }
 });
 
@@ -435,10 +418,10 @@ router.post("/authinfo", async(req,res)=>{
 --------------------------------------- ===================== ---------------------------------- */
 
 // 정규식 필터를 통한 출퇴근 디비 생성 -> init 의 경우 init => true
-function initFunc(data, init) {
+async function initFunc(data, init) {
     let returnArray = [];
 
-    data.forEach((data, idx) => {
+    data.forEach( async data => {
         if(configs.timeAttendenAddString.test(data.text)) {
             let textSplit = configs.timeAttendenAddString.exec(data.text);
             let hour = null;
@@ -454,8 +437,6 @@ function initFunc(data, init) {
              * 
              *  ex) 10시 28분 현대ㅇㄱ
             */
-
-            // console.log(idx+'번', textSplit)
 
             // 첫 번째 배열의 끝 문자가 시 또는 분일 경우 시, 분 제거
             if (textSplit[1]) {
@@ -501,6 +482,13 @@ function initFunc(data, init) {
             let pmCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH");
             if (pmCheck > "12") {
                 if (textSplit[1] != undefined && (textSplit[3] === "ㅌㄱ" || textSplit[3] === "퇴근")) {
+                    hour = parseInt(hour);
+                    textTime = hour+12 + ":" + minute;
+                }
+            }
+            // 9시 출근 ~ 12시 출근 메세지를 제외한 1시 출근 ~ 8시 출근 메세지는 +12시간 하여 표시
+            if (textSplit[1] != undefined && (textSplit[3] === "ㅊㄱ" || textSplit[3] === "출근")) {
+                if (textSplit[0].substring(0, 1) < "9" && (textSplit[0].substring(1, 2) === "시")) {
                     hour = parseInt(hour);
                     textTime = hour+12 + ":" + minute;
                 }
