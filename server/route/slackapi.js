@@ -176,25 +176,6 @@ router.post("/channelhistorycal", async(req,res) =>{
             }
         });
         const resultSet = (result.data.messages).reverse();
-        // let Changetime = "";
-        // let calArray = [];
-        // let calReg = [];
-        // let textTimes = "";
-        // let search = "";
-        // regFunc("calendar",resultSet,Changetime,calReg,calArray,textTimes,search).then( async resultArray => {
-        //     try {
-        //         await Calendar.bulkCreate(resultArray,{
-        //             individualHooks : true,
-        //         })
-        //     } catch(err) {
-        //         console.error("bulkcreate cal err : " + err);
-        //     }
-        //     await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
-        //     res.send(resultArray);
-        // }).catch( error => {
-        //     console.log("regFunc Promise Error : " + error);
-        // })
-        
         const resultArray = initFuncHoliday(resultSet, false);
 
         try {
@@ -230,27 +211,7 @@ router.post("/channelhistoryinittime", async(req,res) =>{
             }
         });
         const resultSet = (result.data.messages).reverse();
-        
-        // let Changetime = "";    // 디비에 들어갈 리얼 타임
-        // let timeCheck = "";     // 시간 비교 용도
-        // let timeReg = [];       // 시간을 정규식으로 처리
-        // let stateSet = "";      // 상태 디비 입력 용도
-        // // let resultArray = [];
-        // regFunc("times",resultSet,"init",Changetime,timeCheck,timeReg,stateSet).then( async resultArray => {
-        //     try {
-        //         await Slackchat.bulkCreate(resultArray,{
-        //             individualHooks : true,
-        //         });
-        //     } catch(err) {
-        //         console.error("bulkcreate Init atten arr : " + err);
-        //     }
-        //     await res.send(resultArray);
-        // }).catch( error => {
-        //     console.log("regFunc Promise Error : " + error);
-        // })
-        
         const resultArray = initFunc(resultSet, true);
-        // console.log('ABC', resultArray);
 
         try {
             await Slackchat.bulkCreate(resultArray,{
@@ -284,23 +245,6 @@ router.post("/channelhistoryinitcal", async(req,res) =>{
             }
         });
         const resultSet = (result.data.messages).reverse();
-        // let Changetime = "";
-        // let calArray = [];
-        // let calReg = [];
-        // let textTimes = "";
-        // let search = "";
-        // regFunc("calendar",resultSet,"init",Changetime,calReg,calArray,textTimes,search).then( async resultArray => {
-        //     try {
-        //         await Calendar.bulkCreate(resultArray,{
-        //             individualHooks : true,
-        //         })
-        //     } catch(err) {
-        //         console.error("bulkcreate Init Cal err : " + err);
-        //     }
-        //     await res.send(resultArray);
-        // }).catch( error => {
-        //     console.log("regFunc Promise Error : " + error);
-        // })
         const resultArray = initFuncHoliday(resultSet, true);
 
         try {
@@ -481,13 +425,13 @@ async function initFunc(data, init) {
             // 시간 지정 퇴근 메세지일 경우 +12시간 하여 표시 ex) 7시 퇴근 -> 19:00
             let pmCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH");
             if (pmCheck > "12") {
-                if (textSplit[1] != undefined && (textSplit[3] === "ㅌㄱ" || textSplit[3] === "퇴근")) {
+                if (textSplit[1] !== undefined && (textSplit[3] === "ㅌㄱ" || textSplit[3] === "퇴근")) {
                     hour = parseInt(hour);
                     textTime = hour+12 + ":" + minute;
                 }
             }
             // 9시 출근 ~ 12시 출근 메세지를 제외한 1시 출근 ~ 8시 출근 메세지는 +12시간 하여 표시
-            if (textSplit[1] != undefined && (textSplit[3] === "ㅊㄱ" || textSplit[3] === "출근")) {
+            if (textSplit[1] !== undefined && (textSplit[3] === "ㅊㄱ" || textSplit[3] === "출근")) {
                 if (textSplit[0].substring(0, 1) < "9" && (textSplit[0].substring(1, 2) === "시")) {
                     hour = parseInt(hour);
                     textTime = hour+12 + ":" + minute;
@@ -511,89 +455,13 @@ async function initFunc(data, init) {
             },{
                 where : { id : data.user }
             })
-
         } else {
             console.log("정규식에 해당하지 않는 채팅입니다. 채팅내용, 시간 = ", data.text, moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm"))
             if(!init) errMessageMe(data, "times")
         }
     });
     return returnArray;
-
 }
-// 정규식을 거쳐 처리하는 함수 --------------------------------------------------
-// async function regFunc(channel ,resultSet,init, ...args){
-//     let resultArray = [];
-//     if(channel === "times") {
-//         // 출퇴근의 처리
-//         // args : 0 => real time
-//         // args : 1 => check time
-//         // args : 2 => time Reg result
-//         // args : 3 => state var
-//         resultSet.forEach( async data => {
-//             args[0] = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss");
-//             args[1] = moment.unix(data.ts).utcOffset("+09:00").format("HH:mm");
-//             // data.text 조건문 처리
-//             if(configs.timeAttenden.test(data.text)) {
-//                 // 출퇴근에 대한 정규식 처리
-//                 args[2] = configs.timeAttenden.exec(data.text);
-//                 // 0번째 요소 제거
-//                 args[2].shift();
-//                 switch(args[2][2]){
-//                     case "ㅊㄱ" : args[2][2] = "출근"; break;
-//                     case "ㅌㄱ" : args[2][2] = "퇴근"; break;
-//                     case "ㅇㄱ" : args[2][2] = "외근"; break;
-//                 }
-//                 try {
-//                     // 본인 지정 시간대가 있을 경우
-//                     if(args[2][0] && parseInt(args[2][0]) <= 11) {
-//                         args[3] = (/출근/.test(args[2][2])) ? "출근" : args[2][2]
-//                         // 만약 분까지 입력 시에
-//                         if(args[2][1]) {
-//                             // 11시이상이며 0분을 넘었다면
-//                             if(parseInt(args[2][0]) >= 11 && parseInt(args[2][1]) > 0) {
-//                                 args[3] = "지각"
-//                             }
-//                         }
-//                         // 지정 시간 없이 텍스트만 입력 시
-//                     } else {
-//                         // 11시 이전 8시 반 이후 지정 텍스트 같이 입력 시
-//                         if (args[1] <= configs.Am1 && args[1] >= configs.Am0) {
-//                             args[3] = args[2][2]
-//                             // 11시 이후 입력 텍스트 경우
-//                         } else if(args[1] > configs.Am1 && args[1] <= configs.Pm0) {
-//                             args[3] = (/출근/.test(args[2][2])) ? "지각" : args[2][2]
-//                             // 4시 50분 이후 입력 텍스트 경우
-//                         } else if(args[1] > configs.Pm0) {
-//                             args[3] = (/퇴근/.test(args[2][2])) ? "퇴근" : args[2][2]
-//                         }
-//                     }
-//                     // 유저 상태 업데이트
-//                     User.update({
-//                         state : args[3]
-//                     },{
-//                         where : { id : data.user }
-//                     })
-//                     // 추가해야 될 예외 처리
-//                     // 오전 반차의 경우 오후에 출근 텍스트 입력 시 지각 처리 x
-//                     resultArray.push({
-//                         userId : data.user,
-//                         time : args[0],
-//                         refineTime : args[1],
-//                         ts : data.ts,
-//                         text : data.text,
-//                         state : args[3]
-//                     });
-//                 } catch (err) {
-//                     console.log("Reg Times Err : " + err)
-//                 }
-//             } else {
-//                 if(!init){
-//                     errMessageMe(data,channel);
-//                 }
-//                 console.log("Reg Times Input Err : retry input : " + 
-//                 moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm:ss")  + " , err Msg : " + data.text)
-//     return returnArray;
-// } 
 
 // 정규식 필터를 통한 휴가 디비 생성  -> init 의 경우 init => true
 function initFuncHoliday(data, init) {

@@ -113,25 +113,26 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                client.get("init", async(err, val)=> {
-                    if(err) {
-                        console.log("new init Set Err : " + err);
-                    }
-                    if(val) {
-                        console.log("new init aleardy Set");
-                    } else {
-                        client.set("init", "init", redis.print);
-                        await axios.get(configs.domain+"/slackapi/teamUsers");
-                        const Cal = axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
-                        const Gnr = axios.post(configs.domain+"/slackapi/channelhistoryinittime");
-                        await Promise.all([Cal,Gnr]).then((data)=>{
-                            console.log("Initializde Success");
-                        });
-                    }
-                })
+                // client.get("init", async(err, val)=> {
+                //     if(err) {
+                //         console.log("new init Set Err : " + err);
+                //     }
+                //     if(val) {
+                //         console.log("new init aleardy Set");
+                //     } else {
+                //         client.set("init", "init", redis.print);
+                //         await axios.get(configs.domain+"/slackapi/teamUsers");
+                //         const Cal = axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                //         const Gnr = axios.post(configs.domain+"/slackapi/channelhistoryinittime");
+                //         await Promise.all([Cal,Gnr]).then((data)=>{
+                //             console.log("Initializde Success");
+                //         });
+                //     }
+                // })
                 
                 // await axios.get(configs.domain+"/slackapi/teamusers");
                 // await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                // await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
                 console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
            
             } catch(err){
