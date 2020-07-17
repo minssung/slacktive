@@ -199,7 +199,6 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
 }
 
 .mycard-main {
@@ -207,11 +206,11 @@
     height: 169px;
     border-radius: 29px;
     background-image: linear-gradient(to top, #a665e5, #ff92eb);
-    margin-bottom: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    margin: 5px;
 }
 
 .mycard-div {
@@ -378,4 +377,198 @@
     font-family: NanumBarunGothic;
     font-size: 18px;
     color: #000000;
+}
+
+@media (max-width: 673px) {
+    /* --- mycard section ---*/
+    .mypage-mycard-div {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .mycard-main {
+        width: 48%;
+        height: 169px;
+        border-radius: 29px;
+        background-image: linear-gradient(to top, #a665e5, #ff92eb);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin: 5px;
+    }
+}
+
+@media (max-width: 560px) {
+    /* --- mycard section ---*/
+    .mypage-mycard-div {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .mycard-main {
+        width: 292px;
+        height: 169px;
+        border-radius: 29px;
+        background-image: linear-gradient(to top, #a665e5, #ff92eb);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    .mypage-holiday-box {
+        height: 380px;
+        border-radius: 30px;
+        background-color: #ffffff;
+        margin-top: 30px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 33px;
+    }
+    
+    .mypage-holiday-title {
+        font-family: NanumBarunGothic;
+        font-size: 18px;
+        color: #000000;
+    }
+    
+    .mypage-holiday-count {
+        margin-top: 258px;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: center;
+    }
+    
+    .mypage-holiday-count-current {
+        font-family: NeoDunggeunmo;
+        font-size: 30px;
+        color: #000000;
+        z-index: 20;
+        margin-bottom: 10px;
+    }
+    
+    .mypage-holiday-count-add {
+        font-family: NeoDunggeunmo;
+        font-size: 20px;
+        color: #6c84ff;
+        z-index: 20;
+        margin-bottom: 15px;
+    }
+    
+    .mypage-holiday-count-total {
+        font-family: NeoDunggeunmo;
+        font-size: 20px;
+        color: #000000;
+        z-index: 20;
+        margin-bottom: 13px;
+    }
+    
+    .mypage-holiday-count-deco {
+        width: 20%;
+        height: 10px;
+        background-color: #e0ff21;
+        bottom: 0;
+        margin-bottom: 10px;
+        position: absolute;
+        z-index: 10;
+    }
+
+    .mypage-holiday-text {
+        font-family: NanumBarunGothic;
+        font-size: 15px;
+        font-weight: 300;
+        color: #000000;
+        margin-top: 0px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .mypage-holiday-right {
+        display: flex;
+        flex-direction: row;
+        position: absolute;
+        align-self: center;
+        z-index: 100;
+        margin-left: 20px;
+    }
+    
+    .mypage-holiday-usa {
+        width: 117.4px;
+        height: 62.5px;
+        position: absolute;
+        margin-top: 60px;
+        margin-left: 10px;
+    }
+    
+    .mypage-holiday-bottle {
+        width: 127px;
+        height: 161.3px;
+        margin-top: 106.5px;
+    }
+
+    .mypage-holiday-right-counts-top {
+        font-family: NeoDunggeunmo;
+        font-size: 20px;
+        color: #6c84ff;
+        margin-top: 160px;
+    }
+    
+    .mypage-holiday-right-counts-bot {
+        font-family: NeoDunggeunmo;
+        font-size: 20px;
+        color: #000000;
+        margin-top: 16px;
+    }
+
+    .history-title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        max-width: 50px;
+        height: 30px;
+        font-family: BusanBada;
+        font-size: 14px;
+        color: #000000;
+        margin-right: 30px;
+        position: relative;
+    }
+    
+    .history-none {
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        position: absolute;
+        background-color: rgb(255, 255, 255);
+        right: 0;
+        margin-right: -14px;
+        z-index: 3;
+    }
+    
+    .history-state {
+        font-family: NanumBarunGothic;
+        font-size: 14px;
+        color: #000000;
+        margin-right: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .history-data {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        margin-right: 10px;
+    }
 }

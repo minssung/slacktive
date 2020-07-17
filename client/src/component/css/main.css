@@ -121,12 +121,9 @@
 
 /* --- calender section ---*/
 .main-tui-calneder {
-    height: 623px;
     width: 100%;
-    background-color: rgb(209, 209, 209);
+    min-height: 600px;
 }
-
-
 
 /* --- bot images section ---*/
 .main-images {
@@ -258,4 +255,142 @@
     font-size: 15px;
     color: #777777;
     margin-top: 7px;
+}
+
+@media (max-width: 650px) {
+    .main-title {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-top: 50px;
+    }
+    
+    .main-title-text {
+        text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+        font-family: 12LotteMartDream;
+        font-size: 30px;
+        font-weight: 500;
+        line-height: 1.17;
+        color: #ffffff;
+        margin-bottom: -100px;
+        margin-top: 100px;
+    }
+
+    .main-img {
+        margin-top: -70px;
+        margin-bottom: 80px;
+    }
+
+    /* --- main bar section --- */
+    .main-bar {
+        height: 30px;
+        width: 100%;
+        display: flex;
+        align-self: center;
+        justify-self: center;
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.17);
+        margin-top: 30px;
+        margin-bottom: 7px;
+        position: relative;
+    }
+    
+    .main-bar-textTitle {
+        font-family: 12LotteMartDream;
+        font-size: 13px;
+        font-weight: 500;
+        color: #ffffff;
+        margin-right: 14px;
+    }
+    
+    .main-bar-text {
+        font-family: 12LotteMartDream;
+        font-size: 13px;
+        font-weight: 500;
+        color: #ffffff;
+        margin-right: 5px;
+    }
+
+    /* card */
+    .main-cards {
+        min-height: 170px;
+        background-color: #faefe0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .main-cards-paading {
+        width: 93%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .card-index {
+        height: 100px;
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        margin: 5px;
+    }
+    
+    .card-border {
+        height: 100%;
+        width: 11px;
+        background-color: #d6ff98;
+        position: absolute;
+    }
+    
+    .card-box {
+        height: 100%;
+        background-color: white;
+        width: 134px;
+        border-radius: 15px;
+        padding-left: 26px;
+        padding-right: 16px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-top {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 16px;
+        height: 31px;
+    }
+    
+    .card-title {
+        font-family: NanumBarunGothic;
+        font-size: 13px;
+        color: #000000;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 70%;
+    }
+    
+    .card-img {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .card-member {
+        font-family: NanumBarunGothic;
+        font-size: 13px;
+        font-weight: bold;
+        color: #000000;
+        margin-top: 7px;
+    }
+    
+    .card-date {
+        font-family: NanumBarunGothic;
+        font-size: 12px;
+        color: #777777;
+        margin-top: 7px;
+    }
 }

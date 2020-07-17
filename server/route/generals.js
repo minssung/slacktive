@@ -121,7 +121,7 @@ router.get("/state", async(req, res) => {
 router.post("/create", async(req, res) => {
     let result = null;
     try{
-        await General.create({
+        result = await General.create({
             title: req.body.title,
             location : req.body.location,
             content: req.body.content,
@@ -131,7 +131,6 @@ router.post("/create", async(req, res) => {
             endDate : req.body.endDate,
             userId : req.body.userId,
         });
-        result = true;
     }catch(err) {
         console.error("created General err : " + err);
         result = false;

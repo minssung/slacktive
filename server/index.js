@@ -106,13 +106,13 @@ try {
 // -------------------- 초기 포트 및 서버 실행 --------------------
 const PORT = process.env.PORT || configs.port;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 0", {raw: true}).then(() => {
-    models.sequelize.sync({ force : true }).then(()=>{
+    models.sequelize.sync({ force : false }).then(()=>{
         app.listen(PORT, async() => {
             console.log(`app running on port ${PORT}`);
             try {
-                await axios.get(configs.domain+"/slackapi/teamusers");
-                await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
-                await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
+                // await axios.get(configs.domain+"/slackapi/teamusers");
+                // await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                // await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
                 // < ----------- 현재 시간의 date string ----------- >
                 console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
                 
@@ -138,6 +138,7 @@ app.get('/login', async(req, res) => {
         res.end();
     }
 });
+
 app.get('/login-access', async(req,res) => {
     try {
         const result = await axios({
@@ -192,3 +193,12 @@ app.get('/verify', (req,res)=>{
     }
 });
 // -------------------- ********** --------------------
+app.get('/update', async(req, res) => {
+    try {
+        await axios.post(`http://localhost:5000/slackapi/channelhistorycal`);
+        res.send(true);
+    } catch(err) {
+        console.log("history update err : " + err);
+        res.send(false);
+    }
+});
