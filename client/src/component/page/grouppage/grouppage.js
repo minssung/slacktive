@@ -1,14 +1,46 @@
 import React, { Component } from 'react';
 import Pagination from '@material-ui/lab/Pagination';
-import moment from 'moment';
+import axios from 'axios';
 import Item from './groupitem';
+import { Paginate } from './utils/Paginate';
+
+let configs = {};
+process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
 
 class Grouppage extends Component {
     constructor(props) {
         super(props);
-        this.state = {  }
+        this.state = {
+            container : [],     // 직원 데이터
+            pageSize : 12,      // 한 페이지당 들어가는 직원 데이터 수
+            currentPage : 1,    // 현재 보고있는 페이지
+        }
     }
+
+    async componentDidMount() {
+        await this.allUser();
+    }
+
+    // 직원 근태 현황 불러오기
+    async allUser() {
+        const result = await axios.post(configs.domain+"/employee/status", {
+            pageSize: this.state.pageSize,
+            currentPage: this.state.currentPage
+        });
+        this.setState({ container: result.data });
+    }
+
     render() { 
+        const { container, pageSize, currentPage } = this.state;
+        const { length: personCount } = this.state.container;
+
+        // 페이지 갯수
+        let totalPage = (personCount / pageSize);
+        totalPage = Math.ceil(totalPage);
+
+        // 페이지네이션 외부 컴포넌트 사용
+        const personArray = Paginate(container, currentPage, pageSize);
+
         return (
             <div className="grouppage-main">
                 <div className="grouppage-top">
@@ -43,22 +75,20 @@ class Grouppage extends Component {
                         {/* 데이터 로우들 */}
                         {/* id, name, holiday, tardy, overtime, total, atten */}
                         <div className="grouppage-box-items">
-                            <Item id={"1"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"2"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"3"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"4"} name={"조가을"} holiday={"20"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"5"} name={"조가을"} holiday={"2"} tardy={"20.5"} overtime={"0"} total={"20.5"} atten={"20"} />
-                            <Item id={"6"} name={"조가을"} holiday={"2"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"7"} name={"조가을"} holiday={"20"} tardy={"20.5"} overtime={"1"} total={"20"} atten={"20.5"} />
-                            <Item id={"8"} name={"조가을"} holiday={"20.5"} tardy={"2"} overtime={"1"} total={"20"} atten={"20"} />
-                            <Item id={"9"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"10"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"11"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
-                            <Item id={"12"} name={"조가을"} holiday={"20.5"} tardy={"20.5"} overtime={"1"} total={"20.5"} atten={"20.5"} />
+                            {
+                                personArray.map((data, i) => {
+                                    return (
+                                        <Item key={i} 
+                                            id={(i+1) + (currentPage-1) * pageSize} name={data.username} holiday={data.vac} tardy={data.tardy}
+                                            overtime={data.nightshift} total='20' atten={data.onworktime}>
+                                        </Item>
+                                    )
+                                })
+                            }
                         </div>
                         {/* 페이지네이션 번호 박스 */}
                         <div className="grouppage-box-btn-nums">
-                            <Pagination count={10} color="primary" />
+                            <Pagination count={totalPage} color="primary" page={currentPage} onChange={(event, page) => this.setState({ currentPage : page })} />
                         </div>
                     </div>
                 </div>

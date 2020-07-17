@@ -38,8 +38,8 @@ router.post("/status", async(req, res) => {
         const userDB = async() => {
             try {
                 for (i = 0; i < result.length; i++) {
-                    let vacationApi = await axios.get(`${configs.domain}/calendar/vacation?cate=`+encodeURI('휴가')+`&userid=${result[i].id}&time=${today}&time2=${today2}`);
-                    let halfVacationApi = await axios.get(`${configs.domain}/calendar/halfVacation?userid=${result[i].id}&time=${today}&time2=${today2}`);
+                    let vacationApi = await axios.get(`${configs.domain}/holiday/vacation?cate=`+encodeURI('휴가')+`&userid=${result[i].id}&time=${today}&time2=${today2}`);
+                    let halfVacationApi = await axios.get(`${configs.domain}/holiday/halfVacation?userid=${result[i].id}&time=${today}&time2=${today2}`);
                     let tardyApi = await axios.get(`${configs.domain}/slack/stateload?state=`+encodeURI('지각')+`&userid=${result[i].id}&time=${today}&time2=${today2}`);
                     let onworkApi = await axios.get(`${configs.domain}/slack/onwork?userid=${result[i].id}&time=${today}&time2=${today2}`);
                     let NightShiftApi = await axios.get(`${configs.domain}/slack/stateload?state=`+encodeURI('야근')+`&userid=${result[i].id}&time=${today}&time2=${today2}`);

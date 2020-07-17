@@ -37,7 +37,14 @@ class Main extends Component {
                             {"조준명"}님, 좋은아침!<br></br>
                             {"9시 45분"}에 출근하셨네요.
                             <img src="/img/cloud.png" alt="cloud" className="main-img-cloud1"></img>
-                            <button onClick={() => axios.post(configs.domain+"/slackapi/channelhistory")} style={{marginLeft: 100}}>갱신</button>
+
+                            {/* 갱신 버튼 (임시) */}
+                            <button onClick={() => {
+                                axios.post(configs.domain+"/slackapi/channelhistory");
+                                alert('갱신 완료');
+                                window.location.reload();
+                            }} style={{marginLeft: 100}}>갱신</button>
+                            
                         </div>
                         <div style={{position:"relative"}}>
                             <img src="/img/developer.png" alt="cloud" className="main-img"></img>

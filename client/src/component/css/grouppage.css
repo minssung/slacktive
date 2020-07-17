@@ -164,6 +164,7 @@
 .groupitem-holiday {
     font-family: NanumBarunGothic;
     font-size: 18px;
+    font-weight: bold;
     color: #4ea9ff;
     width: 30px;
 }
@@ -171,6 +172,7 @@
 .groupitem-tardy {
     font-family: NanumBarunGothic;
     font-size: 18px;
+    font-weight: bold;
     color: #ff4d4d;
     width: 30px;
     margin-right: 10px;
@@ -179,6 +181,7 @@
 .groupitem-overtime {
     font-family: NanumBarunGothic;
     font-size: 18px;
+    font-weight: bold;
     color: #f2994a;
     width: 30px;
     margin-right: 10px;
