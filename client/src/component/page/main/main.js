@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-// import axios from 'axios';
+import axios from 'axios';
 
 import Card from './card';
 import Tui from './tui';
-
-import axios from 'axios';
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
@@ -13,20 +11,53 @@ class Main extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            calenderData : [],
+            generalData : [],
 
+            load : false,
+        }
+    }
+
+    // 데이터 콘캣으로 새롭게 렌더링
+    // data : 데이터, cate : 종류 : ( true = 휴가 ), init : 덮어씌우는 여부
+    calendarConcat(data, cate, init) {
+        if(init) {
+            if(cate) {
+                this.setState({ calenderData : data });
+            } else {
+                this.setState({ generalData : data });
+            }
+        } else {
+            const { calenderData, generalData } = this.state;
+            if(cate) {
+                this.setState({ calenderData : calenderData.concat(data) });
+            } else {
+                this.setState({ calenderData : generalData.concat(data) });
+            }
         }
     }
 
     async componentDidMount() {
         try {
+            let calender = axios.get(`${configs.domain}/holiday/all`);
+            let general = axios.get(`${configs.domain}/general/all`);
 
+            await Promise.all([calender, general]).then(data => {
+                calender = data[0].data;
+                general = data[1].data;
+            })
+
+            this.setState({ calenderData : calender });
+            this.setState({ generalData : general });
         } catch(err) {
-            console.log("main mount err : ", err);
+            console.log("정보를 불러오는데 실패하였습니다.", err);
         }
+        this.setState({ load : true });
     }
-    
+
     render() {
-        // const { user } = this.props;
+        const { user, userList } = this.props;
+        const { calenderData, generalData, load } = this.state;
         return (
             <div className="main-main">
                 <div className="main-top">
@@ -46,7 +77,7 @@ class Main extends Component {
                             }} style={{marginLeft: 100}}>갱신</button>
                             
                         </div>
-                        <div style={{position:"relative"}}>
+                        <div className="main-img-layout" style={{position:"relative"}}>
                             <img src="/img/developer.png" alt="cloud" className="main-img"></img>
                             <img src="/img/cloud3.png" alt="cloud" className="main-img-cloud3"></img>
                         </div>
@@ -68,7 +99,9 @@ class Main extends Component {
 
                     {/* 캘린더 버튼과 영역 */}
                     <div className="main-tui-calneder">
-                        <Tui />
+                        {
+                            load && <Tui userList={userList} user={user} holidayData={calenderData} generalData={generalData} calendarConcat={this.calendarConcat.bind(this)} />
+                        }
                     </div>
                 </div>
                 <div className="main-bot">

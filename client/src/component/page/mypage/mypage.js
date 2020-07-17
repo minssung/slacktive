@@ -4,10 +4,6 @@ import Mycard from './mycard';
 import History from './history';
 
 class Mypage extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {  }
-    }
     render() { 
         return (
             <div className="mypage-main">

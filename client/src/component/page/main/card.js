@@ -6,13 +6,22 @@ export default function Card(props) {
             <div className="card-border"></div>
             <div className="card-box">
                 <div className="card-top">
-                    <div className="card-title">{"강남 출장 ..."}</div>
+                    <div className="card-title">{props.title || "제목이 없습니다."}</div>
                     <div>
-                        <img src="/img/developer.png" alt="img" className="card-img"></img>
+                        <img src={props.src || "/img/developer.png"} alt="img" className="card-img"></img>
                     </div>
                 </div>
-                <div className="card-member">{"가을, 지혜"}</div>
-                <div className="card-date">{"2.4(호) ~ 2.7(금)"}</div>
+                <div className="card-member">
+                    {
+                        props.partner ? props.partner[0] &&
+                        props.partner.map((data,i) => {
+                            return <span key={i}>{data}</span>
+                        })
+                        :
+                        "참여인원이 없습니다."
+                    }
+                </div>
+                <div className="card-date">{props.date || "날짜가 없습니다."}</div>
             </div>
         </div>
     );

@@ -204,7 +204,7 @@ router.post("/channelhistorycal", async(req,res) =>{
         } catch(err) {
             console.error("bulkcreate cal err : " + err);
         }
-        await models.sequelize.query("delete n1 from `calendars` n1, `calendars` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
+        await models.sequelize.query("delete n1 from `holidays` n1, `holidays` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
     } catch(error) {
         console.log("slack channel history cal err : " + error);
@@ -630,7 +630,10 @@ function initFuncHoliday(data, init) {
                 month = textSplit[3].replace(/월/g,"");
                 if(!/\d{2}/.test(month)) month = "0" + month;   
             }
-            if(textSplit[4]) days = textSplit[4].replace(/일/g,"");
+            if(textSplit[4]) {
+                days = textSplit[4].replace(/일/g,"");
+                days = days.replace(/ /g,"");
+            }
             cate = textSplit[6].replace(/ /,"") || "휴가";
 
             startDate = year + "-" + month + "-";

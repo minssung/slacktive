@@ -55,6 +55,7 @@ class SlackLoginBtn extends React.Component {
                         <CircularProgress style={{width:"100px",height:"100px"}} />
                     </div>
                 }
+                <div className="login-text">Slack으로 로그인이 필요합니다.</div>
                 <button className="login-btn" onClick={this.clickSlackLogin.bind(this)} >
                     <img alt="Sign in with Slack" height="40" width="172" 
                     src="https://platform.slack-edge.com/img/sign_in_with_slack.png" 

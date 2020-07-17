@@ -132,10 +132,8 @@ models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
                 
                 // await axios.get(configs.domain+"/slackapi/teamusers");
                 // await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
-                // await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
-                // < ----------- 현재 시간의 date string ----------- >
                 console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
-                
+           
             } catch(err){
                 console.log("app running err ( sql db created ) : " + err);
             }
@@ -158,6 +156,7 @@ app.get('/login', async(req, res) => {
         res.end();
     }
 });
+
 app.get('/login-access', async(req,res) => {
     try {
         const result = await axios({
@@ -212,3 +211,12 @@ app.get('/verify', (req,res)=>{
     }
 });
 // -------------------- ********** --------------------
+app.get('/update', async(req, res) => {
+    try {
+        await axios.post(`http://localhost:5000/slackapi/channelhistorycal`);
+        res.send(true);
+    } catch(err) {
+        console.log("history update err : " + err);
+        res.send(false);
+    }
+});
