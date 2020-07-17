@@ -235,7 +235,6 @@ class Tui extends Component {
 
         let result = null;
         let textTime = "";
-        let dbTextTime = "";
 
         let updat = null;
         let postUpdat = null;
@@ -257,6 +256,8 @@ class Tui extends Component {
 
                 start = moment(startDate).format("YYYY/MM/DD") + " " + startTime;
                 end = moment(endDate).format("YYYY/MM/DD") + " " + endTime;
+
+                let dbTextTime = start + " " + end;
                 
                 updat = axios.put(configs.domain+"/general/update",{
                     id,
@@ -282,10 +283,11 @@ class Tui extends Component {
                     textTime = `[${user.username}] ${moment(startDate).format("YYYY[년] MM[월] DD[일]")} ${title}`
                 }
 
-                dbTextTime = {
+                let dbTextTime = [];
+                dbTextTime.push({
                     startDate : moment(startDate).format("YYYY-MM-DD"),
-                    endDate : moment(startDate).format("YYYY-MM-DD")
-                }
+                    endDate : moment(endDate).format("YYYY-MM-DD")
+                });
 
                 updat = axios.put(configs.domain+"/holiday/update",{
                     id,
@@ -391,7 +393,7 @@ class Tui extends Component {
             id : result.data.id,
             cid : data.calendarId,
             state : result.data.userId === user.userid ? true : false,
-            title : data.title,
+            title : result.data.title || result.data.cate,
             startDate : data.start._date,
             endDate : data.end._date,
             startTime : moment(data.start._date).format("HH:mm"),
