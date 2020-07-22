@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import Pagination from '@material-ui/lab/Pagination';
-import axios from 'axios';
+// import axios from 'axios';
 import Item from './groupitem';
 import { Paginate } from './utils/Paginate';
 
-let configs = {};
-process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
+// let configs = {};
+// process.env.NODE_ENV === 'development' ? configs = require('../../../devClient_config') : configs = require('../../../client_config');
 
 class Grouppage extends Component {
     constructor(props) {
@@ -18,21 +18,13 @@ class Grouppage extends Component {
     }
 
     async componentDidMount() {
-        await this.allUser();
-    }
 
-    // 직원 근태 현황 불러오기
-    async allUser() {
-        const result = await axios.post(configs.domain+"/employee/status", {
-            pageSize: this.state.pageSize,
-            currentPage: this.state.currentPage
-        });
-        this.setState({ container: result.data });
     }
 
     render() { 
-        const { container, pageSize, currentPage } = this.state;
-        const { length: personCount } = this.state.container;
+        const { container } = this.props
+        const { pageSize, currentPage } = this.state;
+        const { length: personCount } = this.props.container;
 
         // 페이지 갯수
         let totalPage = (personCount / pageSize);

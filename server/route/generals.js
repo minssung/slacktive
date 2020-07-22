@@ -38,8 +38,8 @@ router.get("/alltime", async(req, res) => {
                 'id' , 'ASC'
             ]],
             where : {
-                textTime : {
-                    [Op.like] : "%" + req.query.textTime + "%"
+                startDate : {
+                    [Op.like] : "%" + req.query.startDate + "%"
                 }
             }
         });

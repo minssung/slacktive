@@ -56,7 +56,7 @@ class Main extends Component {
     }
 
     render() {
-        const { user, userList } = this.props;
+        const { user, userList, attenTime, special, todayCard } = this.props;
         const { calenderData, generalData, load } = this.state;
         return (
             <div className="main-main">
@@ -65,8 +65,8 @@ class Main extends Component {
                     {/* 타이틀과 옆에 이미지 박스 */}
                     <div className="main-title">
                         <div className="main-title-text">
-                            {"조준명"}님, 좋은아침!<br></br>
-                            {"9시 45분"}에 출근하셨네요.
+                            {user.username ? user.username + '님, 좋은아침!' : '다시 로그인을 해주세요.'}<br></br>
+                            {attenTime ? attenTime + '에 출근하셨네요.' : ''}
                             <img src="/img/cloud.png" alt="cloud" className="main-img-cloud1"></img>
 
                             {/* 갱신 버튼 (임시) */}
@@ -87,12 +87,11 @@ class Main extends Component {
                     <div className="main-bar">
                         <div className="main-bar-tardyList">
                             <span className="main-bar-textTitle">지각자</span>
-                            <span className="main-bar-text">{"가을"}</span>
+                            <span className="main-bar-text">{special.tardyList}</span>
                         </div>
                         <div className="main-bar-holidayList">
                             <span className="main-bar-textTitle">휴가자</span>
-                            <span className="main-bar-text">{"가을,"}</span>
-                            <span className="main-bar-text">{"지혜"}</span>
+                            <span className="main-bar-text">{special.holidayList}</span>
                         </div>
                         <img src="/img/cloud2.png" alt="cloud" className="main-img-cloud2"></img>
                     </div>
@@ -121,9 +120,12 @@ class Main extends Component {
                     {/* 오늘의 카드 영역 */}
                     <div className="main-cards">
                         <div className="main-cards-paading">
-                            <Card />
-                            <Card />
-                            <Card />
+                            {
+                                todayCard.map((data, i) => {
+                                    return <Card key={i}
+                                    title={data.title} partner={data.partner} date={data.startDate} />
+                                })
+                            }
                         </div>
                     </div>
                 </div>
