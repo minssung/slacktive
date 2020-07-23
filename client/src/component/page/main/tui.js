@@ -171,7 +171,7 @@ class Tui extends Component {
         this.setState({ load : false });
 
         const { title, startDate, startTime, endDate, endTime, ingCheck, cate, partners, content } = this.state;
-        const { user } = this.props;
+        const { user, resetTodayCard } = this.props;
 
         try {
             let start = moment(startDate).format("YYYY/MM/DD") + " " + startTime;
@@ -218,6 +218,7 @@ class Tui extends Component {
             }
 
             this.mountCalendar();
+            await resetTodayCard();
         } catch(err) {
             console.log("일정 등록 에러 발생 : ", err);
         }
@@ -232,7 +233,7 @@ class Tui extends Component {
         const calendar = this.calendarRef.current.getInstance();
 
         const { title, startDate, endDate, startTime, endTime, ingCheck, cate, partners, content, id, cid } = this.state;
-        const { user } = this.props;
+        const { user, resetTodayCard } = this.props;
 
         let result = null;
         let textTime = "";
@@ -309,6 +310,7 @@ class Tui extends Component {
             await Promise.all([updat,postUpdat]);
 
             this.mountCalendar();
+            await resetTodayCard();
         } catch(err) {
             console.log("캘린더 업데이트 에러 발생 : ", err);
         }
@@ -324,7 +326,7 @@ class Tui extends Component {
     async deleted(id, cid) {
         this.setState({ load : false });
         const calendar = this.calendarRef.current.getInstance();
-        const { user } = this.props;
+        const { user, resetTodayCard } = this.props;
 
         let result = null;
         let post = null;
@@ -364,6 +366,7 @@ class Tui extends Component {
             });
 
             this.mountCalendar();
+            await resetTodayCard();
         } catch(err) {
             console.log("유저 일정/휴가 삭제 에러 발생 : ", err);
             alert("삭제 도중 에러가 발생했습니다. 새로고침 하여주세요.");

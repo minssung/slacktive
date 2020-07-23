@@ -61,8 +61,6 @@ router.post("/status", async(req, res) => {
                     });
                 }
 
-                console.log('CURRENT data', array.length);
-
             } catch (err) {
                 console.log('TRY CATCH', err);
             }

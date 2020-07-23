@@ -24,7 +24,7 @@ import Leftmenu from './leftmenu';
 // page
 import Login from '../page/login/login';
 import Main from '../page/main/main';
-import Mypage from '../page/mypage/mypage';
+// import Mypage from '../page/mypage/mypage';
 import Grouppage from '../page/grouppage/grouppage';
 import Etc from '../page/etcpage/etc';
 
@@ -59,6 +59,11 @@ class Base extends Component {
 
             load : false,
             aa : false,
+
+            container : [],     // 초기 직원 데이터
+            attenTime : null,   // 출근 시간
+            special : null,     // 지각자, 휴가자 객체
+            todayCard : [],     // 오늘의 카드
         }
     }
 
@@ -98,8 +103,7 @@ class Base extends Component {
                 })
 
                 this.setState({ userList : users });
-                this.setState({ 
-                    user : {
+                this.setState({ user : {
                         userid : result.userid,
                         username : userInfo.username,
                         usertag : userInfo.usertag,
@@ -108,6 +112,37 @@ class Base extends Component {
                     }, 
                     holidayHistoryData : holidayHistory 
                 });
+
+                // 직원 정보 호출
+                const employee = await axios.post(configs.domain+"/employee/status");
+                this.setState({ container: employee.data });
+
+                // 출근 시간 체크
+                const attenTime = await axios.post(configs.domain+"/slack/onworktime", {userid : this.state.user.userid});
+                let timeArray =  attenTime.data.textTime.split(':');
+                let editTime = timeArray[0] + '시 ' + timeArray[1] + '분';
+                if (timeArray[1] === '00') editTime = timeArray[0] + '시';
+                else if (timeArray[1].substring(0, 1) === '0') editTime = timeArray[0] + '시 ' + timeArray[1].substring(1, 2) + '분';
+                this.setState({ attenTime : editTime });
+
+                // 지각자 체크
+                const tardyApi = await axios.get(configs.domain+`/user/stateall?state=${'지각'}`);
+                const tardyArray = tardyApi.data.map( data => data.username );
+                const newTardyArray = tardyArray.join(', ');
+
+                // 휴가자 체크
+                const holidayApi = await axios.get(configs.domain+`/user/stateall?state=${'휴가'}`);
+                const holidayArray = holidayApi.data.map( data => data.username );
+                const newHolidayArray = holidayArray.join(', ');
+                this.setState({ special : {
+                    tardyList : newTardyArray,
+                    holidayList : newHolidayArray
+                } });
+
+                // 오늘의 카드에 들어갈 일정 데이터
+                const todayCardApi = await axios.get(configs.domain+`/generals/alltime?startDate=${moment().format('MM/DD')}`);
+                this.setState({ todayCard : todayCardApi.data });
+
             }
         } catch(err) {
             console.log("first mount err : ", err);
@@ -120,9 +155,14 @@ class Base extends Component {
     // 배경색을 사이드 메뉴 누를 시에 변경
     backgoundChange(top, bottom, num) { this.setState({ backgound : { top, bottom }, bar : num }); }
 
+    async resetTodayCard() {
+        const todayCardApi = await axios.get(configs.domain+`/generals/alltime?startDate=${moment().format('MM/DD')}`);
+        this.setState({ todayCard : todayCardApi.data });
+    }
+
     render() { 
         const { backgound, bar, load, 
-            user, userList, holidayHistoryData
+            user, userList, container, attenTime, special, todayCard
         } = this.state;
         return (
             <div className="base-main" style={user ? {backgroundImage:`linear-gradient(to top, ${backgound.top}, ${backgound.bottom}`} : {}}>
@@ -133,13 +173,13 @@ class Base extends Component {
                         <div className="base-right">
                             <Switch>
                                 {/* 초기 유저 데이터가 없을 시 로그인 화면, 있다면 메인 페이지부터 시작  */}
-                                <Route exact path="/" render={() => user ? <Main userList={userList} user={user} />  : <Login />} />
+                                <Route exact path="/" render={() => user ? <Main resetTodayCard={this.resetTodayCard.bind(this)} userList={userList} user={user} attenTime={attenTime} special={special} todayCard={todayCard} />  : <Login />} />
                                 {/* <Route path="/mypage" render={() => user ? <Mypage user={user} holidayHistoryData={holidayHistoryData} /> : <Login />} /> */}
-                                <Route path="/grouppage" render={() => user ? <Grouppage user={user} /> : <Login />} />
+                                <Route path="/grouppage" render={() => user ? <Grouppage user={user} container={container} /> : <Login />} />
                                 <Route path="/etc" render={() => user ? <Etc user={user} /> : <Login />} />
 
                                 {/* 비로그인 상태에서 잘못된 주소 접근 시 처리 - not found */}
-                                <Route render={() => user ? <Main userList={userList} user={user} /> : load ? <NotFound /> : "" } />
+                                <Route render={() => user ? <Main resetTodayCard={this.resetTodayCard.bind(this)} userList={userList} user={user} attenTime={attenTime} special={special} todayCard={todayCard} /> : load ? <NotFound /> : "" } />
                             </Switch>
                         </div>
                         :

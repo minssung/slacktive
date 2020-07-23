@@ -149,12 +149,12 @@ router.get("/oneRow", async(req, res) => {
 });
 
 // DB SelectOne onWorkTime Lastdata --------------------
-router.get("/onworktime", async(req, res) => {
+router.post("/onworktime", async(req, res) => {
     try {
         let result = await Slack.findOne({
             limit : 1,
             where : {
-                userid : req.query.userid,
+                userid : req.body.userid,
                 [Op.or]: [{state: '출근'}, {state: '지각'}]
             },
             order : [

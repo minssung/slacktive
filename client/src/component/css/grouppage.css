@@ -1,11 +1,13 @@
 .grouppage-main {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     animation-name: mypageload;
     animation-duration: 1s;
     overflow-x: scroll;
+    position: relative;
 }
 
 .grouppage-top {
@@ -16,7 +18,8 @@
 }
 
 .grouppage-bot {
-    width: 100%;
+    position: fixed;
+    bottom: 0;
 }
 
 /* --- title and box section ---*/
@@ -207,7 +210,6 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    margin-top: 115px;
 }
 
 .grouppage-image-ground {

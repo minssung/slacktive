@@ -197,6 +197,18 @@
     margin-bottom: 30px;
 }
 
+.main-cards-non {
+    width: 350px;
+    height: 80px;
+    margin: 0 auto;
+    border: 1px solid black;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
 .card-index {
     height: 110px;
     display: flex;

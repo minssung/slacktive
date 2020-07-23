@@ -14,9 +14,7 @@ export default function Card(props) {
                 <div className="card-member">
                     {
                         props.partner ? props.partner[0] &&
-                        props.partner.map((data,i) => {
-                            return <span key={i}>{data}</span>
-                        })
+                        props.partner.map((data,i) => <span key={i}>{data.username}&nbsp;</span>)
                         :
                         "참여인원이 없습니다."
                     }
