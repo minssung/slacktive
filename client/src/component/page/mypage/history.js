@@ -15,7 +15,7 @@ export default function History(props) {
     return (
         <div className="history-main">
             <div className="history-title" style={{backgroundColor: color}}>
-                {label}
+                <span>{label}</span>
                 <div className="history-none"></div>
             </div>
             {

@@ -1,0 +1,46 @@
+.mypopup-main {
+    background-color: rgba(109, 109, 109, 0.39);
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    z-index: 3000;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.mypopup-div {
+    width: 570px;
+    height: 936px;
+    border-radius: 20px;
+    background-color: #ffffff;
+    animation-name: mypopup;
+    animation-duration: 0.5s;
+}
+
+@keyframes mypopup {
+    0% {
+        margin-top: 20%;
+        opacity: 0;
+    }
+}
+
+.mypopup-title-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 78px;
+    width: 100%;
+}
+
+.mypopup-title-text {
+    margin-left: 40px;
+}   
+
+.mypopup-title-close {
+    margin-right: 16px;
+    margin-bottom: 14px;
+}

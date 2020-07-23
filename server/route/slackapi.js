@@ -211,16 +211,23 @@ router.post("/channelhistoryinittime", async(req,res) =>{
             }
         });
         const resultSet = (result.data.messages).reverse();
-        const resultArray = initFunc(resultSet, true);
+        
+        initFunc(resultSet, true).then( async resultArray => {
+            try {
+                await Slackchat.bulkCreate(resultArray,{
+                    individualHooks : true,
+                });
+            } catch(err) {
+                console.error("bulkcreate atten arr : " + err);
+                res.status(500).send(err);
+            }
 
-        try {
-            await Slackchat.bulkCreate(resultArray,{
-                individualHooks : true,
-            });
-        } catch(err) {
-            console.error("bulkcreate Init atten arr : " + err);
-        }
-        res.send(resultArray);
+            await res.send(resultArray);
+
+        }).catch(error => {
+                console.log("slack channel history err : " + error);
+                res.status(500).send(error);
+        })
     } catch(error) {
         console.log("slack channel history atten init err : " + error);
     }

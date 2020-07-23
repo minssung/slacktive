@@ -1,13 +1,49 @@
 import React, { Component } from 'react';
+import moment from 'moment';
 
 import Mycard from './mycard';
 import History from './history';
+import Mypopup from './mypopup';
 
 class Mypage extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            open : false,
+
+            tardyCountData : this.props.tardyCount || [],
+            attenAvgData : this.props.attenAvg || [],
+            attenCountData : this.props.attenCount || [],
+            overTimeCountData : this.props.overTimeCount || [],
+
+            viewData : [],
+        }
+    }
+
+    // 팝업 띄우기 위한 카드 클릭 시
+    cardClick(bool, num) { 
+        if(num) {
+            const { tardyCountData, attenAvgData, attenCountData, overTimeCountData } = this.state;
+            let viewData = [];
+            switch(num) {
+                case 0 : viewData = tardyCountData; break;
+                case 1 : viewData = attenAvgData; break;
+                case 2 : viewData = attenCountData; break;
+                case 3 : viewData = overTimeCountData; break;
+                default : viewData = tardyCountData; break;
+            }
+            this.setState({ viewData })
+        }
+        this.setState({ open : bool }); 
+    }
+
     render() { 
+        const { holidayHistoryData } = this.props;
+        const { open, viewData } = this.state;
         return (
             <div className="mypage-main">
                 <div className="mypage-top">
+                    <Mypopup viewData={viewData} cardClick={this.cardClick.bind(this)} open={open} />
 
                     {/* 타이틀과 휴가 갯수 박스 */}
                     <div className="mypage-title">내 현황</div>
@@ -45,10 +81,10 @@ class Mypage extends Component {
                         </div>
                     </div>
                     <div className="mypage-mycard-div">
-                        <Mycard img="/img/run.png" result={"지난달보다 2회 감소"} data={"없음"} label="지각 횟수" color="linear-gradient(to top, #a665e5, #ff92eb)" />
-                        <Mycard img="/img/clock.png" result={"지난달보다 20분 빠름"} data={"9시 40분"} label="평균 출근시간" color="linear-gradient(to top, #988ffe, #988ffe, #9cd5ff)" />
-                        <Mycard img="/img/workplace.png" result={"이번달 연차 0.5개 사용"} data={"20일"} label="출근 일수" color="linear-gradient(to top, #6b59cf, #b47eff)" />
-                        <Mycard img="/img/overtime.png" result={"지난달보다 1회 증가"} data={"1일"} label="야근 일수" color="linear-gradient(to top, #ffd15b, #ff8e3d)" />
+                        <Mycard num={0} cardClick={this.cardClick.bind(this)} img="/img/run.png" result={"지난달보다 2회 감소"} data={"없음"} label="지각 횟수" color="linear-gradient(to top, #a665e5, #ff92eb)" />
+                        <Mycard num={1} cardClick={this.cardClick.bind(this)} img="/img/clock.png" result={"지난달보다 20분 빠름"} data={"9시 40분"} label="평균 출근시간" color="linear-gradient(to top, #988ffe, #988ffe, #9cd5ff)" />
+                        <Mycard num={2} cardClick={this.cardClick.bind(this)} img="/img/workplace.png" result={"이번달 연차 0.5개 사용"} data={"20일"} label="출근 일수" color="linear-gradient(to top, #6b59cf, #b47eff)" />
+                        <Mycard num={3} cardClick={this.cardClick.bind(this)} img="/img/overtime.png" result={"지난달보다 1회 증가"} data={"1일"} label="야근 일수" color="linear-gradient(to top, #ffd15b, #ff8e3d)" />
                     </div>
                 </div>
                 <div className="mypage-bot">
@@ -68,12 +104,21 @@ class Mypage extends Component {
                                 <div className="mypage-history-text">휴가 사용 내역</div>
                             </div>
                             <div className="mypage-history-box">
-                                <History label="반차" data={"2020. 3. 20 (수)"} state={true} />
-                                <History label="휴가" data={"2020. 3. 02 (월) ~ 3. 6 (금)"} state={true} />
-                                <History label="대휴" data={"2020. 3. 20 (수)(2020. 1. 8 (일) 근무)"} state={false} />
-                                <History label="병가" data={"2020. 3. 20 (수)"} state={false} />
-                                <History label="휴가" data={"2020. 3. 20 (수)"} state={false} />
-                                <History label="휴가" data={"2020. 3. 20 (수)"} state={false} />
+                                {
+                                    holidayHistoryData && holidayHistoryData[0] &&
+                                    holidayHistoryData.map(data => {
+                                        let timeText = "";
+                                        data.textTime.forEach((data,i) => {
+                                            if(data.startDate === data.endDate) {
+                                                timeText += moment(data.startDate).format("YYYY. M. D. (ddd)")
+                                            } else {
+                                                timeText += moment(data.startDate).format("YYYY. M. D. (ddd)") + " ~ " + moment(data.endDate).format("M. D. (ddd)") + (i !== 0 ? " / " : "")
+                                            }
+                                        })
+                                        const state = moment(moment(new Date())).startOf('day').diff(moment(data.textTime[0].startDate).startOf('day'), 'days') < 0;
+                                        return <History key={data.id} label={data.cate} data={timeText} state={state} />
+                                    })
+                                }
                             </div>
                         </div>
                     </div>

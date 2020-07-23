@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 // modules
 import axios from 'axios';
+import moment from 'moment';
 import { BrowserRouter as Router, Route, Switch  } from 'react-router-dom';
 
 // css
@@ -14,6 +15,7 @@ import '../css/grouppage.css';
 import '../css/etc.css';
 import '../css/popup.css';
 import '../css/confirm.css';
+import '../css/mypopup.css';
 
 // layout
 import NotFound from './notFound';
@@ -48,7 +50,9 @@ class Base extends Component {
         super(props);
         this.state = {
             user : null,    // 초기 사용자 로그인 데이터
-            userList : null,    // 초기 유저 목록 데이터
+            userList : [],    // 초기 유저 목록 데이터
+
+            holidayHistoryData : [],
 
             backgound,  // 전체 배경색
             bar,    // 사이드 메뉴의 테두리
@@ -75,17 +79,35 @@ class Base extends Component {
                 await Promise.all([result, users]).then(data => {
                     result = data[0].data;
                     users = data[1].data;
+                });
+
+                if(result === "err") {
+                    localStorage.removeItem("slacklogin");
+                    alert("로그인 시간이 만료되었습니다. 재로그인 해주세요.");
+                    window.location.href = "/";
+                }
+
+                let toYear = moment(new Date()).format("YYYY");
+
+                let userInfo = axios.get(`${configs.domain}/user/one?userid=${result.userid}`)
+                let holidayHistory = axios.get(`${configs.domain}/holiday/gettime?textTime=${toYear}&userId=${result.userid}`)
+
+                await Promise.all([userInfo, holidayHistory]).then(data => {
+                    userInfo = data[0].data;
+                    holidayHistory = data[1].data;
                 })
 
-                const userInfo = await axios.get(`${configs.domain}/user/one?userid=${result.userid}`)
-
                 this.setState({ userList : users });
-                this.setState({ user : {
-                    userid : result.userid,
-                    username : userInfo.data.username,
-                    p_token : userInfo.data.p_token,
-                    userchannel : userInfo.data.userchannel,
-                } });
+                this.setState({ 
+                    user : {
+                        userid : result.userid,
+                        username : userInfo.username,
+                        usertag : userInfo.usertag,
+                        p_token : userInfo.p_token,
+                        userchannel : userInfo.userchannel,
+                    }, 
+                    holidayHistoryData : holidayHistory 
+                });
             }
         } catch(err) {
             console.log("first mount err : ", err);
@@ -99,26 +121,33 @@ class Base extends Component {
     backgoundChange(top, bottom, num) { this.setState({ backgound : { top, bottom }, bar : num }); }
 
     render() { 
-        const { user, backgound, bar, load, userList } = this.state;
-        return load ? (
+        const { backgound, bar, load, 
+            user, userList, holidayHistoryData
+        } = this.state;
+        return (
             <div className="base-main" style={user ? {backgroundImage:`linear-gradient(to top, ${backgound.top}, ${backgound.bottom}`} : {}}>
                 <Router>
                     { user ? <Leftmenu bar={bar} backgoundChange={this.backgoundChange.bind(this)} /> : "" }
-                    <div className="base-right">
-                        <Switch>
-                            {/* 초기 유저 데이터가 없을 시 로그인 화면, 있다면 메인 페이지부터 시작  */}
-                            <Route exact path="/" render={() => user ? <Main userList={userList} user={user} />  : <Login />} />
-                            <Route path="/mypage" render={() => user ? <Mypage user={user} /> : <Login />} />
-                            <Route path="/grouppage" render={() => user ? <Grouppage user={user} /> : <Login />} />
-                            <Route path="/etc" render={() => user ? <Etc user={user} /> : <Login />} />
+                    {
+                        load ? 
+                        <div className="base-right">
+                            <Switch>
+                                {/* 초기 유저 데이터가 없을 시 로그인 화면, 있다면 메인 페이지부터 시작  */}
+                                <Route exact path="/" render={() => user ? <Main userList={userList} user={user} />  : <Login />} />
+                                {/* <Route path="/mypage" render={() => user ? <Mypage user={user} holidayHistoryData={holidayHistoryData} /> : <Login />} /> */}
+                                <Route path="/grouppage" render={() => user ? <Grouppage user={user} /> : <Login />} />
+                                <Route path="/etc" render={() => user ? <Etc user={user} /> : <Login />} />
 
-                            {/* 비로그인 상태에서 잘못된 주소 접근 시 처리 - not found */}
-                            <Route render={() => user ? <Main userList={userList} user={user} /> : load ? <NotFound /> : "" } />
-                        </Switch>
-                    </div>
+                                {/* 비로그인 상태에서 잘못된 주소 접근 시 처리 - not found */}
+                                <Route render={() => user ? <Main userList={userList} user={user} /> : load ? <NotFound /> : "" } />
+                            </Switch>
+                        </div>
+                        :
+                        <div className="base-right"></div>
+                    }
                 </Router>
             </div>
-        ) : <div></div>
+        )
     }
 }
  

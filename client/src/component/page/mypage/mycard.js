@@ -1,8 +1,9 @@
 import React from 'react';
 
 export default function Mycard(props) {
+    const { cardClick, num } = props;
     return (
-        <div className="mycard-main" style={{backgroundImage: props.color}}>
+        <div className="mycard-main" style={{backgroundImage: props.color}} onClick={() => cardClick(true, num)}>
             <div className="mycard-div">
                 <div className="mycard-title">{props.label}</div>
                 <div className="mycard-data">{props.data}</div>

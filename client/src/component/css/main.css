@@ -394,3 +394,21 @@
         margin-top: 7px;
     }
 }
+
+@media (max-width: 500px) {
+    .main-title-text {
+        text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+        font-family: 12LotteMartDream;
+        font-size: 30px;
+        font-weight: 500;
+        line-height: 1.17;
+        color: #ffffff;
+        margin-bottom: -100px;
+        margin-top: 100px;
+    }
+
+    .main-img {
+        margin-top: -100px;
+        margin-bottom: 80px;
+    }
+}

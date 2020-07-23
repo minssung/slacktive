@@ -198,6 +198,7 @@ class Tui extends Component {
                         ${partners && partners[0] && `참여자: ${partners}`}`
                 })
             } else {
+                console.log("holiday?")
                 let timeText = "";
 
                 if(moment(endDate).diff(startDate, "days") >= 1) {
@@ -230,7 +231,7 @@ class Tui extends Component {
 
         const calendar = this.calendarRef.current.getInstance();
 
-        const { title, startDate, endDate, startTime, endTime, cate, partners, content, id, cid } = this.state;
+        const { title, startDate, endDate, startTime, endTime, ingCheck, cate, partners, content, id, cid } = this.state;
         const { user } = this.props;
 
         let result = null;
@@ -255,7 +256,7 @@ class Tui extends Component {
                 let end = "";
 
                 start = moment(startDate).format("YYYY/MM/DD") + " " + startTime;
-                end = moment(endDate).format("YYYY/MM/DD") + " " + endTime;
+                end = ingCheck ? start : (moment(endDate).format("YYYY/MM/DD") + " " + endTime);
 
                 let dbTextTime = start + " " + end;
                 
@@ -277,7 +278,7 @@ class Tui extends Component {
             } else {
                 result = await axios.get(`${configs.domain}/holiday/one?id=${id}`);
 
-                if(moment(endDate).diff(startDate, "days") >= 1){
+                if(moment(endDate).diff(startDate, "days") >= 1 || ingCheck){
                     textTime = `[${user.username}] ${moment(startDate).format("YYYY[년] MM[월] DD[일]")}~${moment(endDate).format("YYYY[년] MM[월] DD[일]")} ${title}`
                 } else {
                     textTime = `[${user.username}] ${moment(startDate).format("YYYY[년] MM[월] DD[일]")} ${title}`
@@ -286,7 +287,7 @@ class Tui extends Component {
                 let dbTextTime = [];
                 dbTextTime.push({
                     startDate : moment(startDate).format("YYYY-MM-DD"),
-                    endDate : moment(endDate).format("YYYY-MM-DD")
+                    endDate : ingCheck ? moment(startDate).format("YYYY-MM-DD") : moment(endDate).format("YYYY-MM-DD")
                 });
 
                 updat = axios.put(configs.domain+"/holiday/update",{

@@ -25,8 +25,8 @@ class Etc extends Component {
                     <div className="etc-guide">내 계정 및 앱 정보</div>
                     <div className="etc-guide-box">
                         <div className="etc-guide-margin">
-                            <div className="etc-guide-title">
-                                <div className="etc-guide-title-text">모바일 푸시알람 설정</div>
+                            <div className="etc-guide-title"  onClick={() => alert("추후 업데이트 예정입니다.")}>
+                                <div className="etc-guide-title-text" >모바일 푸시알람 설정</div>
                                 <div className="etc-guide-filter">
                                     <div className="etc-guide-circle"></div>
                                     <div className="etc-guide-filter-text">{"꺼짐"}</div>
