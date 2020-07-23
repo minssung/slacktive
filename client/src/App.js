@@ -1,7 +1,5 @@
 import React from 'react';
-// import './App.css';
 import './App_.css';
-// import IndexRoot from './components/indexRoot';
 import Base from './component/layout/base';
 
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';

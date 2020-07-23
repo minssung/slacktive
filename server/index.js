@@ -13,9 +13,6 @@ let jwt = require("jsonwebtoken");
 const moment = require('moment');
 const Agenda = require('agenda');
 
-const redis = require("redis");
-let client = redis.createClient(6379, "localhost");
-
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');
 // -------------------- 초기 서버 ( app ) 설정 --------------------
@@ -38,10 +35,6 @@ app.use("/holiday", holiday_router);
 app.use("/general", generals_router);
 // API
 app.use("/slackapi", slack_router);
-// Default
-app.get('/', async(req, res) => {
-    //let reg = /\(?(수정|삭제)?\)?\s*\[(\s*\S*\s*)\]\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*\s*(\W*)\s*(\_)*\s*(\d*년)?\s*(\d*월)?\s*((\d*일?,*\s*~*)*\s*일?)*/
-});
 
 // ---------- MongoDB 연동 ---------- //
 const mongoConnectionString = 'mongodb://'+configs.host+':27017/agenda';
@@ -55,41 +48,37 @@ try {
         agenda.define('Busy', {lockLifetime: 10000}, async job => {
             console.log('2분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelhistory");
-            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const HistoryCal = axios.post(configs.domain+"/slackapi/channelhistorycal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            // await calendarStateUpdatFunc();
         });
         // 10분
         agenda.define('First', {lockLifetime: 10000}, async job => {
             console.log('10분 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelhistory");
-            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const HistoryCal = axios.post(configs.domain+"/slackapi/channelhistorycal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            // await calendarStateUpdatFunc();
         });
         // 2시간
         agenda.define('Second', {lockLifetime: 10000}, async job => {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelhistory");
-            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const HistoryCal = axios.post(configs.domain+"/slackapi/channelhistorycal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            // await calendarStateUpdatFunc();
         });
         // 2시간
         agenda.define('Third', {lockLifetime: 10000}, async job => {
             console.log('2시간 마다 실행', moment(new Date()).format('MM-DD HH:mm'));
             const History = axios.post(configs.domain+"/slackapi/channelhistory");
-            // const HistoryCal = axios.post(configs.domain+"/slackapi/channelHistoryCal");
+            const HistoryCal = axios.post(configs.domain+"/slackapi/channelhistorycal");
             await Promise.all([History,HistoryCal]).then((val)=>{
                 console.log("Promise All History Api Suce")
             })
-            // await calendarStateUpdatFunc();
         });
           
         (async () => { // IIFE to give access to async/await
@@ -111,33 +100,22 @@ const PORT = process.env.PORT || configs.port;
 models.sequelize.query("SET FOREIGN_KEY_CHECKS = 1", {raw: true}).then(() => {
     models.sequelize.sync({ force : false }).then(()=>{
         app.listen(PORT, async() => {
-            console.log(`app running on port ${PORT}`);
-            try {
-                // client.get("init", async(err, val)=> {
-                //     if(err) {
-                //         console.log("new init Set Err : " + err);
-                //     }
-                //     if(val) {
-                //         console.log("new init aleardy Set");
-                //     } else {
-                //         client.set("init", "init", redis.print);
-                //         await axios.get(configs.domain+"/slackapi/teamUsers");
-                //         const Cal = axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
-                //         const Gnr = axios.post(configs.domain+"/slackapi/channelhistoryinittime");
-                //         await Promise.all([Cal,Gnr]).then((data)=>{
-                //             console.log("Initializde Success");
-                //         });
-                //     }
-                // })
-                
-                // await axios.get(configs.domain+"/slackapi/teamusers");
-                // await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
-                // await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
-                console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
-           
-            } catch(err){
-                console.log("app running err ( sql db created ) : " + err);
+            async function startServer() {
+                console.log(`app running on port ${PORT}`);
+                try {
+                    const result = await axios.get(`${configs.domain}/user/all`);
+                    if(!result.data || !result.data[0]) {
+                        await axios.get(configs.domain+"/slackapi/teamusers");
+                        await axios.post(configs.domain+"/slackapi/channelhistoryinitcal");
+                        await axios.post(configs.domain+"/slackapi/channelhistoryinittime");
+                    }
+                    console.log('현재 시간 : ', moment(new Date()).format('HH:mm'));
+               
+                } catch(err){
+                    console.log("app running err ( sql db created ) : " + err);
+                }
             }
+            startServer();
         });
     });
 });
@@ -214,7 +192,7 @@ app.get('/verify', (req,res)=>{
 // -------------------- ********** --------------------
 app.get('/update', async(req, res) => {
     try {
-        await axios.post(`http://localhost:5000/slackapi/channelhistorycal`);
+        await axios.post(`${configs.domain}/slackapi/channelhistorycal`);
         res.send(true);
     } catch(err) {
         console.log("history update err : " + err);

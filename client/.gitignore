@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-/package-lock.json
 /src/client_config.js
 /src/devClient_config.js
 /ecosystem.config.js

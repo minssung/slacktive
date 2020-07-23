@@ -158,7 +158,7 @@ router.post("/channelhistory", async(req,res) =>{
     }
 });
 
-// 채널의 메시지 내역 가져오기 ( 일정용 ) --------------------------------------------------
+// 채널의 메시지 내역 가져오기 ( 휴가용 ) --------------------------------------------------
 router.post("/channelhistorycal", async(req,res) =>{
     try {
         let historyOne = await axios.get(configs.domain+"/holiday/oneRow");
@@ -185,7 +185,6 @@ router.post("/channelhistorycal", async(req,res) =>{
         } catch(err) {
             console.error("bulkcreate cal err : " + err);
         }
-        await models.sequelize.query("delete n1 from `holidays` n1, `holidays` n2 where n1.id < n2.id and n1.cate = n2.cate and n1.textTime = n2.textTime and n1.userId = n2.userId")
         res.send(resultArray);
     } catch(error) {
         console.log("slack channel history cal err : " + error);

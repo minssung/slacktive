@@ -12,6 +12,7 @@ var configs = {
     channel_time : "",     // 출퇴근
     channel_calendar : "", // 일정용
     secretKey : "",
+    
     // 정규식 컨피그
     timeAttenden : "",
     subTime : "",
