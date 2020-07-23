@@ -120,7 +120,7 @@ class Base extends Component {
                     holidayList : newHolidayArray
                 } });
 
-                // 
+                // 오늘의 카드에 들어갈 일정 데이터
                 const todayCardApi = await axios.get(configs.domain+`/generals/alltime?startDate=${moment().format('MM/DD')}`);
                 this.setState({ todayCard : todayCardApi.data });
 

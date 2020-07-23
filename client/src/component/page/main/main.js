@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 
 import Card from './card';
 import Tui from './tui';
@@ -121,10 +122,15 @@ class Main extends Component {
                     <div className="main-cards">
                         <div className="main-cards-paading">
                             {
+                                todayCard.length ?
                                 todayCard.map((data, i) => {
                                     return <Card key={i}
-                                    title={data.title} partner={data.partner} date={data.startDate} />
+                                    title={data.title} partner={data.partner} date={moment(data.startDate).format('MM월 DD일 hh시 mm분')} />
                                 })
+                                :
+                                <div className="main-cards-non">
+                                    등록된 오늘의 일정이 없습니다.
+                                </div>
                             }
                         </div>
                     </div>
