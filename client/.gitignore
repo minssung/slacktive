@@ -4,7 +4,6 @@
 /node_modules
 /src/client_config.js
 /src/devClient_config.js
-/ecosystem.config.js
 /.pnp
 .pnp.js
 
