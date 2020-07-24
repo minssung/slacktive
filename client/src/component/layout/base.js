@@ -230,14 +230,17 @@ class Base extends Component {
                 else if (timeArray[1].substring(0, 1) === '0') editTime = timeArray[0] + '시 ' + timeArray[1].substring(1, 2) + '분';
                 this.setState({ attenTime : editTime });
 
+                // 휴가 상태 처리
+                await axios.get(configs.domain+"/holiday/alltime");
+
                 // 지각자 체크
                 const tardyApi = await axios.get(configs.domain+`/user/stateall?state=${'지각'}`);
                 const tardyArray = tardyApi.data.map( data => data.username );
                 const newTardyArray = tardyArray.join(', ');
 
                 // 휴가자 체크
-                const holidayApi = await axios.get(configs.domain+`/user/stateall?state=${'휴가'}`);
-                const holidayArray = holidayApi.data.map( data => data.username );
+                const holidayCheckApi = await axios.get(configs.domain+`/user/stateall?state=${'휴가'}`);
+                const holidayArray = holidayCheckApi.data.map( data => data.username );
                 const newHolidayArray = holidayArray.join(', ');
                 this.setState({ special : {
                     tardyList : newTardyArray,

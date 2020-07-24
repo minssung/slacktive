@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const models = require("../models");
+const moment = require("moment");
 
 // DB Setting --------------------
 const Holiday = models.holiday;
@@ -27,9 +28,11 @@ router.get("/all", async(req, res) => {
     }
 });
 
-// DB SelectAll Users Holiday --------------------
+// DB SelectAll Users Holiday ( 휴가자 체크 ) --------------------
 router.get("/alltime", async(req, res) => {
     try {
+        const today = moment().format('YYYY-MM-DD');
+
         const result = await Holiday.findAll({
             include : [{
                 model : models.user,
@@ -38,11 +41,46 @@ router.get("/alltime", async(req, res) => {
                 'id' , 'ASC'
             ]],
             where : {
-                textTime : {
-                    [Op.like] : "%" + req.query.textTime + "%"
-                }
+                textTime : models.Sequelize.literal(`textTime like '%${today}%'`)
             }
         });
+
+        const clock = moment().format("HH:mm");
+        for (let i = 0; i < result.length; i++) {
+            let holidayList = result[i].dataValues.userId;
+            let holidayCate = result[i].dataValues.cate;
+
+            if (holidayCate === "휴가" || holidayCate === "병가") {
+                await User.update({
+                    state : '휴가'
+                }, {
+                    where : {
+                        id : holidayList
+                    }
+                });
+            } else if (holidayCate === "오전반차") {
+                if (clock < "14:00") {
+                    await User.update({
+                        state : '휴가'
+                    }, {
+                        where : {
+                            id : holidayList
+                        }
+                    });
+                }
+            } else if (holidayCate === "오후반차") {
+                if (clock > "15:30") {
+                    await User.update({
+                        state : '휴가'
+                    }, {
+                        where : {
+                            id : holidayList
+                        }
+                    });
+                }
+            }
+        }
+
         res.send(result);
     } catch(err) {
         console.log("select Holiday all err : " + err)
