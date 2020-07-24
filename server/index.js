@@ -13,8 +13,8 @@ let jwt = require("jsonwebtoken");
 const moment = require('moment');
 const Agenda = require('agenda');
 
-const redis = require("redis");
-let client = redis.createClient(6379, "localhost");
+// const redis = require("redis");
+// let client = redis.createClient(6379, "localhost");
 
 let configs = {};
 process.env.NODE_ENV === 'development' ? configs = require('./devServer_config') : configs = require('./server_config');

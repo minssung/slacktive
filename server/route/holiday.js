@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const models = require("../models");
+const moment = require("moment");
 
 // DB Setting --------------------
 const Holiday = models.holiday;
@@ -27,30 +28,11 @@ router.get("/all", async(req, res) => {
     }
 });
 
-// 유저 하나의 모든 휴가 내역
-router.get("/all", async(req, res) => {
-    try {
-        const result = await Holiday.findAll({
-            include : [{
-                model : models.user,
-            }],
-            order : [[
-                'id' , 'ASC'
-            ]],
-            where : {
-                userId : req.query.userId,
-            }
-        });
-        res.send(result);
-    } catch(err) {
-        console.log("select Holiday all err : " + err)
-        res.end();
-    }
-});
-
 // DB SelectAll Users Holiday --------------------
 router.get("/alltime", async(req, res) => {
     try {
+        const today = moment().format('YYYY-MM-DD');
+
         const result = await Holiday.findAll({
             include : [{
                 model : models.user,
@@ -59,11 +41,14 @@ router.get("/alltime", async(req, res) => {
                 'id' , 'ASC'
             ]],
             where : {
-                textTime : {
-                    [Op.like] : "%" + req.query.textTime + "%"
-                }
+                textTime : models.Sequelize.literal(`textTime like '%${today}%'`)
             }
         });
+
+        const holidayList = result[0].dataValues;
+        console.log(result);
+        console.log('ABC', holidayList)
+
         res.send(result);
     } catch(err) {
         console.log("select Holiday all err : " + err)
