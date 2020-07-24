@@ -188,8 +188,8 @@ class Base extends Component {
                     holidayHistoryData : holidayHistory,    // 휴가 내역
                     tardyCount : { 
                         row : tardyData || [], 
-                        to : tardyData[tardyData.length -1].state || null, 
-                        pre : tardyData[tardyData.length -2].state || null ,
+                        to : tardyData ? tardyData[0] ? tardyData[tardyData.length -1].state || null : null : null, 
+                        pre : tardyData ? tardyData[0] ? tardyData[tardyData.length -2].state || null : null : null ,
                         title : "지각 횟수",
                         text : "지각 횟수",
                     }, 
@@ -202,14 +202,14 @@ class Base extends Component {
                     },
                     attenCount : { 
                         row : attenDataMonth || [], 
-                        to : attenDataMonth[attenDataMonth.length -1].state || null,
+                        to : attenDataMonth ? attenDataMonth[0] ? attenDataMonth[attenDataMonth.length -1].state : null : null,
                         pre : historyCount || null,
                         title : "출근 일수",
                         text : "출근 일수",
                     }, 
                     overTimeCount : { 
-                        to : overTimeMonth[overTimeMonth.length -1].state || null,  
-                        pre : overTimeMonth[overTimeMonth.length -2] || null, 
+                        to : overTimeMonth ? overTimeMonth[0] ? overTimeMonth[overTimeMonth.length -1].state : null : null,  
+                        pre : overTimeMonth ? overTimeMonth[overTimeMonth.length -2] || null : null, 
                         row :overTimeData || [],
                         title : "야근 내역",
                         text : "초과 근무시간",
