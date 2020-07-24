@@ -28,7 +28,7 @@ export default function Confirm(props) {
                         <div className="confirm-box-cate-text">{cate.text}</div>
                     </div>
                     <div className="confirm-box-title">참여인원</div>
-                    <div className="confirm-box-partner-box">
+                    <div className="popup-box-partner-box">
                         {
                             partners && partners.map((data,i) => {
                                 return <div className="confirm-box-partner-div" key={i}>

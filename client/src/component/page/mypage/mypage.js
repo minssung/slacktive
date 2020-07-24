@@ -9,41 +9,28 @@ class Mypage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            open : false,
+            open : { view : false, num : 0 },
 
-            tardyCountData : this.props.tardyCount || [],
-            attenAvgData : this.props.attenAvg || [],
-            attenCountData : this.props.attenCount || [],
-            overTimeCountData : this.props.overTimeCount || [],
-
-            viewData : [],
+            viewCount : 5,
         }
     }
 
     // 팝업 띄우기 위한 카드 클릭 시
-    cardClick(bool, num) { 
-        if(num) {
-            const { tardyCountData, attenAvgData, attenCountData, overTimeCountData } = this.state;
-            let viewData = [];
-            switch(num) {
-                case 0 : viewData = tardyCountData; break;
-                case 1 : viewData = attenAvgData; break;
-                case 2 : viewData = attenCountData; break;
-                case 3 : viewData = overTimeCountData; break;
-                default : viewData = tardyCountData; break;
-            }
-            this.setState({ viewData })
-        }
-        this.setState({ open : bool }); 
+    async cardClick(bool, num) { 
+        this.setState({ open : { view : bool, num } }); 
     }
 
     render() { 
-        const { holidayHistoryData } = this.props;
-        const { open, viewData } = this.state;
+        const { holidayHistoryData, tardyCount, attenAvg, attenCount, overTimeCount, holidayUse, holidayAdd, user } = this.props;
+        const { open, viewCount } = this.state;
+
         return (
             <div className="mypage-main">
                 <div className="mypage-top">
-                    <Mypopup viewData={viewData} cardClick={this.cardClick.bind(this)} open={open} />
+                    <Mypopup num={0} data={tardyCount} cardClick={this.cardClick.bind(this)} open={open} />
+                    <Mypopup num={1} data={attenAvg} cardClick={this.cardClick.bind(this)} open={open} />
+                    <Mypopup num={2} data={attenCount} cardClick={this.cardClick.bind(this)} open={open} />
+                    <Mypopup num={3} data={overTimeCount} cardClick={this.cardClick.bind(this)} open={open} />
 
                     {/* 타이틀과 휴가 갯수 박스 */}
                     <div className="mypage-title">내 현황</div>
@@ -51,13 +38,13 @@ class Mypage extends Component {
                         <div className="mypage-holiday-left">
                             <div className="mypage-holiday-title">내 휴가</div>
                             <div className="mypage-holiday-count">
-                                <div className="mypage-holiday-count-current">{"15"}</div>
-                                <div className="mypage-holiday-count-add">{"(+1)"}</div>
-                                <div className="mypage-holiday-count-total">{"20"}</div>
+                                <div className="mypage-holiday-count-current">{holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount}</div>
+                                <div className="mypage-holiday-count-add">{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</div>
+                                <div className="mypage-holiday-count-total">/{user.holidaycount}</div>
                                 <div className="mypage-holiday-count-deco"></div>
                             </div>
                             <div className="mypage-holiday-text">
-                                {"5"}번 사용했고, <strong>{"15"}번{"(+1)"}</strong> 남아있어요.
+                                {`${holidayUse || 0}`}번 사용했고, <strong>{holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount}번{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</strong> 남아있어요.
                             </div>
                         </div>
                         <div className="mypage-holiday-right">
@@ -66,8 +53,8 @@ class Mypage extends Component {
                                 <img src="/img/usabottle.png" alt="holidayimg" className="mypage-holiday-bottle"></img>
                             </div>
                             <div className="mypage-holiday-right-counts">
-                                <div className="mypage-holiday-right-counts-top">{"+1"}</div>
-                                <div className="mypage-holiday-right-counts-bot">{"15"}</div>
+                                <div className="mypage-holiday-right-counts-top">{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</div>
+                                <div className="mypage-holiday-right-counts-bot">{holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount}</div>
                             </div>
                         </div>
                     </div>
@@ -81,10 +68,42 @@ class Mypage extends Component {
                         </div>
                     </div>
                     <div className="mypage-mycard-div">
-                        <Mycard num={0} cardClick={this.cardClick.bind(this)} img="/img/run.png" result={"지난달보다 2회 감소"} data={"없음"} label="지각 횟수" color="linear-gradient(to top, #a665e5, #ff92eb)" />
-                        <Mycard num={1} cardClick={this.cardClick.bind(this)} img="/img/clock.png" result={"지난달보다 20분 빠름"} data={"9시 40분"} label="평균 출근시간" color="linear-gradient(to top, #988ffe, #988ffe, #9cd5ff)" />
-                        <Mycard num={2} cardClick={this.cardClick.bind(this)} img="/img/workplace.png" result={"이번달 연차 0.5개 사용"} data={"20일"} label="출근 일수" color="linear-gradient(to top, #6b59cf, #b47eff)" />
-                        <Mycard num={3} cardClick={this.cardClick.bind(this)} img="/img/overtime.png" result={"지난달보다 1회 증가"} data={"1일"} label="야근 일수" color="linear-gradient(to top, #ffd15b, #ff8e3d)" />
+                        <Mycard 
+                            num={0} 
+                            cardClick={this.cardClick.bind(this)} 
+                            img="/img/run.png" 
+                            result={`지난달보다 ${(tardyCount.to - tardyCount.pre) || 0}회 증가`} 
+                            data={`${tardyCount.to ? tardyCount.to + "회" : "없음"}`} 
+                            label="지각 횟수" 
+                            color="linear-gradient(to top, #a665e5, #ff92eb)" 
+                        />
+                        <Mycard 
+                            num={1} 
+                            cardClick={this.cardClick.bind(this)} 
+                            img="/img/clock.png" 
+                            result={`${attenAvg.pre ? `지난달보다  ${attenAvg.pre} 빠름` : `추후 추가 예정`}`} 
+                            data={`${attenAvg.to || "없음"}`} 
+                            label="평균 출근시간" 
+                            color="linear-gradient(to top, #988ffe, #988ffe, #9cd5ff)" 
+                        />
+                        <Mycard 
+                            num={2} 
+                            cardClick={this.cardClick.bind(this)} 
+                            img="/img/workplace.png" 
+                            result={`이번달 연차 ${attenCount.pre || 0}개 사용`} 
+                            data={`${attenCount.to ? attenCount.to + "일" : "없음"}`} 
+                            label="출근 일수" 
+                            color="linear-gradient(to top, #6b59cf, #b47eff)" 
+                        />
+                        <Mycard 
+                            num={3} 
+                            cardClick={this.cardClick.bind(this)} 
+                            img="/img/overtime.png" 
+                            result={`지난달보다 ${overTimeCount.pre || 0}회 증가`} 
+                            data={`${(overTimeCount.to || 0) + "일"}`} 
+                            label="야근 일수" 
+                            color="linear-gradient(to top, #ffd15b, #ff8e3d)" 
+                        />
                     </div>
                 </div>
                 <div className="mypage-bot">
@@ -106,7 +125,8 @@ class Mypage extends Component {
                             <div className="mypage-history-box">
                                 {
                                     holidayHistoryData && holidayHistoryData[0] &&
-                                    holidayHistoryData.map(data => {
+                                    holidayHistoryData.map((data, i) => {
+                                        if(i >= viewCount) return null;
                                         let timeText = "";
                                         data.textTime.forEach((data,i) => {
                                             if(data.startDate === data.endDate) {
@@ -120,6 +140,7 @@ class Mypage extends Component {
                                     })
                                 }
                             </div>
+                            <div className="mypage-history-add-view" onClick={() => this.setState({ viewCount : viewCount * 2 })}>더 보기</div>
                         </div>
                     </div>
                 </div>

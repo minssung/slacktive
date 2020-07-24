@@ -99,12 +99,6 @@
     margin-right: 10px;
 }
 
-.confirm-box-partner-box {
-    margin-top: 17px;
-    display: flex;
-    flex-direction: row;
-}
-
 .confirm-box-partner-div {
     min-width: 94px;
     height: 41px;

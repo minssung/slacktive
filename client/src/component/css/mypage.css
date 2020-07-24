@@ -334,6 +334,20 @@
     flex-direction: column;
 }
 
+.mypage-history-add-view {
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 80px;
+    cursor: pointer;
+    color: black;
+}
+
+.mypage-history-add-view:hover {
+    color: rgba(51, 51, 51, 0.404);
+}
+
 .history-main {
     display: flex;
     flex-direction: row;

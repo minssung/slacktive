@@ -27,93 +27,57 @@ router.get("/all", async(req, res) => {
     }
 });
 
-// 해당 스태이트에 맞는 내용 및 이전 달과 비교값까지 가져오기 --------------------
-router.get("/state", async(req, res) => {
+// 월 기준 가져오기 --------------------
+router.get("/monthall", async(req, res) => {
+    let stateIf = `state="${req.query.state}"`;
+    if(req.query.state === "출근") {
+        stateIf = `state="출근" or state="지각" or state="외근"`;
+    } else if(req.query.state === "야근") {
+        stateIf = `state="야근"`;
+    }
+
+    let query = `select date_format(time, "%Y-%m") as date, count(state) as state from slackchats where (${stateIf}) and userId="${req.query.userId}" group by date`;
     try {
-        let setTime = req.query.time;
-        if(req.query.sub) {
-            setTime = moment(req.query.time,"YYYY-MM-DD").subtract(1, 'month').format("YYYY-MM")
-        }
-        let result = await Slack.count({
+        const result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT, raw : true })
+        res.send(result);
+    } catch(err){
+        console.log("select chat all err : " + err);
+        res.send(false);
+    }
+});
+
+// 한사람 전체 가져오기 --------------------
+router.get("/userall", async(req, res) => {
+    let stateIf  = req.query.state === "지각" ? 
+        [{ [Op.like] : "%지각%"}] : ( req.query.state === "출근" ? 
+        [{ [Op.like] : "%지각%"}, { [Op.like] : "%출근%"}, { [Op.like] : "%외근%"}] : [{ [Op.like] : "%야근%" }] )
+    try {
+        const result = await Slack.findAll({
+            include : [{
+                model : models.user,
+            }],
+            order : [[
+                'id' , 'ASC'
+            ]],
             where : {
-                [Op.or] : [{state : req.query.state}, {state : req.query.stateSub}],
-                userId : req.query.userid,
-                time : {
-                    [Op.substring] : setTime, 
+                [Op.and] : {
+                    [Op.or] : [
+                        { time : { [Op.like] : `%${req.query.preTime}%`} }, 
+                        { time : { [Op.like] : `%${req.query.toTime}%`} }
+                    ],
+                    state : {
+                        [Op.or] : stateIf
+                    },
+                    userId : {
+                        [Op.like] : `%${req.query.userId}%`
+                    }
                 }
             }
-        })
-        res.send(result+"");
-    } catch (err){
-        console.log("select chat state err : " + err);
-        res.end();
-    }
-});
-
-// 스태이트의 모든 값 가져오기 --------------------
-router.get("/stateall", async(req, res) => {
-    try {
-        let whereQuery = `state='${req.query.state}'`
-        if(req.query.stateSub) {
-            whereQuery = `(state='${req.query.state}' or state='${req.query.stateSub}')`
-        }
-        const queryStateAll = `SELECT d.date, ifnull(s.state,0) as state FROM ( SELECT DATE_FORMAT(time, '%Y-%m') AS date FROM slackchats where userid='${req.query.userId}' 
-                GROUP BY DATE_FORMAT(time, '%Y-%m') ORDER BY date DESC) as d LEFT JOIN (
-                SELECT DATE_FORMAT(time, '%Y-%m') as date, count(state) as state FROM slackchats WHERE userid='${req.query.userId}' and ${whereQuery} 
-                group by DATE_FORMAT(time, '%Y-%m')) as s on d.date = s.date;`
-        
-        let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true, required : false})
+        });
         res.send(result);
-    } catch (err){
-        console.log("select chat state err : " + err); 
-        res.end();
-    }
-});
-
-// 스태이트의 모든 값 가져오기 --------------------
-router.get("/stateallavg", async(req, res) => {
-    try {
-        const queryStateAll = `SELECT time, text FROM slackchats where (state="지각" or state="출근" or state="외근") order by time desc`
-        let result = await models.sequelize.query(queryStateAll, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
-        res.send(result);
-    } catch (err){
-        console.log("select chat state err : " + err);
-        res.end();
-    }
-});
-
-// 해당 스태이트의 값 타임에 맞게 가져오기 --------------------
-router.get("/getstate", async(req, res) => {
-    try {
-        let result = await Slack.findOne({
-            where : {
-                state : req.query.state,
-                userId : req.query.userid,
-                time : {
-                    [Op.substring] : req.query.time, 
-                }
-            }
-        })
-        res.send(result);
-    } catch (err){
-        console.log("select chat getState err : " + err);
-        res.end();
-    }
-});
-
-// 평균 시간 값 가져오기 --------------------
-router.get("/time", async(req, res) => {
-    try {
-        let setTime = req.query.time;
-        if(req.query.sub) {
-            setTime = moment(req.query.time,"YYYY-MM-DD").subtract(1, 'month').format("YYYY-MM")
-        }
-        const query = `select SEC_TO_TIME(AVG(TIME_TO_SEC(date_format(time, '%T')))) as times from slackchats where (state='${req.query.state}' or state='${req.query.stateSub}') and userId='${req.query.userid}' and time like '%${setTime}%'`
-        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
-        res.send(result[0].times);
-    } catch (err){
-        console.log("select chat Timestate err : " + err);
-        res.end();
+    } catch(err){
+        console.log("select chat all err : " + err);
+        res.send(false);
     }
 });
 
@@ -129,6 +93,18 @@ router.get("/one", async(req, res) => {
     } catch (err){
         console.log("select chat one err : " + err);
         res.end();
+    }
+});
+
+// DB SelectOne Time --------------------
+router.get("/avgtime", async(req, res) => {
+    let query = `select sec_to_time(avg(time_to_sec(date_format(time, "%T")))) as times from slackchats where (state="출근" or state="지각" or state="외근") and userId="${req.query.userId}" and time like "%${req.query.time}%" `;
+    try {
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT, raw : true })
+        res.send(result[0].times);
+    } catch (err){
+        console.log("select chat one err : " + err);
+        res.send(false);
     }
 });
 

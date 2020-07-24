@@ -13,7 +13,6 @@
 
 .mypopup-div {
     width: 570px;
-    height: 936px;
     border-radius: 20px;
     background-color: #ffffff;
     animation-name: mypopup;
@@ -43,4 +42,126 @@
 .mypopup-title-close {
     margin-right: 16px;
     margin-bottom: 14px;
+}
+
+.mypopup-title-guide {
+    display: flex;
+    flex-direction: row;
+    font-family: NanumBarunGothic;
+    font-size: 15px;
+    font-weight: bold;
+    color: #777777;
+    justify-content: center;
+}
+
+.mypopup-title-guide-date {
+    width: 55%;
+    margin-left: 39px;
+}
+
+.mypopup-title-guide-text {
+    width: 45%;
+}
+
+.mypopup-lines {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 13px;
+}
+
+.mypopup-line1 {
+    height: 3px;
+    width: 60%;
+    background-color: rgba(187, 187, 187, 0.452);
+}
+
+.mypopup-line2 {
+    height: 3px;
+    width: 30%;
+    background-color: rgba(71, 71, 71, 0.616);
+}
+
+.mypopup-line3 {
+    height: 3px;
+    width: 15%;
+    background-color: rgba(187, 187, 187, 0.452);
+}
+
+.mypopup-content {
+    display: flex;
+    flex-direction: column;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.mypopup-null {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+}
+
+.mypopup-pagination {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* ----------------- row ---------------- */
+.row-main {
+    border-bottom: 1px solid rgba(204, 204, 204, 0.5);
+    width: 100%;
+    height: 55.5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.row-date {
+    width: 60%;
+}
+
+.row-rowData {
+    width: 40%;
+}
+
+@media (max-height:770px) {
+    .mypopup-div {
+        width: 570px;
+        height: 100%;
+        border-radius: 0px;
+        background-color: #ffffff;
+        animation-name: mypopup;
+        animation-duration: 0.5s;
+        overflow: auto;
+    }
+
+    .mypopup-title-div {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        height: 40px;
+        width: 100%;
+    }
+    
+    .mypopup-title-text {
+        margin-left: 40px;
+        font-size: 15px;
+    }   
+    
+    .mypopup-title-guide-date {
+        width: 55%;
+        margin-left: 39px;
+        font-size: 12px;
+    }
+    
+    .mypopup-title-guide-text {
+        width: 45%;
+        font-size: 12px;
+    }
 }
