@@ -1,5 +1,7 @@
 #/ ignore files
 /node_modules
 
+package-lock.json
+
 /server/server_config.js
 /server/devServer_config.js

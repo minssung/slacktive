@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'Server',
       script: './server/index.js',
-      instances : 2,
+      instances : 1,
       env: {
         "NODE_ENV": "development"
       },
