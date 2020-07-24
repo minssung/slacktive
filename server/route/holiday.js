@@ -27,27 +27,6 @@ router.get("/all", async(req, res) => {
     }
 });
 
-// 유저 하나의 모든 휴가 내역
-router.get("/all", async(req, res) => {
-    try {
-        const result = await Holiday.findAll({
-            include : [{
-                model : models.user,
-            }],
-            order : [[
-                'id' , 'ASC'
-            ]],
-            where : {
-                userId : req.query.userId,
-            }
-        });
-        res.send(result);
-    } catch(err) {
-        console.log("select Holiday all err : " + err)
-        res.end();
-    }
-});
-
 // DB SelectAll Users Holiday --------------------
 router.get("/alltime", async(req, res) => {
     try {

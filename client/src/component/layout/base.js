@@ -24,7 +24,7 @@ import Leftmenu from './leftmenu';
 // page
 import Login from '../page/login/login';
 import Main from '../page/main/main';
-// import Mypage from '../page/mypage/mypage';
+import Mypage from '../page/mypage/mypage';
 import Grouppage from '../page/grouppage/grouppage';
 import Etc from '../page/etcpage/etc';
 
@@ -53,6 +53,13 @@ class Base extends Component {
             userList : [],    // 초기 유저 목록 데이터
 
             holidayHistoryData : [],
+            holidayAdd : 0,
+            holidayUse : 0,
+
+            tardyCount : [],
+            attenAvg : [],
+            attenCount : [],
+            overTimeCount : [],
 
             backgound,  // 전체 배경색
             bar,    // 사이드 메뉴의 테두리
@@ -71,6 +78,7 @@ class Base extends Component {
     async componentDidMount() {
         try {
             if(localStorage.getItem("slacklogin")) {
+                // 토큰 조회
                 let result = axios(configs.domain+"/verify",{
                     method : "get",
                     headers : {
@@ -79,6 +87,7 @@ class Base extends Component {
                     }
                 });
 
+                // 사용자 전체 조회
                 let users = axios.get(`${configs.domain}/user/all`);
                 
                 await Promise.all([result, users]).then(data => {
@@ -86,22 +95,87 @@ class Base extends Component {
                     users = data[1].data;
                 });
 
+                // 토큰 만료시
                 if(result === "err") {
                     localStorage.removeItem("slacklogin");
                     alert("로그인 시간이 만료되었습니다. 재로그인 해주세요.");
                     window.location.href = "/";
                 }
 
+                // 입력용 날짜값
                 let toYear = moment(new Date()).format("YYYY");
+                let preYear = moment(new Date()).subtract(1, 'year').format("YYYY");
+                let toMonth = moment(new Date()).format("YYYY-MM");
 
-                let userInfo = axios.get(`${configs.domain}/user/one?userid=${result.userid}`)
-                let holidayHistory = axios.get(`${configs.domain}/holiday/gettime?textTime=${toYear}&userId=${result.userid}`)
+                // 사용자 정보
+                let userInfo = axios.get(`${configs.domain}/user/one?userid=${result.userid}`);
 
-                await Promise.all([userInfo, holidayHistory]).then(data => {
+                // 휴가 내역
+                let holidayHistory = axios.get(`${configs.domain}/holiday/gettime?textTime=${toYear}&userId=${result.userid}`);
+
+                // 옵션 값
+                let attenData = axios.get(`${configs.domain}/slack/userall?preTime=${preYear}&toTime=${toYear}&userId=${result.userid}&state=${"출근"}`)
+                let tardyData = axios.get(`${configs.domain}/slack/monthall?state=${"지각"}&userId=${result.userid}`)
+                let overTimeData = axios.get(`${configs.domain}/slack/userall?preTime=${preYear}&toTime=${toYear}&userId=${result.userid}&state=${"야근"}`)
+                let overTimeMonth = axios.get(`${configs.domain}/slack/monthall?state=${"야근"}&userId=${result.userid}`)
+                let attenDataMonth = axios.get(`${configs.domain}/slack/monthall?state=${"출근"}&userId=${result.userid}`)
+                let avgToTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${toMonth}`)
+
+                await Promise.all([userInfo, holidayHistory, attenData, tardyData, overTimeData, attenDataMonth, avgToTime, overTimeMonth]).then(data => {
                     userInfo = data[0].data;
                     holidayHistory = data[1].data;
-                })
+                    attenData = data[2].data;
+                    tardyData = data[3].data;
+                    overTimeData = data[4].data;
+                    attenDataMonth = data[5].data;
+                    avgToTime = data[6].data;
+                    overTimeMonth = data[7].data;
+                });
 
+                // 출근 일수
+                attenData = attenData.map(data => {
+                    return {
+                        id : data.id,
+                        text : data.text,
+                        state : data.state,
+                        time : moment(data.time).format("YYYY-MM-DD") + " " + data.textTime,
+                        ts : data.ts,
+                    }
+                });
+
+                // 평균 출근 시간 변환
+                let filterTime_to = avgToTime.split(":");
+                let toSplit = filterTime_to && filterTime_to[0] + filterTime_to[1];
+                toSplit = moment(toSplit, "hmm").format("HH시 mm분")
+
+                let addCount = 0;
+                let useCount = 0.0;
+
+                // 대휴 및 휴가 사용량
+                holidayHistory.forEach(data => {
+                    if(/반차/.test(data.cate)) useCount += 0.5;
+                    if(/휴가/.test(data.cate)) useCount += 1.0;
+                    if(/대휴/.test(data.cate)) {
+                        addCount += 1.0;
+                        useCount += 1.0;
+                    }
+                });
+
+                // 이번달 연차 사용량
+                let historyCount = 0.0;
+                holidayHistory.forEach(data => {
+                    let days = moment(new Date()).format("YYYY-MM");
+                    let reg = new RegExp(`${days}`);
+                    if(reg.test(data.textTime[0].startDate)) {
+                        if(/반차/.test(data.cate)) {
+                            historyCount += 0.5;
+                        } else {
+                            historyCount += 1;
+                        }
+                    }
+                });
+
+                // 모든 값 적용
                 this.setState({ userList : users });
                 this.setState({ user : {
                         userid : result.userid,
@@ -109,8 +183,39 @@ class Base extends Component {
                         usertag : userInfo.usertag,
                         p_token : userInfo.p_token,
                         userchannel : userInfo.userchannel,
+                        holidaycount : userInfo.holidaycount,
                     }, 
-                    holidayHistoryData : holidayHistory 
+                    holidayHistoryData : holidayHistory,    // 휴가 내역
+                    tardyCount : { 
+                        row : tardyData || [], 
+                        to : tardyData[tardyData.length -1].state || null, 
+                        pre : tardyData[tardyData.length -2].state || null ,
+                        title : "지각 횟수",
+                        text : "지각 횟수",
+                    }, 
+                    attenAvg : { 
+                        to : toSplit || null, 
+                        pre : null, 
+                        row : attenData || [],
+                        title : "출근 시간 내역",
+                        text : "출근 시각",
+                    },
+                    attenCount : { 
+                        row : attenDataMonth || [], 
+                        to : attenDataMonth[attenDataMonth.length -1].state || null,
+                        pre : historyCount || null,
+                        title : "출근 일수",
+                        text : "출근 일수",
+                    }, 
+                    overTimeCount : { 
+                        to : overTimeMonth[overTimeMonth.length -1].state || null,  
+                        pre : overTimeMonth[overTimeMonth.length -2] || null, 
+                        row :overTimeData || [],
+                        title : "야근 내역",
+                        text : "초과 근무시간",
+                    },
+                    holidayAdd : addCount,
+                    holidayUse : useCount,
                 });
 
                 // 직원 정보 호출
@@ -162,7 +267,8 @@ class Base extends Component {
 
     render() { 
         const { backgound, bar, load, 
-            user, userList, container, attenTime, special, todayCard
+            user, userList, container, holidayHistoryData, attenTime, special, todayCard,
+            tardyCount, attenAvg, attenCount, overTimeCount, holidayAdd, holidayUse
         } = this.state;
         return (
             <div className="base-main" style={user ? {backgroundImage:`linear-gradient(to top, ${backgound.top}, ${backgound.bottom}`} : {}}>
@@ -174,7 +280,7 @@ class Base extends Component {
                             <Switch>
                                 {/* 초기 유저 데이터가 없을 시 로그인 화면, 있다면 메인 페이지부터 시작  */}
                                 <Route exact path="/" render={() => user ? <Main resetTodayCard={this.resetTodayCard.bind(this)} userList={userList} user={user} attenTime={attenTime} special={special} todayCard={todayCard} />  : <Login />} />
-                                {/* <Route path="/mypage" render={() => user ? <Mypage user={user} holidayHistoryData={holidayHistoryData} /> : <Login />} /> */}
+                                <Route path="/mypage" render={() => user ? <Mypage holidayAdd={holidayAdd} holidayUse={holidayUse} overTimeCount={overTimeCount} attenCount={attenCount} attenAvg={attenAvg} tardyCount={tardyCount} user={user} holidayHistoryData={holidayHistoryData} /> : <Login />} />
                                 <Route path="/grouppage" render={() => user ? <Grouppage user={user} container={container} /> : <Login />} />
                                 <Route path="/etc" render={() => user ? <Etc user={user} /> : <Login />} />
 
