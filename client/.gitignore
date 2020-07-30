@@ -6,6 +6,7 @@
 /src/client_config.js
 /src/devClient_config.js
 /ecosystem.config.js
+/setupProxy.js
 /.pnp
 .pnp.js
 

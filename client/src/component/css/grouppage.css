@@ -190,7 +190,7 @@
     font-family: NanumBarunGothic;
     font-size: 18px;
     color: #000000;
-    width: 10px;
+    text-align: left;
 }
 
 .groupitem-name {
@@ -322,5 +322,17 @@
     .grouppage-box-header-text-atten {
         margin-right: 0px;
         width: 30px;
+    }
+
+    .groupitem-main {
+        justify-content: space-between;
+    }
+    
+    .groupitem-name {
+        margin-left: 20px;
+    }
+    
+    .groupitem-holiday {
+        margin-left: -30px;
     }
 }
