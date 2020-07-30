@@ -43,20 +43,20 @@ class Grouppage extends Component {
                         {/* 타이틀고 필터 */}
                         <div className="grouppage-box-title">
                             <div className="grouppage-box-title-text">근태 현황</div>
-                            <div className="grouppage-box-title-filter">
+                            <div className="grouppage-box-title-filter" onClick={() => alert("추후 업데이트 예정입니다.")}>
                                 <div className="grouppage-filter-circle"></div>
                                 <div className="grouppage-filter-text">월통계</div>
                             </div>
                         </div>
                         {/* 헤더라인 */}
                         <div className="grouppage-box-header">
-                            <div className="grouppage-box-header-text" style={{marginRight:"20px", marginLeft:"40px"}}>순번</div>
-                            <div className="grouppage-box-header-text" style={{marginRight:"102px"}}>이름</div>
-                            <div className="grouppage-box-header-text" style={{marginRight:"20px"}}>사용 휴가</div>
-                            <div className="grouppage-box-header-text" style={{marginRight:"50px"}}>지각</div>
-                            <div className="grouppage-box-header-text" style={{marginRight:"59px"}}>야근</div>
-                            <div className="grouppage-box-header-text" style={{marginRight:"33px"}}>총 휴가</div>
-                            <div className="grouppage-box-header-text" style={{marginRight:"50px"}}>출근</div>
+                            <div className="grouppage-box-header-text-id">순번</div>
+                            <div className="grouppage-box-header-text-name">이름</div>
+                            <div className="grouppage-box-header-text-holiday">사용 휴가</div>
+                            <div className="grouppage-box-header-text-tardy">지각</div>
+                            <div className="grouppage-box-header-text-over">야근</div>
+                            <div className="grouppage-box-header-text-total">총 휴가</div>
+                            <div className="grouppage-box-header-text-atten">출근</div>
                         </div>
                         {/* 라인들 */}
                         <div className="grouppage-box-lines">

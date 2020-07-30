@@ -214,7 +214,7 @@ app.get('/verify', (req,res)=>{
 // -------------------- ********** --------------------
 app.get('/update', async(req, res) => {
     try {
-        await axios.post(`http://localhost:5000/slackapi/channelhistorycal`);
+        await axios.post(`${configs.domain}/slackapi/channelhistorycal`);
         res.send(true);
     } catch(err) {
         console.log("history update err : " + err);

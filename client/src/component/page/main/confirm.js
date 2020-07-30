@@ -39,7 +39,7 @@ export default function Confirm(props) {
                         }
                     </div>
                     <div className="confirm-box-title" style={{marginTop:"12px"}}>메모 사항</div>
-                    <div className="confirm-box-title-text">{content}</div>
+                    <div className="confirm-box-title-text-pre">{content}</div>
                     {
                         state &&
                         <div className="confirm-box-btns">

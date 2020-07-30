@@ -15,7 +15,7 @@
 
 .confirm-box {
     width: 570px;
-    height: 641px;
+    min-height: 641px;
     overflow-y: auto;
     box-shadow: 0px 1px 1px 1px rgb(170, 170, 170);
     background-color: #ffffff;
@@ -30,11 +30,13 @@
 
 .confirm-margin {
     margin-left: 40px;
+    margin-right: 40px;
+    font-size: 18px;
 }
 
 /* 상단 */
 .confirm-box-top {
-    height: 65px;
+    min-height: 65px;
     width: 100%;
     display: flex;
     align-items: center;
@@ -56,7 +58,7 @@
 }
 
 .confirm-box-line {
-    height: 3px;
+    min-height: 3px;
     background-color: #d8d9d9;
     width: 100%;
 }
@@ -72,17 +74,29 @@
 
 .confirm-box-title-text {
     font-family: NanumBarunGothic;
+    font-size: 1em;
+    font-weight: normal;
+    color: #000000;
+    margin-top: 17px;
+    max-width: 100%;
+    max-height: 40px;
+    white-space: pre-line;
+    overflow-y: auto;
+}
+
+.confirm-box-title-text-pre {
+    font-family: NanumBarunGothic;
     font-size: 18px;
     font-weight: normal;
     color: #000000;
     margin-top: 17px;
     max-width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    max-height: 40px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-height: 40px;
+    max-height: 100px;
+    margin-bottom: 100px;
+    white-space: pre-line;
+    word-break: break-all;
+    overflow-y: auto;
 }
 
 .confirm-box-cate-div {
@@ -160,147 +174,35 @@
     align-items: center;
 }
 
-@media (max-height : 700px) {
-    .confirm-main {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 500;
-        background-color: rgba(88, 88, 88, 0.39);
-        overflow: hidden;
-    }
-    
+@media (max-width:590px) {
     .confirm-box {
         width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        box-shadow: 0px 1px 1px 1px rgb(170, 170, 170);
-        background-color: #ffffff;
-        z-index: 600;
-        display: flex;
-        flex-direction: column;
-        font-family: NanumBarunGothic;
-        animation-name: popup;
-        animation-duration: 0.6s;
-        position: absolute;
-        top: 0;
+        min-height: 100%;
     }
 
     .confirm-box-btns {
-        width: 100%;
-        margin-top: 44px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        margin-bottom: 75px;
-    }
-}
-
-@media (max-width : 550px) {
-    .confirm-main {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 500;
-        background-color: rgba(88, 88, 88, 0.39);
-        overflow: hidden;
-    }
-    
-    .confirm-box {
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        box-shadow: 0px 1px 1px 1px rgb(170, 170, 170);
-        background-color: #ffffff;
-        z-index: 600;
-        display: flex;
-        flex-direction: column;
-        font-family: NanumBarunGothic;
-        animation-name: popup;
-        animation-duration: 0.6s;
-        position: absolute;
-        top: 0;
-    }
-
-    .confirm-box-btns {
-        width: 100%;
-        margin-top: 44px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        margin-bottom: 75px;
-    }
-
-    .confirm-box-btns {
-        width: 100%;
-        margin-top: 44px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        margin-bottom: 75px;
-        overflow: hidden;
-    }
-
-    .confirm-box-update {
-        width: 50%;
-        height: 41px;
-        border-radius: 10px;
-        border: solid 2px #6c84ff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-right: 16px;
-        margin-left: 10px;
-    }
-    
-    .confirm-box-delete {
-        width: 50%;
-        height: 41px;
-        border-radius: 10px;
-        border: solid 2px #777777;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-right: 10px;
+        margin-top: -60px;
+        position: relative;
+        margin-bottom: 80px;
     }
 
     .confirm-box-title-text {
-        font-family: NanumBarunGothic;
-        font-size: 14px;
-        font-weight: normal;
-        color: #000000;
-        margin-top: 17px;
-        width: 90%;
-        max-width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        max-height: 40px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        font-size: 0.8em;
+    }
+
+    .confirm-box-title-text-pre {
+        font-size: 0.8em;
+    }
+}
+
+@media (max-height:800px) {
+    .confirm-box {
+        min-height: 100%;
+    }
+
+    .confirm-box-btns {
+        margin-top: -60px;
+        position: relative;
+        margin-bottom: 80px;
     }
 }

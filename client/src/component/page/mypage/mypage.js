@@ -62,7 +62,7 @@ class Mypage extends Component {
                     {/* 나의 이번달 타이틀, 셀렉트 박스, 카드 목록들 */}
                     <div className="mypage-mycard-title">
                         <div className="mypage-mycard-title-text">이번달에 나는 ...</div>
-                        <div className="mypage-mycard-filter-box">
+                        <div className="mypage-mycard-filter-box" onClick={() => alert("추후 추가 예정입니다.")}>
                             <div className="mypage-mycard-circle"></div>
                             <div className="mypage-mycard-filter">월평균</div>
                         </div>
@@ -140,7 +140,10 @@ class Mypage extends Component {
                                     })
                                 }
                             </div>
-                            <div className="mypage-history-add-view" onClick={() => this.setState({ viewCount : viewCount * 2 })}>더 보기</div>
+                            {
+                                viewCount <= holidayHistoryData.length && 
+                                <div className="mypage-history-add-view" onClick={() => this.setState({ viewCount : viewCount * 2 })}>더 보기</div>
+                            }
                         </div>
                     </div>
                 </div>

@@ -169,7 +169,7 @@ class Base extends Component {
                     if(reg.test(data.textTime[0].startDate)) {
                         if(/반차/.test(data.cate)) {
                             historyCount += 0.5;
-                        } else {
+                        } else if(/휴가/.test(data.cate)) {
                             historyCount += 1;
                         }
                     }
@@ -187,7 +187,7 @@ class Base extends Component {
                     }, 
                     holidayHistoryData : holidayHistory,    // 휴가 내역
                     tardyCount : { 
-                        row : tardyData || [], 
+                        row : tardyData.reverse() || [], 
                         to : tardyData ? tardyData[0] ? tardyData[tardyData.length -1].state || null : null : null, 
                         pre : tardyData ? tardyData[0] ? tardyData[tardyData.length -2].state || null : null : null ,
                         title : "지각 횟수",
@@ -196,12 +196,12 @@ class Base extends Component {
                     attenAvg : { 
                         to : toSplit || null, 
                         pre : null, 
-                        row : attenData || [],
+                        row : attenData.reverse() || [],
                         title : "출근 시간 내역",
                         text : "출근 시각",
                     },
                     attenCount : { 
-                        row : attenDataMonth || [], 
+                        row : attenDataMonth.reverse() || [], 
                         to : attenDataMonth ? attenDataMonth[0] ? attenDataMonth[attenDataMonth.length -1].state : null : null,
                         pre : historyCount || null,
                         title : "출근 일수",
@@ -210,7 +210,7 @@ class Base extends Component {
                     overTimeCount : { 
                         to : overTimeMonth ? overTimeMonth[0] ? overTimeMonth[overTimeMonth.length -1].state : null : null,  
                         pre : overTimeMonth ? overTimeMonth[overTimeMonth.length -2] || null : null, 
-                        row :overTimeData || [],
+                        row :overTimeData.reverse() || [],
                         title : "야근 내역",
                         text : "초과 근무시간",
                     },
@@ -250,7 +250,6 @@ class Base extends Component {
                 // 오늘의 카드에 들어갈 일정 데이터
                 const todayCardApi = await axios.get(configs.domain+`/generals/alltime?startDate=${moment().format('MM/DD')}`);
                 this.setState({ todayCard : todayCardApi.data });
-
             }
         } catch(err) {
             console.log("first mount err : ", err);
