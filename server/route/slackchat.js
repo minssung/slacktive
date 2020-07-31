@@ -57,14 +57,10 @@ router.get("/userall", async(req, res) => {
                 model : models.user,
             }],
             order : [[
-                'id' , 'ASC'
+                'id' , 'DESC'
             ]],
             where : {
                 [Op.and] : {
-                    [Op.or] : [
-                        { time : { [Op.like] : `%${req.query.preTime}%`} }, 
-                        { time : { [Op.like] : `%${req.query.toTime}%`} }
-                    ],
                     state : {
                         [Op.or] : stateIf
                     },
@@ -215,6 +211,33 @@ router.get("/onwork", async(req, res) => {
         res.send(result);
     } catch (err){
         console.log("select all tardy user err : " + err);
+    }
+});
+
+// Row Query --------------------------
+// 특정 월에 출근 또는 야근 등의 데이터가 있지만, 지각의 데이터는 없는 경우에, 지각은 해당 월에 0으로 표시됨.
+// 특정 월에 어떤한 데이터도 없을 시, 해당 월은 표시되지 않음.
+router.get("/monthdata", async(req, res) => {
+    let whereQuery = `state="${req.query.state}"`;
+
+    if(req.query.state === "출근") {
+        whereQuery = `(state="출근" or state="지각")`;
+    }
+
+    try {
+        const query = `
+            SELECT d.date, ifnull(s.state,0) as state FROM ( SELECT DATE_FORMAT(time, '%Y-%m') AS date FROM slackchats where userid='${req.query.userId}' 
+            GROUP BY DATE_FORMAT(time, '%Y-%m') ORDER BY date DESC) as d LEFT JOIN (
+            SELECT DATE_FORMAT(time, '%Y-%m') as date, count(state) as state FROM slackchats WHERE userid='${req.query.userId}' and ${whereQuery} 
+            group by DATE_FORMAT(time, '%Y-%m')) as s on d.date = s.date  order by date desc;
+        `;
+
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        
+        res.send(result);
+    } catch (err){
+        console.log("select all tardy user err : " + err);
+        res.send(false);
     }
 });
 

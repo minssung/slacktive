@@ -16,13 +16,17 @@ class Mypage extends Component {
     }
 
     // 팝업 띄우기 위한 카드 클릭 시
-    async cardClick(bool, num) { 
+    cardClick(bool, num) { 
         this.setState({ open : { view : bool, num } }); 
     }
 
     render() { 
-        const { holidayHistoryData, tardyCount, attenAvg, attenCount, overTimeCount, holidayUse, holidayAdd, user } = this.props;
+        const { holidayHistoryData, holidayUse, holidayAdd, user,
+            tardyCount, attenAvg, attenCount, overTimeCount,
+        } = this.props;
         const { open, viewCount } = this.state;
+
+        let holidayRest = holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount;
 
         return (
             <div className="mypage-main">
@@ -38,13 +42,13 @@ class Mypage extends Component {
                         <div className="mypage-holiday-left">
                             <div className="mypage-holiday-title">내 휴가</div>
                             <div className="mypage-holiday-count">
-                                <div className="mypage-holiday-count-current">{holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount}</div>
+                                <div className="mypage-holiday-count-current">{holidayRest}</div>
                                 <div className="mypage-holiday-count-add">{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</div>
                                 <div className="mypage-holiday-count-total">/{user.holidaycount}</div>
                                 <div className="mypage-holiday-count-deco"></div>
                             </div>
                             <div className="mypage-holiday-text">
-                                {`${holidayUse || 0}`}번 사용했고, <strong>{holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount}번{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</strong> 남아있어요.
+                                {`${holidayUse || 0}`}번 사용했고, <strong>{holidayRest}번{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</strong> 남아있어요.
                             </div>
                         </div>
                         <div className="mypage-holiday-right">
@@ -54,7 +58,7 @@ class Mypage extends Component {
                             </div>
                             <div className="mypage-holiday-right-counts">
                                 <div className="mypage-holiday-right-counts-top">{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</div>
-                                <div className="mypage-holiday-right-counts-bot">{holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount}</div>
+                                <div className="mypage-holiday-right-counts-bot">{holidayRest}</div>
                             </div>
                         </div>
                     </div>
@@ -72,8 +76,8 @@ class Mypage extends Component {
                             num={0} 
                             cardClick={this.cardClick.bind(this)} 
                             img="/img/run.png" 
-                            result={`지난달보다 ${(tardyCount.to - tardyCount.pre) || 0}회 증가`} 
-                            data={`${tardyCount.to ? tardyCount.to + "회" : "없음"}`} 
+                            result={`지난달보다 ${tardyCount.pre}회 증가`} 
+                            data={`${tardyCount.to}일`} 
                             label="지각 횟수" 
                             color="linear-gradient(to top, #a665e5, #ff92eb)" 
                         />
@@ -81,8 +85,8 @@ class Mypage extends Component {
                             num={1} 
                             cardClick={this.cardClick.bind(this)} 
                             img="/img/clock.png" 
-                            result={`${attenAvg.pre ? `지난달보다  ${attenAvg.pre} 빠름` : `추후 추가 예정`}`} 
-                            data={`${attenAvg.to || "없음"}`} 
+                            result={`지난달보다 ${attenAvg.pre.h ? (attenAvg.pre.h + "시" + attenAvg.pre.m + "분") : (attenAvg.pre.m + "분")} 빠름`} 
+                            data={`${attenAvg.to ? attenAvg.to : "없음"}`} 
                             label="평균 출근시간" 
                             color="linear-gradient(to top, #988ffe, #988ffe, #9cd5ff)" 
                         />
@@ -90,7 +94,7 @@ class Mypage extends Component {
                             num={2} 
                             cardClick={this.cardClick.bind(this)} 
                             img="/img/workplace.png" 
-                            result={`이번달 연차 ${attenCount.pre || 0}개 사용`} 
+                            result={`이번달 연차 ${attenCount.pre}개 사용`} 
                             data={`${attenCount.to ? attenCount.to + "일" : "없음"}`} 
                             label="출근 일수" 
                             color="linear-gradient(to top, #6b59cf, #b47eff)" 
@@ -99,8 +103,8 @@ class Mypage extends Component {
                             num={3} 
                             cardClick={this.cardClick.bind(this)} 
                             img="/img/overtime.png" 
-                            result={`지난달보다 ${overTimeCount.pre || 0}회 증가`} 
-                            data={`${(overTimeCount.to || 0) + "일"}`} 
+                            result={`지난달보다 ${overTimeCount.pre}회 증가`} 
+                            data={`${overTimeCount.to ? overTimeCount.to + "일" : "없음"}`} 
                             label="야근 일수" 
                             color="linear-gradient(to top, #ffd15b, #ff8e3d)" 
                         />

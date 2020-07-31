@@ -53,8 +53,10 @@ class Base extends Component {
             userList : [],    // 초기 유저 목록 데이터
 
             holidayHistoryData : [],
-            holidayAdd : 0,
-            holidayUse : 0,
+
+            holidayAdd : 0,     // 대휴량
+            holidayUse : 0,     // 사용량
+            historyCount : 0,   // 이번달 사용량
 
             tardyCount : [],
             attenAvg : [],
@@ -104,8 +106,8 @@ class Base extends Component {
 
                 // 입력용 날짜값
                 let toYear = moment(new Date()).format("YYYY");
-                let preYear = moment(new Date()).subtract(1, 'year').format("YYYY");
                 let toMonth = moment(new Date()).format("YYYY-MM");
+                let preMonth = moment(new Date()).subtract(1, 'month').format("YYYY-MM");
 
                 // 사용자 정보
                 let userInfo = axios.get(`${configs.domain}/user/one?userid=${result.userid}`);
@@ -114,14 +116,17 @@ class Base extends Component {
                 let holidayHistory = axios.get(`${configs.domain}/holiday/gettime?textTime=${toYear}&userId=${result.userid}`);
 
                 // 옵션 값
-                let attenData = axios.get(`${configs.domain}/slack/userall?preTime=${preYear}&toTime=${toYear}&userId=${result.userid}&state=${"출근"}`)
-                let tardyData = axios.get(`${configs.domain}/slack/monthall?state=${"지각"}&userId=${result.userid}`)
-                let overTimeData = axios.get(`${configs.domain}/slack/userall?preTime=${preYear}&toTime=${toYear}&userId=${result.userid}&state=${"야근"}`)
-                let overTimeMonth = axios.get(`${configs.domain}/slack/monthall?state=${"야근"}&userId=${result.userid}`)
-                let attenDataMonth = axios.get(`${configs.domain}/slack/monthall?state=${"출근"}&userId=${result.userid}`)
-                let avgToTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${toMonth}`)
+                let tardyData = axios.get(`${configs.domain}/slack/monthdata?state=${"지각"}&userId=${result.userid}`);         // 지각 데이터 전체
+                let attenDataMonth = axios.get(`${configs.domain}/slack/monthdata?state=${"출근"}&userId=${result.userid}`);    // 출근 월 데이터
+                let overTimeMonth = axios.get(`${configs.domain}/slack/monthdata?state=${"야근"}&userId=${result.userid}`);     // 야근 월 데이터
+            
+                let attenData = axios.get(`${configs.domain}/slack/userall?userId=${result.userid}&state=${"출근"}`);           // 출근 일수 데이터
+                let overTimeData = axios.get(`${configs.domain}/slack/userall?userId=${result.userid}&state=${"야근"}`);        // 야근 일수 데이터
+                
+                let avgToTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${toMonth}`);          // 이번달 평균시간
+                let avgPreTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${preMonth}`);        // 저번달 평균시간
 
-                await Promise.all([userInfo, holidayHistory, attenData, tardyData, overTimeData, attenDataMonth, avgToTime, overTimeMonth]).then(data => {
+                await Promise.all([userInfo, holidayHistory, attenData, tardyData, overTimeData, attenDataMonth, avgToTime, overTimeMonth, avgPreTime]).then(data => {
                     userInfo = data[0].data;
                     holidayHistory = data[1].data;
                     attenData = data[2].data;
@@ -130,6 +135,7 @@ class Base extends Component {
                     attenDataMonth = data[5].data;
                     avgToTime = data[6].data;
                     overTimeMonth = data[7].data;
+                    avgPreTime = data[8].data;
                 });
 
                 // 출근 일수
@@ -139,41 +145,15 @@ class Base extends Component {
                         text : data.text,
                         state : data.state,
                         time : moment(data.time).format("YYYY-MM-DD") + " " + data.textTime,
-                        ts : data.ts,
                     }
                 });
 
                 // 평균 출근 시간 변환
-                let filterTime_to = avgToTime.split(":");
-                let toSplit = filterTime_to && filterTime_to[0] + filterTime_to[1];
-                toSplit = moment(toSplit, "hmm").format("HH시 mm분")
+                const toAvgTime = this.avgGetTime(avgToTime);
+                const avgDiff = this.avgGetTimeDiff(avgToTime, avgPreTime);
 
-                let addCount = 0;
-                let useCount = 0.0;
-
-                // 대휴 및 휴가 사용량
-                holidayHistory.forEach(data => {
-                    if(/반차/.test(data.cate)) useCount += 0.5;
-                    if(/휴가/.test(data.cate)) useCount += 1.0;
-                    if(/대휴/.test(data.cate)) {
-                        addCount += 1.0;
-                        useCount += 1.0;
-                    }
-                });
-
-                // 이번달 연차 사용량
-                let historyCount = 0.0;
-                holidayHistory.forEach(data => {
-                    let days = moment(new Date()).format("YYYY-MM");
-                    let reg = new RegExp(`${days}`);
-                    if(reg.test(data.textTime[0].startDate)) {
-                        if(/반차/.test(data.cate)) {
-                            historyCount += 0.5;
-                        } else {
-                            historyCount += 1;
-                        }
-                    }
-                });
+                // 휴가 사용량 계산 ( 사용량, 대휴량, 내역 )
+                await this.holidayCalculate(holidayHistory);
 
                 // 모든 값 적용
                 this.setState({ userList : users });
@@ -187,35 +167,33 @@ class Base extends Component {
                     }, 
                     holidayHistoryData : holidayHistory,    // 휴가 내역
                     tardyCount : { 
-                        row : tardyData || [], 
-                        to : tardyData ? tardyData[0] ? tardyData[tardyData.length -1].state || null : null : null, 
-                        pre : tardyData ? tardyData[0] ? tardyData[tardyData.length -2].state || null : null : null ,
+                        row : tardyData || [],
+                        pre : tardyData[0] ? tardyData[0].state - tardyData[1].state : 0,
+                        to : tardyData[0].state || 0,
                         title : "지각 횟수",
                         text : "지각 횟수",
                     }, 
                     attenAvg : { 
-                        to : toSplit || null, 
-                        pre : null, 
                         row : attenData || [],
+                        pre : { h : avgDiff.h || 0, m : avgDiff.m || 0 },
+                        to : toAvgTime || 0,
                         title : "출근 시간 내역",
                         text : "출근 시각",
                     },
                     attenCount : { 
-                        row : attenDataMonth || [], 
-                        to : attenDataMonth ? attenDataMonth[0] ? attenDataMonth[attenDataMonth.length -1].state : null : null,
-                        pre : historyCount || null,
+                        row : attenDataMonth || [],
+                        pre : this.state.historyCount || 0,
+                        to : attenDataMonth[0].state || 0,
                         title : "출근 일수",
                         text : "출근 일수",
                     }, 
                     overTimeCount : { 
-                        to : overTimeMonth ? overTimeMonth[0] ? overTimeMonth[overTimeMonth.length -1].state : null : null,  
-                        pre : overTimeMonth ? overTimeMonth[overTimeMonth.length -2] || null : null, 
-                        row :overTimeData || [],
+                        row : overTimeData || [],
+                        pre : (overTimeMonth[0].state - overTimeMonth[1].state) || 0,
+                        to : overTimeMonth[0].state || 0,
                         title : "야근 내역",
                         text : "초과 근무시간",
                     },
-                    holidayAdd : addCount,
-                    holidayUse : useCount,
                 });
 
                 // 직원 정보 호출
@@ -260,6 +238,81 @@ class Base extends Component {
         this.setState({ load : true });
     }
 
+    // 휴가 계산
+    async holidayCalculate(holidayHistory) {
+        let addCount = 0;
+        let useCount = 0.0;
+
+        // 이번달 연차 사용량
+        let historyCount = 0.0;
+        holidayHistory.forEach(data => {
+            let days = moment(new Date()).format("YYYY-MM");
+            let reg = new RegExp(`${days}`);
+
+            data.textTime.forEach(time => {
+                // 하루 초과 차이나는 경우 ( 연속된 일 수 휴가 )
+                if(moment(time.endDate).diff(time.startDate, 'day') > 0) {
+                    let count = moment(time.endDate).diff(time.startDate, 'day') + 1;
+                    if(reg.test(time.startDate)) {
+                        if(/휴가/.test(data.cate)) {
+                            historyCount += count;
+                        }
+                    }
+                    if(/휴가/.test(data.cate)) {
+                        useCount += count;
+                    }
+                // 하루 휴가
+                } else {
+                    if(reg.test(time.startDate)) {
+                        if(/반차/.test(data.cate)) {
+                            historyCount += 0.5;
+                        } else if(/휴가/.test(data.cate)) {
+                            historyCount += 1;
+                        }
+                    }
+                    if(/반차/.test(data.cate)) {
+                        useCount += 0.5;
+                    } else if(/휴가/.test(data.cate)) {
+                        useCount += 1;
+                    } else if(/대휴/.test(data.cate)) {
+                        addCount += 1.0;
+                        useCount += 1.0;
+                    }
+                }
+            });
+        });
+
+        await this.setState({ 
+            holidayAdd : addCount,
+            holidayUse : useCount,
+            historyCount,
+        });
+    }
+
+    // 평균 시간 계산
+    avgGetTime(data) {
+        let filterTime_to = data.split(":");
+        let toSplit = filterTime_to[0] + filterTime_to[1];
+        toSplit = moment(toSplit, "hmm").format("HH시 mm분");
+        return toSplit;
+    }
+
+    // 두 평균 시간의 차이 계산
+    avgGetTimeDiff(data1, data2) {
+        let filterTime_to = data1.split(":");
+        let hour1 = parseInt(filterTime_to[0]);
+        let min1 = parseInt(filterTime_to[1]);
+
+        filterTime_to = data2.split(":");
+        let hour2 = parseInt(filterTime_to[0]);
+        let min2 = parseInt(filterTime_to[1]);
+
+        const result_h = hour1 - hour2;
+        const result_m = min1 - min2;
+        
+        return { h : result_h, m : result_m };
+    }
+
     // 배경색을 사이드 메뉴 누를 시에 변경
     backgoundChange(top, bottom, num) { this.setState({ backgound : { top, bottom }, bar : num }); }
 
@@ -271,7 +324,7 @@ class Base extends Component {
     render() { 
         const { backgound, bar, load, 
             user, userList, container, holidayHistoryData, attenTime, special, todayCard,
-            tardyCount, attenAvg, attenCount, overTimeCount, holidayAdd, holidayUse
+            tardyCount, attenAvg, attenCount, overTimeCount, holidayAdd, holidayUse, historyCount
         } = this.state;
         return (
             <div className="base-main" style={user ? {backgroundImage:`linear-gradient(to top, ${backgound.top}, ${backgound.bottom}`} : {}}>
@@ -283,7 +336,7 @@ class Base extends Component {
                             <Switch>
                                 {/* 초기 유저 데이터가 없을 시 로그인 화면, 있다면 메인 페이지부터 시작  */}
                                 <Route exact path="/" render={() => user ? <Main resetTodayCard={this.resetTodayCard.bind(this)} userList={userList} user={user} attenTime={attenTime} special={special} todayCard={todayCard} />  : <Login />} />
-                                <Route path="/mypage" render={() => user ? <Mypage holidayAdd={holidayAdd} holidayUse={holidayUse} overTimeCount={overTimeCount} attenCount={attenCount} attenAvg={attenAvg} tardyCount={tardyCount} user={user} holidayHistoryData={holidayHistoryData} /> : <Login />} />
+                                <Route path="/mypage" render={() => user ? <Mypage historyCount={historyCount} holidayAdd={holidayAdd} holidayUse={holidayUse} overTimeCount={overTimeCount} attenCount={attenCount} attenAvg={attenAvg} tardyCount={tardyCount} user={user} holidayHistoryData={holidayHistoryData} /> : <Login />} />
                                 <Route path="/grouppage" render={() => user ? <Grouppage user={user} container={container} /> : <Login />} />
                                 <Route path="/etc" render={() => user ? <Etc user={user} /> : <Login />} />
 

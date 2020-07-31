@@ -32,10 +32,12 @@ export default function Mypopup(props) {
                     {
                         data.row[0] ? data.row.map((value,i) => {
                             if(((page - 1) * item) <= i && i < item * page) {
+                                const _data = value.date ? moment(value.date).format("YYYY년 M월") : moment(value.time).format("YYYY. M. D (ddd)");
+                                const _row = value.date ? value.state + "회" : moment(value.time).format("HH시 mm분");
                                 return <Row 
                                     key={i} 
-                                    date={value.date ? moment(value.date).format("YYYY년 M월") : moment(value.time).format("YYYY. M. D (ddd)") } 
-                                    rowData={value.date ? value.state + "회" : moment(value.time).format("HH시 mm분")} 
+                                    date={_data} 
+                                    rowData={_row} 
                                     notData={"없음"} 
                                 />
                             } else return null;
