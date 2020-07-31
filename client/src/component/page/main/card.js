@@ -14,7 +14,14 @@ export default function Card(props) {
                 <div className="card-member">
                     {
                         props.partner ? props.partner[0] &&
-                        props.partner.map((data,i) => <span key={i}>{data.username}&nbsp;</span>)
+                        props.partner.map((data,i) => {
+                            if(i < 2)
+                                return <span key={i}>{data.username}&nbsp;</span>
+                            else if(i === 2)
+                                return <span key={i}>외 {props.partner.length - i}명</span>
+                            else
+                                return null
+                        })
                         :
                         "참여인원이 없습니다."
                     }
