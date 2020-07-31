@@ -4,11 +4,7 @@
 /node_modules
 /src/client_config.js
 /src/devClient_config.js
-<<<<<<< HEAD
-=======
-/ecosystem.config.js
 /setupProxy.js
->>>>>>> JJ
 /.pnp
 .pnp.js
 

@@ -66,7 +66,7 @@ class Mypage extends Component {
                     {/* 나의 이번달 타이틀, 셀렉트 박스, 카드 목록들 */}
                     <div className="mypage-mycard-title">
                         <div className="mypage-mycard-title-text">이번달에 나는 ...</div>
-                        <div className="mypage-mycard-filter-box" onClick={() => alert("추후 추가 예정입니다.")}>
+                        <div className="mypage-mycard-filter-box" onClick={() => alert("추후 업데이트 예정입니다.")}>
                             <div className="mypage-mycard-circle"></div>
                             <div className="mypage-mycard-filter">월평균</div>
                         </div>
