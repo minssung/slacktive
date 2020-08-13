@@ -110,91 +110,103 @@ class Base extends Component {
                 let preMonth = moment(new Date()).subtract(1, 'month').format("YYYY-MM");
 
                 // 사용자 정보
-                let userInfo = axios.get(`${configs.domain}/user/one?userid=${result.userid}`);
+                let userInfo = await axios.get(`${configs.domain}/user/one?userid=${result.userid}`);
+                if(userInfo.data) {
+                    userInfo = userInfo.data;
+                    // 휴가 내역
+                    let holidayHistory = axios.get(`${configs.domain}/holiday/gettime?textTime=${toYear}&userId=${result.userid}`);
 
-                // 휴가 내역
-                let holidayHistory = axios.get(`${configs.domain}/holiday/gettime?textTime=${toYear}&userId=${result.userid}`);
-
-                // 옵션 값
-                let tardyData = axios.get(`${configs.domain}/slack/monthdata?state=${"지각"}&userId=${result.userid}`);         // 지각 데이터 전체
-                let attenDataMonth = axios.get(`${configs.domain}/slack/monthdata?state=${"출근"}&userId=${result.userid}`);    // 출근 월 데이터
-                let overTimeMonth = axios.get(`${configs.domain}/slack/monthdata?state=${"야근"}&userId=${result.userid}`);     // 야근 월 데이터
-            
-                let attenData = axios.get(`${configs.domain}/slack/userall?userId=${result.userid}&state=${"출근"}`);           // 출근 일수 데이터
-                let overTimeData = axios.get(`${configs.domain}/slack/userall?userId=${result.userid}&state=${"야근"}`);        // 야근 일수 데이터
+                    // 옵션 값
+                    let tardyData = axios.get(`${configs.domain}/slack/monthdata?state=${"지각"}&userId=${result.userid}`);         // 지각 데이터 전체
+                    let attenDataMonth = axios.get(`${configs.domain}/slack/monthdata?state=${"출근"}&userId=${result.userid}`);    // 출근 월 데이터
+                    let overTimeMonth = axios.get(`${configs.domain}/slack/monthdata?state=${"야근"}&userId=${result.userid}`);     // 야근 월 데이터
                 
-                let avgToTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${toMonth}`);          // 이번달 평균시간
-                let avgPreTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${preMonth}`);        // 저번달 평균시간
+                    let attenData = axios.get(`${configs.domain}/slack/userall?userId=${result.userid}&state=${"출근"}`);           // 출근 일수 데이터
+                    let overTimeData = axios.get(`${configs.domain}/slack/userall?userId=${result.userid}&state=${"야근"}`);        // 야근 일수 데이터
+                    
+                    let avgToTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${toMonth}`);          // 이번달 평균시간
+                    let avgPreTime = axios.get(`${configs.domain}/slack/avgtime?userId=${result.userid}&time=${preMonth}`);        // 저번달 평균시간
 
-                await Promise.all([userInfo, holidayHistory, attenData, tardyData, overTimeData, attenDataMonth, avgToTime, overTimeMonth, avgPreTime]).then(data => {
-                    userInfo = data[0].data;
-                    holidayHistory = data[1].data;
-                    attenData = data[2].data;
-                    tardyData = data[3].data;
-                    overTimeData = data[4].data;
-                    attenDataMonth = data[5].data;
-                    avgToTime = data[6].data;
-                    overTimeMonth = data[7].data;
-                    avgPreTime = data[8].data;
-                });
+                    await Promise.all([holidayHistory, attenData, tardyData, overTimeData, attenDataMonth, avgToTime, overTimeMonth, avgPreTime]).then(data => {
+                        holidayHistory = data[0].data;
+                        attenData = data[1].data;
+                        tardyData = data[2].data;
+                        overTimeData = data[3].data;
+                        attenDataMonth = data[4].data;
+                        avgToTime = data[5].data;
+                        overTimeMonth = data[6].data;
+                        avgPreTime = data[7].data;
+                    });
 
-                // 출근 일수
-                attenData = attenData.map(data => {
-                    return {
-                        id : data.id,
-                        text : data.text,
-                        state : data.state,
-                        time : moment(data.time).format("YYYY-MM-DD") + " " + data.textTime,
+                    // 출근 일수
+                    attenData = attenData.map(data => {
+                        return {
+                            id : data.id,
+                            text : data.text,
+                            state : data.state,
+                            time : moment(data.time).format("YYYY-MM-DD") + " " + data.textTime,
+                        }
+                    });
+
+                    // 평균 출근 시간 변환
+                    let toAvgTime = null;
+                    let avgDiff = null;
+                    if(avgToTime) {
+                        toAvgTime = this.avgGetTime(avgToTime);
+                        avgDiff = this.avgGetTimeDiff(avgToTime, avgPreTime);
                     }
-                });
 
-                // 평균 출근 시간 변환
-                const toAvgTime = this.avgGetTime(avgToTime);
-                const avgDiff = this.avgGetTimeDiff(avgToTime, avgPreTime);
+                    // 휴가 사용량 계산 ( 사용량, 대휴량, 내역 )
+                    await this.holidayCalculate(holidayHistory);
 
-                // 휴가 사용량 계산 ( 사용량, 대휴량, 내역 )
-                await this.holidayCalculate(holidayHistory);
+                    // 모든 값 적용
+                    await this.setState({ user : {
+                            userid : result.userid,
+                            username : userInfo.username,
+                            usertag : userInfo.usertag,
+                            p_token : userInfo.p_token,
+                            userchannel : userInfo.userchannel,
+                            holidaycount : userInfo.holidaycount,
+                        }, 
+                        holidayHistoryData : holidayHistory,    // 휴가 내역
+                        tardyCount : { 
+                            row : tardyData || [],
+                            pre : tardyData[0] ? tardyData[0].state - tardyData[1].state : 0,
+                            to : tardyData[0].state || 0,
+                            title : "지각 횟수",
+                            text : "지각 횟수",
+                        }, 
+                        attenAvg : { 
+                            row : attenData || [],
+                            pre : { h : avgDiff.h || 0, m : avgDiff.m || 0 },
+                            to : toAvgTime || 0,
+                            title : "출근 시간 내역",
+                            text : "출근 시각",
+                        },
+                        attenCount : { 
+                            row : attenDataMonth || [],
+                            pre : this.state.historyCount || 0,
+                            to : attenDataMonth[0].state || 0,
+                            title : "출근 일수",
+                            text : "출근 일수",
+                        }, 
+                        overTimeCount : { 
+                            row : overTimeData || [],
+                            pre : (overTimeMonth[0].state - overTimeMonth[1].state) || 0,
+                            to : overTimeMonth[0].state || 0,
+                            title : "야근 내역",
+                            text : "초과 근무시간",
+                        },
+                    });
+                } else {
+                    localStorage.removeItem("slacklogin");
+                    alert("팀에 추가되어 있지않은 사용자입니다.");
+                    window.location.href = "/";
+                    return;
+                }
 
-                // 모든 값 적용
+                // 유저 리스트
                 this.setState({ userList : users });
-                this.setState({ user : {
-                        userid : result.userid,
-                        username : userInfo.username,
-                        usertag : userInfo.usertag,
-                        p_token : userInfo.p_token,
-                        userchannel : userInfo.userchannel,
-                        holidaycount : userInfo.holidaycount,
-                    }, 
-                    holidayHistoryData : holidayHistory,    // 휴가 내역
-                    tardyCount : { 
-                        row : tardyData || [],
-                        pre : tardyData[0] ? tardyData[0].state - tardyData[1].state : 0,
-                        to : tardyData[0].state || 0,
-                        title : "지각 횟수",
-                        text : "지각 횟수",
-                    }, 
-                    attenAvg : { 
-                        row : attenData || [],
-                        pre : { h : avgDiff.h || 0, m : avgDiff.m || 0 },
-                        to : toAvgTime || 0,
-                        title : "출근 시간 내역",
-                        text : "출근 시각",
-                    },
-                    attenCount : { 
-                        row : attenDataMonth || [],
-                        pre : this.state.historyCount || 0,
-                        to : attenDataMonth[0].state || 0,
-                        title : "출근 일수",
-                        text : "출근 일수",
-                    }, 
-                    overTimeCount : { 
-                        row : overTimeData || [],
-                        pre : (overTimeMonth[0].state - overTimeMonth[1].state) || 0,
-                        to : overTimeMonth[0].state || 0,
-                        title : "야근 내역",
-                        text : "초과 근무시간",
-                    },
-                });
 
                 // 직원 정보 호출
                 const employee = await axios.post(configs.domain+"/employee/status");

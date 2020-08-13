@@ -76,7 +76,7 @@ class Mypage extends Component {
                             num={0} 
                             cardClick={this.cardClick.bind(this)} 
                             img="/img/run.png" 
-                            result={`지난달보다 ${tardyCount.pre}회 증가`} 
+                            result={`지난달보다 ${tardyCount.pre < 0 ? tardyCount.pre * -1 + "회 감소" : tardyCount.pre + "회 증가"}`} 
                             data={`${tardyCount.to}일`} 
                             label="지각 횟수" 
                             color="linear-gradient(to top, #a665e5, #ff92eb)" 
@@ -103,7 +103,7 @@ class Mypage extends Component {
                             num={3} 
                             cardClick={this.cardClick.bind(this)} 
                             img="/img/overtime.png" 
-                            result={`지난달보다 ${overTimeCount.pre}회 증가`} 
+                            result={`지난달보다 ${overTimeCount.pre < 0 ? overTimeCount.pre * -1 + "회 감소"  : overTimeCount.pre + "회 증가"}`} 
                             data={`${overTimeCount.to ? overTimeCount.to + "일" : "없음"}`} 
                             label="야근 일수" 
                             color="linear-gradient(to top, #ffd15b, #ff8e3d)" 
