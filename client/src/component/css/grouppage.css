@@ -328,12 +328,19 @@
     .groupitem-main {
         justify-content: space-between;
     }
+
+    .groupitem-id {
+        width: 25px;
+    }
     
     .groupitem-name {
         margin-left: 0px;
+        width: 80px;
+        font-size: 16px;
     }
     
     .groupitem-holiday {
-        margin-left: -30px;
+        margin-left: -20px;
+        margin-right: 10px;
     }
 }
