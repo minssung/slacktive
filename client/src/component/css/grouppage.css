@@ -30,8 +30,7 @@
 
 .grouppage-box {
     width: 100%;
-    width: 100%;
-    height: 810px;
+    min-height: 810px;
     border-radius: 20px;
     background-color: #ffffff;
     margin-top: 27px;
@@ -191,6 +190,7 @@
 .grouppage-box-btn-nums {
     display: flex;
     justify-content: center;
+    margin-bottom: 37px;
 }
 
 @media (max-width:660px) {
