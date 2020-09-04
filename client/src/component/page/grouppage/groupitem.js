@@ -3,14 +3,21 @@ import React from 'react';
 export default function Groupitem(props) {
     const { id, name, holiday, tardy, overtime, total, atten } = props;
     return (
-        <div className="groupitem-main">
-            <div className="groupitem-id">{id}</div>
-            <div className="groupitem-name">{name}</div>
-            <div className="groupitem-holiday">{holiday}</div>
-            <div className="groupitem-tardy">{tardy}</div>
-            <div className="groupitem-overtime">{overtime}</div>
-            <div className="groupitem-total">{total}</div>
-            <div className="groupitem-atten">{atten}</div>
-        </div>
+        <>
+            <tr className="grouppage-table-data">
+                <td>{id}</td>
+                <td style={{ textAlign: "left" }}>{name}</td>
+                <td style={{ color:"#4ea9ff" }}>{holiday}</td>
+                <td style={{ color:"#ff4d4d" }}>{tardy}</td>
+                <td style={{ color: overtime ? "#f2994a" : "black" }}>{overtime}</td>
+                <td>{total}</td>
+                <td>{atten}</td>
+            </tr>
+            <tr className="grouppage-table-data-line-tr">
+                <td colSpan="7" className="grouppage-table-data-line-td">
+                    <div className="grouppage-table-data-line"></div>
+                </td>
+            </tr>
+        </>
     )
 }
