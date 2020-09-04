@@ -56,9 +56,9 @@ class Grouppage extends Component {
                         {/* 헤더라인 */}
                         <table className="grouppage-table">
                             <thead>
-                                <tr>
-                                    <td>순번</td>
-                                    <td style={{ textAlign: "left" }}>이름</td>
+                                <tr className="grouppage-table-thead-tr">
+                                    <td style={{ width: "10%" }}>순번</td>
+                                    <td style={{ textAlign: "left", width: "15%" }}>이름</td>
                                     <td>사용휴가</td>
                                     <td>지각</td>
                                     <td>야근</td>

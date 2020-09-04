@@ -98,6 +98,10 @@
     color: #777777;
 }
 
+.grouppage-table-thead-tr {
+    width: 100%;
+}
+
 .grouppage-lines {
     width: 100%;
     position: absolute;
@@ -111,13 +115,13 @@
 
 .grouppage-line1 {
     background-color: #b6b6b673;
-    width: 40%;
+    width: 30%;
     height: 3px;
 }
 
 .grouppage-line2 {
     background-color: #777777;
-    width: 30%;
+    width: 40%;
     height: 3px;
 }
 
