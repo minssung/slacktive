@@ -6,7 +6,7 @@ export default function Groupitem(props) {
         <>
             <tr className="grouppage-table-data">
                 <td style={{ width: "10%" }}>{id}</td>
-                <td style={{ textAlign: "left", width: "15%" }}>{name}</td>
+                <td style={{ textAlign: "left", width: "15%", whiteSpace: "nowrap" }}>{name}</td>
                 <td style={{ color:"#4ea9ff" }}>{holiday}</td>
                 <td style={{ color:"#ff4d4d" }}>{tardy}</td>
                 <td style={{ color: overtime ? "#f2994a" : "black"}}>{overtime}</td>
