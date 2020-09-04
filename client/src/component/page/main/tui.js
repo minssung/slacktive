@@ -19,6 +19,7 @@ class Tui extends Component {
         this.calendarRef = React.createRef();   // 캘린더 인스턴스용 Ref
         this.state = {
             resultData : [],
+            todayMonth : moment(new Date()).format("YYYY-MM-DD"),
 
             open : false,    // 팝업 오픈
             click : false,   // 상세 팝업 오픈
@@ -146,8 +147,14 @@ class Tui extends Component {
     // 월 변경의 경우
     nextPre(cate) {
         const calendar = this.calendarRef.current.getInstance();
-        if(!cate) calendar.prev();
-        else calendar.next();
+        const { todayMonth } = this.state;
+        if(!cate) {
+            this.setState({ todayMonth : moment(todayMonth).subtract(1, "month") });
+            calendar.prev();
+        } else {
+            this.setState({ todayMonth : moment(todayMonth).add(1, "month") });
+            calendar.next();
+        }
     }
 
     // 카테 컬러 변경
@@ -437,7 +444,7 @@ class Tui extends Component {
             partnerInput,
             partners,
             content,
-            open, click, load
+            open, click, load, todayMonth
         } = this.state;
         const { userList } = this.props;
         return (
@@ -452,6 +459,7 @@ class Tui extends Component {
                 {/* 버튼 영역 */}
                 <div className="tui-arrow">
                     <div onClick={this.nextPre.bind(this, false)} className="tui-text">{" < "}&nbsp;이전달</div>
+                    <div className="tui-todaymonth">{moment(todayMonth).format("M")}월</div>
                     <div onClick={this.nextPre.bind(this, true)} className="tui-text">다음달&nbsp;{" > "}</div>
                 </div>
                 

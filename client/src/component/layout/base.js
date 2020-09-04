@@ -178,7 +178,7 @@ class Base extends Component {
                         }, 
                         attenAvg : { 
                             row : attenData || [],
-                            pre : { h : avgDiff.h || 0, m : avgDiff.m || 0 },
+                            pre : { h : avgDiff ? (avgDiff.h || 0) : 0, m : avgDiff ? (avgDiff.m || 0) : 0 },
                             to : toAvgTime || 0,
                             title : "출근 시간 내역",
                             text : "출근 시각",

@@ -111,7 +111,7 @@
 .mypage-holiday-right {
     display: flex;
     flex-direction: row;
-    margin-right: 30px;
+    margin-right: 50px;
 }
 
 .mypage-holiday-right-images {
@@ -120,23 +120,22 @@
 }
 
 .mypage-holiday-usa {
-    width: 117.4px;
-    height: 62.5px;
+    width: 127px;
+    height: auto;
     position: absolute;
-    margin-top: 10.9px;
-    margin-left: 10px;
+    margin-top: 20px;
+    margin-left: -147px;
 }
 
-.mypage-holiday-bottle {
-    width: 127px;
-    height: 161.3px;
-    margin-top: 56.5px;
+.mypage-holiday-usa-null {
+    width: 138px;
+    margin-top: 50px;
 }
 
 .mypage-holiday-right-counts {
     display: flex;
     flex-direction: column;
-    margin-left: 15px;
+    margin-left: 0px;
 }
 
 .mypage-holiday-right-counts-top {
@@ -516,17 +515,15 @@
     }
     
     .mypage-holiday-usa {
-        width: 117.4px;
-        height: 62.5px;
         position: absolute;
         margin-top: 60px;
-        margin-left: 10px;
+        margin-left: 20px;
     }
-    
-    .mypage-holiday-bottle {
-        width: 127px;
-        height: 161.3px;
-        margin-top: 106.5px;
+
+    .mypage-holiday-right-counts {
+        display: flex;
+        flex-direction: column;
+        margin-left: 160px;
     }
 
     .mypage-holiday-right-counts-top {

@@ -12,6 +12,11 @@
     align-items: center;
 }
 
+.tui-todaymonth {
+    color: white;
+    font-size: 18px;
+}
+
 .tui-text {
     font-family: 12LotteMartDream;
     font-size: 18px;

@@ -26,7 +26,18 @@ class Mypage extends Component {
         } = this.props;
         const { open, viewCount } = this.state;
 
-        let holidayRest = holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount;
+        let holidayRest  = holidayUse ? (user.holidaycount - holidayUse) : user.holidaycount;
+
+        let usaNull = false;
+        let usaNum = 0;
+        if(holidayRest < 20 && holidayRest >= 18) usaNum = 1;
+        if(holidayRest < 18 && holidayRest >= 14) usaNum = 2;
+        if(holidayRest < 14 && holidayRest >= 10) usaNum = 3;
+        if(holidayRest < 10 && holidayRest >= 5) usaNum = 4;
+        if(holidayRest < 5 && holidayRest >= 1) usaNum = 5;
+        if(holidayRest <= 0) {
+            usaNum = 6; usaNull = true;
+        }
 
         return (
             <div className="mypage-main">
@@ -53,8 +64,7 @@ class Mypage extends Component {
                         </div>
                         <div className="mypage-holiday-right">
                             <div className="mypage-holiday-right-images">
-                                <img src="/img/usa.png" alt="holidayimg" className="mypage-holiday-usa"></img>
-                                <img src="/img/usabottle.png" alt="holidayimg" className="mypage-holiday-bottle"></img>
+                                <img src={`/img/use${usaNum}.png`} alt="holidayimg" className={`mypage-holiday-usa ${usaNull && "mypage-holiday-usa-null"}`}></img>
                             </div>
                             <div className="mypage-holiday-right-counts">
                                 <div className="mypage-holiday-right-counts-top">{`${holidayAdd ? `(+${holidayAdd})` : ""}`}</div>
