@@ -6,10 +6,11 @@ export default function Confirm(props) {
     const { click, title, startDate, startTime, endDate, endTime, cate, partners, content, openChange, close, deleted, id, cid, state } = props;
     return (
         <div className="confirm-main" style={{display : click ? "flex" : "none"}}>
+            <div onClick={() => close()} className="confirm-overlay"></div>
             <div className="confirm-box">
                 <div className="confirm-box-top">
                     <div className="confirm-box-top-text">일정 확인</div>
-                    <div className="confirm-box-close"><CloseIcon onClick={() => close()} style={{}} /></div>
+                    <div className="confirm-box-close"><CloseIcon onClick={() => close()} style={{ cursor: "pointer" }} /></div>
                 </div>
                 <div className="confirm-box-line"></div>
                 <div className="confirm-margin">

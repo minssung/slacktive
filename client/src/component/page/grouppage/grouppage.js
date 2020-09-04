@@ -48,36 +48,39 @@ class Grouppage extends Component {
                                 <div className="grouppage-filter-text">월통계</div>
                             </div>
                         </div>
+                        <div className="grouppage-lines">
+                            <div className="grouppage-line1"></div>
+                            <div className="grouppage-line2"></div>
+                            <div className="grouppage-line3"></div>
+                        </div>
                         {/* 헤더라인 */}
-                        <div className="grouppage-box-header">
-                            <div className="grouppage-box-header-text-id">순번</div>
-                            <div className="grouppage-box-header-text-name">이름</div>
-                            <div className="grouppage-box-header-text-holiday">사용 휴가</div>
-                            <div className="grouppage-box-header-text-tardy">지각</div>
-                            <div className="grouppage-box-header-text-over">야근</div>
-                            <div className="grouppage-box-header-text-total">총 휴가</div>
-                            <div className="grouppage-box-header-text-atten">출근</div>
-                        </div>
-                        {/* 라인들 */}
-                        <div className="grouppage-box-lines">
-                            <div className="grouppage-box-line1"></div>
-                            <div className="grouppage-box-line2"></div>
-                            <div className="grouppage-box-line3"></div>
-                        </div>
-                        {/* 데이터 로우들 */}
-                        {/* id, name, holiday, tardy, overtime, total, atten */}
-                        <div className="grouppage-box-items">
-                            {
-                                personArray.map((data, i) => {
-                                    return (
-                                        <Item key={i} 
-                                            id={(i+1) + (currentPage-1) * pageSize} name={data.username} holiday={data.vac} tardy={data.tardy}
-                                            overtime={data.nightshift} total='20' atten={data.onworktime}>
-                                        </Item>
-                                    )
-                                })
-                            }
-                        </div>
+                        <table className="grouppage-table">
+                            <thead>
+                                <tr className="grouppage-table-thead-tr">
+                                    <td style={{ width: "10%" }}>순번</td>
+                                    <td style={{ textAlign: "left", width: "15%" }}>이름</td>
+                                    <td>사용휴가</td>
+                                    <td>지각</td>
+                                    <td>야근</td>
+                                    <td>총 휴가</td>
+                                    <td>출근</td>
+                                </tr>
+                                <tr className="grouppage-table-line"></tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    personArray.map((data, i) => {
+                                        return (
+                                            <Item key={i} 
+                                                id={(i+1) + (currentPage-1) * pageSize} name={data.username} holiday={data.vac} tardy={data.tardy}
+                                                overtime={data.nightshift} total='20' atten={data.onworktime}>
+                                            </Item>
+                                        )
+                                    })
+                                }
+                            </tbody>
+                        </table>
+
                         {/* 페이지네이션 번호 박스 */}
                         <div className="grouppage-box-btn-nums">
                             <Pagination count={totalPage} color="primary" page={currentPage} onChange={(event, page) => this.setState({ currentPage : page })} />
