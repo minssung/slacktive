@@ -13,6 +13,7 @@ export default function Mypopup(props) {
     } = props;
     return (
         <div className="mypopup-main" style={{display : open.num === num && open.view ? "flex" : "none"}}>
+            <div className="myppopup-overlay" onClick={() => cardClick(false, false)}></div>
             <div className="mypopup-div">
                 <div className="mypopup-title-div">
                     <div className="mypopup-title-text">{data.title || "제목없음"}</div>

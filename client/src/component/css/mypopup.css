@@ -1,5 +1,4 @@
 .mypopup-main {
-    background-color: rgba(109, 109, 109, 0.39);
     position: fixed;
     justify-content: center;
     align-items: center;
@@ -11,12 +10,23 @@
     overflow: hidden;
 }
 
+.myppopup-overlay {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background-color: rgba(109, 109, 109, 0.39);
+    z-index: 3001;
+}
+
 .mypopup-div {
     width: 570px;
     border-radius: 20px;
     background-color: #ffffff;
     animation-name: mypopup;
     animation-duration: 0.5s;
+    z-index: 3002;
 }
 
 @keyframes mypopup {
