@@ -551,13 +551,14 @@ function initFuncHoliday(data, init) {
                  */
 
                 if(!/\d{2}/.test(backtick[0])) backtick[0] = "0" + backtick[0]; 
-                if(/(\d*년)\s*(\d*월)\s*(\d*)?/.test(backtick[1])) {
+                if(/(\d*년)?\s*(\d*월)\s*(\d*)?/.test(backtick[1])) {
                     backtick[1] = backtick[1].replace(/ /,"");
-                    let backtickSplit = /(\d*년)\s*(\d*월)\s*(\d*)/.exec(backtick[1]);
-
+                    let backtickSplit = /(\d*년)?\s*(\d*월)\s*(\d*)/.exec(backtick[1]);
+                    let year_ = moment(new Date()).format("YYYY");
+                    year_ = year_[2] + year_[3]; 
                     if(backtickSplit[1]) backtickSplit[1] = backtickSplit[1].replace(/년/g,"");
                     if(backtickSplit[2]) backtickSplit[2] = backtickSplit[2].replace(/월/g,"");
-                    if(!/\d{4}/.test(backtickSplit[1])) backtickSplit[1] = "20" + backtickSplit[1];  
+                    if(!/\d{4}/.test(backtickSplit[1])) backtickSplit[1] = "20" + (backtickSplit[1] || year_);  
                     if(!/\d{2}/.test(backtickSplit[2])) backtickSplit[2] = "0" + backtickSplit[2];
                     if(!/\d{2}/.test(backtickSplit[3])) backtickSplit[3] = "0" + backtickSplit[3];
 
