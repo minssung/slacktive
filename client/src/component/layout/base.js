@@ -171,8 +171,8 @@ class Base extends Component {
                         holidayHistoryData : holidayHistory,    // 휴가 내역
                         tardyCount : { 
                             row : tardyData || [],
-                            pre : tardyData[0] ? tardyData[0].state - tardyData[1].state : 0,
-                            to : tardyData[0].state || 0,
+                            pre : tardyData[1] ? (tardyData[0].state - tardyData[1].state) : 0,
+                            to : tardyData[0] ? (tardyData[0].state || 0) : 0,
                             title : "지각 횟수",
                             text : "지각 횟수",
                         }, 
@@ -186,14 +186,14 @@ class Base extends Component {
                         attenCount : { 
                             row : attenDataMonth || [],
                             pre : this.state.historyCount || 0,
-                            to : attenDataMonth[0].state || 0,
+                            to : attenDataMonth[0] ? (attenDataMonth[0].state || 0) : 0,
                             title : "출근 일수",
                             text : "출근 일수",
                         }, 
                         overTimeCount : { 
                             row : overTimeData || [],
-                            pre : (overTimeMonth[0].state - overTimeMonth[1].state) || 0,
-                            to : overTimeMonth[0].state || 0,
+                            pre : overTimeMonth[1] ? (overTimeMonth[0].state - overTimeMonth[1].state) : 0,
+                            to : overTimeMonth[0] ? (overTimeMonth[0].state || 0) : 0,
                             title : "야근 내역",
                             text : "초과 근무시간",
                         },
@@ -214,10 +214,15 @@ class Base extends Component {
 
                 // 출근 시간 체크
                 const attenTime = await axios.post(configs.domain+"/slack/onworktime", {userid : this.state.user.userid});
-                let timeArray =  attenTime.data.textTime.split(':');
-                let editTime = timeArray[0] + '시 ' + timeArray[1] + '분';
-                if (timeArray[1] === '00') editTime = timeArray[0] + '시';
-                else if (timeArray[1].substring(0, 1) === '0') editTime = timeArray[0] + '시 ' + timeArray[1].substring(1, 2) + '분';
+                let editTime = null;
+                if(!attenTime.data) {
+                    editTime = "";
+                } else {
+                    let timeArray =  attenTime.data.textTime.split(':');
+                    editTime = timeArray[0] + '시 ' + timeArray[1] + '분';
+                    if (timeArray[1] === '00') editTime = timeArray[0] + '시';
+                    else if (timeArray[1].substring(0, 1) === '0') editTime = timeArray[0] + '시 ' + timeArray[1].substring(1, 2) + '분';
+                }
                 this.setState({ attenTime : editTime });
 
                 // 휴가 상태 처리
