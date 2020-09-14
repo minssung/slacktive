@@ -192,7 +192,7 @@ router.delete("/delete", async(req, res) => {
     }
 });
 
-// DB halfVacation --------------------
+// DB 원하는 state 데이터 가져오기 --------------------
 router.get("/stateload", async(req, res) => {
     try {
         const query = `select * from slackchats where state='${req.query.state}' and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;
@@ -203,7 +203,7 @@ router.get("/stateload", async(req, res) => {
     }
 });
 
-// DB halfVacation --------------------
+// DB 출근, 지각 데이터 가져오기 --------------------
 router.get("/onwork", async(req, res) => {
     try {
         const query = `select * from slackchats where (state='지각' or state='출근') and userid='${req.query.userid}' and time >= '${req.query.time}' and time <= '${req.query.time2}'`;

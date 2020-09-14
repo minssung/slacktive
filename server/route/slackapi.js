@@ -133,7 +133,7 @@ router.post("/channelhistory", async(req,res) =>{
                     }
                 }
             } catch (err) {
-                console.log('Night Shift Error : ' + err);
+                console.log('Night Shift ' + err);
                 console.log('배열형식의 채팅 데이터', resultArray);
             }
 
@@ -213,6 +213,7 @@ router.post("/channelhistoryinittime", async(req,res) =>{
         
         initFunc(resultSet, true).then( async resultArray => {
             try {
+                // console.log('BBB', resultArray);
                 await Slackchat.bulkCreate(resultArray,{
                     individualHooks : true,
                 });
@@ -371,101 +372,120 @@ router.post("/authinfo", async(req,res)=>{
 async function initFunc(data, init) {
     let returnArray = [];
 
-    data.forEach( async data => {
-        if(configs.timeAttendenAddString.test(data.text)) {
-            let textSplit = configs.timeAttendenAddString.exec(data.text);
-            let hour = null;
-            let minute = null;
-            let cate = "출근";
-
-            /** 
-             *  textSplit 결과
-             *  0번째 인덱스 => 전체값
-             *  1번째 인덱스 => 시
-             *  2번째 인덱스 => 분
-             *  3번째 인덱스 => 구분
-             * 
-             *  ex) 10시 28분 현대ㅇㄱ
-            */
-
-            // 첫 번째 배열의 끝 문자가 시 또는 분일 경우 시, 분 제거
-            if (textSplit[1]) {
-                let firstIndex = textSplit[1].substring(textSplit[1].length - 1);
-                if (firstIndex === "시") {
-                    hour = textSplit[1].replace(/시/, "");
-                    if (textSplit[2] === undefined) minute = "00";
-                    // 9시 출근 -> 09:00
-                    if (textSplit[1].length === 2) hour = "0"+hour;
-                } 
-                else if (firstIndex === "분") hour = textSplit[1].replace(/분/, "");
-            }
-            if(textSplit[2]) {
-                minute = textSplit[2].replace(/분/, "");
-
-                // 9시 1분 출근 -> 09:01
-                if (textSplit[2].length === 2) minute = "0"+minute;
-            }
-            switch(textSplit[3]) {      // ex : ㅇㄱ => 외근
-                case "ㅊㄱ" : cate = "출근"; break;
-                case "ㅌㄱ" : cate = "퇴근"; break;
-                case "ㅇㄱ" : cate = "외근"; break;
-                default : cate = textSplit[3]; break;
-            }
-            
-            // 시 처리
-            if (!hour) hour = moment.unix(data.ts).utcOffset("+09:00").format("HH");        // 시가 없다면 해당 텍스트를 찍은 시
-
-            // 분 처리
-            if (!minute) minute = moment.unix(data.ts).utcOffset("+09:00").format("mm");      // 분이 없다면 해당 텍스트를 찍은 분
-
-            // 해당 유저가 당일 반차인 경우에 대한 조건 필요 -> 오전반차인 경우 오후 출근이기에 지각이 아님 ( 15시 이후는 지각 )
-            if(hour >= configs.Am1 && cate === "출근") {
-                cate = "지각";
-                // 11:00 까지는 출근 인정
-                if (minute === "00") cate = "출근";
-            }
-
-            // 시:분
-            let textTime = hour + ":" + minute;
-
-            // 시간 지정 퇴근 메세지일 경우 +12시간 하여 표시 ex) 7시 퇴근 -> 19:00
-            let pmCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH");
-            if (pmCheck > "12") {
-                if (textSplit[1] !== undefined && (textSplit[3] === "ㅌㄱ" || textSplit[3] === "퇴근")) {
-                    hour = parseInt(hour);
-                    textTime = hour+12 + ":" + minute;
+    const setArray = data.map( data => new Promise( async (resolve, reject) => {
+        try {
+            if(configs.timeAttendenAddString.test(data.text)) {
+                let textSplit = configs.timeAttendenAddString.exec(data.text);
+                let hour = null;
+                let minute = null;
+                let cate = "출근";
+    
+                //  *  textSplit 결과
+                //  *  0번째 인덱스 => 전체값
+                //  *  1번째 인덱스 => 시
+                //  *  2번째 인덱스 => 분
+                //  *  3번째 인덱스 => 구분
+                //  * 
+                //  *  ex) 10시 28분 현대ㅇㄱ
+                
+                // 첫 번째 배열의 끝 문자가 시 또는 분일 경우 시, 분 제거
+                if (textSplit[1]) {
+                    let firstIndex = textSplit[1].substring(textSplit[1].length - 1);
+                    if (firstIndex === "시") {
+                        hour = textSplit[1].replace(/시/, "");
+                        if (textSplit[2] === undefined) minute = "00";
+                        // 9시 출근 -> 09:00
+                        if (textSplit[1].length === 2) hour = "0"+hour;
+                    } 
+                    else if (firstIndex === "분") hour = textSplit[1].replace(/분/, "");
                 }
-            }
-            // 9시 출근 ~ 12시 출근 메세지를 제외한 1시 출근 ~ 8시 출근 메세지는 +12시간 하여 표시
-            if (textSplit[1] !== undefined && (textSplit[3] === "ㅊㄱ" || textSplit[3] === "출근")) {
-                if (textSplit[0].substring(0, 1) < "9" && (textSplit[0].substring(1, 2) === "시")) {
-                    hour = parseInt(hour);
-                    textTime = hour+12 + ":" + minute;
+                if(textSplit[2]) {
+                    minute = textSplit[2].replace(/분/, "");
+    
+                    // 9시 1분 출근 -> 09:01
+                    if (textSplit[2].length === 2) minute = "0"+minute;
                 }
+                switch(textSplit[3]) {      // ex : ㅇㄱ => 외근
+                    case "ㅊㄱ" : cate = "출근"; break;
+                    case "ㅌㄱ" : cate = "퇴근"; break;
+                    case "ㅇㄱ" : cate = "외근"; break;
+                    default : cate = textSplit[3]; break;
+                }
+                
+                // 시 처리
+                if (!hour) hour = moment.unix(data.ts).utcOffset("+09:00").format("HH");        // 시가 없다면 해당 텍스트를 찍은 시
+    
+                // 분 처리
+                if (!minute) minute = moment.unix(data.ts).utcOffset("+09:00").format("mm");      // 분이 없다면 해당 텍스트를 찍은 분
+    
+                // 시:분
+                let textTime = hour + ":" + minute;
+    
+                // 시간 지정 퇴근 메세지일 경우 +12시간 하여 표시 ex) 7시 퇴근 -> 19:00
+                let pmCheck = moment.unix(data.ts).utcOffset("+09:00").format("HH");
+                if (pmCheck > "12") {
+                    if (textSplit[1] !== undefined && (textSplit[3] === "ㅌㄱ" || textSplit[3] === "퇴근")) {
+                        hour = parseInt(hour);
+                        textTime = hour+12 + ":" + minute;
+                    }
+                }
+                // 9시 출근 ~ 12시 출근 메세지를 제외한 1시 출근 ~ 8시 출근 메세지는 +12시간 하여 표시
+                if (textSplit[1] !== undefined && (textSplit[3] === "ㅊㄱ" || textSplit[3] === "출근")) {
+                    if (textSplit[0].substring(0, 1) < "9" && (textSplit[0].substring(1, 2) === "시")) {
+                        hour = parseInt(hour)+12;
+                        textTime = hour + ":" + minute;
+                    }
+                }
+    
+                // 해당 유저가 당일 반차인 경우에 대한 조건 필요 -> 오전반차인 경우 오후 출근이기에 지각이 아님 ( 15시 이후는 지각 )
+                if(hour >= configs.Am1 && cate === "출근") {
+                    cate = "지각";
+    
+                    // 11:00 까지는 출근 인정
+                    if (hour === 11 && minute === "00") cate = "출근";
+    
+                    if (hour >= 12 && hour <= 14) {
+                        cate = "지각";
+                        const date = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD");
+                        const halfData = await axios.get(`${configs.domain}/holiday/halfexception?date=${date}&userid=${data.user}`);
+    
+                        if (Array.isArray(halfData.data) && halfData.data.length) {
+                            cate = "출근";
+                        }
+                    }
+                }
+                
+                let time = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm");
+    
+                // user 테이블에 state 반영
+                User.update({
+                    state : cate
+                },{
+                    where : { id : data.user }
+                })
+    
+                resolve(returnArray = {
+                    userId : data.user,
+                    text : data.text,
+                    time : time,
+                    ts : data.ts,
+                    state : cate,
+                    textTime : textTime,
+                })
+                
+            } else {
+                console.log("정규식에 해당하지 않는 채팅입니다. 채팅내용, 시간 = ", data.text, moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm"))
+                if(!init) errMessageMe(data, "times")
+                if(reject) resolve({});
             }
-            
-            let time = moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm");
-
-            returnArray.push({
-                userId : data.user,
-                text : data.text,
-                time : time,
-                ts : data.ts,
-                state : cate,
-                textTime : textTime,
-            });
-
-            // user 테이블에 state 반영
-            User.update({
-                state : cate
-            },{
-                where : { id : data.user }
-            })
-        } else {
-            console.log("정규식에 해당하지 않는 채팅입니다. 채팅내용, 시간 = ", data.text, moment.unix(data.ts).utcOffset("+09:00").format("YYYY-MM-DD HH:mm"))
-            if(!init) errMessageMe(data, "times")
+        } catch (err) {
+            console.log('휴가 처리', err)
         }
-    });
+    }));
+
+    returnArray = await Promise.all(setArray);
+    returnArray = returnArray.filter(value => Object.keys(value).length !== 0);
+    
     return returnArray;
 }
 

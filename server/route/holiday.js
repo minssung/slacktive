@@ -273,5 +273,18 @@ router.get("/halfVacation", async(req, res) => {
     }
 });
 
+// 오전 반차 예외처리
+router.get("/halfexception", async(req, res) => {
+    try {
+        // 현재 날짜 기준으로 오전반차 휴가 기록이 있는지 확인
+        const query = `SELECT JSON_EXTRACT(textTime, '$[0].startDate') FROM holidays WHERE JSON_EXTRACT(textTime, '$[0].startDate') = '${req.query.date}' AND cate = '오전반차' AND userid = '${req.query.userid}'`;
+        let result = await models.sequelize.query(query, { type : models.sequelize.QueryTypes.SELECT ,raw : true})
+        res.send(result);
+
+    } catch (err) {
+        console.log("halfexception", err);
+    }
+})
+
 // Module Exports --------------------
 module.exports = router;
