@@ -1,4 +1,4 @@
-# Cedar Slack Program Project
+# Slack Program Project
 - Slack Api  
 - Sign In With Slack  
 - TOAST UI : TUi-Calendar(nhn)  
@@ -16,6 +16,19 @@ npm i --save express
 mkdir server ... cd server ... touch index.js
 npx create-react-app client
 ```
+
+## Visual  
+![HOME](/client/public/img/md_visual1.JPG)  
+Home 화면 - 당일 휴가자 및 지각자 확인 가능하고, 이달의 일정을 보여준다. 달력으로 일정 추가 및 수정 가능.
+***
+![MYPAGE](/client/public/img/md_visual2.JPG)  
+Mypage 화면 - 현재 남은 휴가를 주스로 표현하였고, 나의 출근, 지각, 야근에 대한 기록을 확인할 수 있다.
+***
+![EMPLOYEE](/client/public/img/md_visual3.JPG)  
+Employee 화면 - 직원들의 근태 현황을 볼 수 있다.
+***
+
+## 현재 프로젝트 리펙토링 계획중에 있으며, 다른 깃 레파지토리에서 새로 작업이 진행될 예정입니다.
 
 ## 어떤 기능을 하는지 ?
 
